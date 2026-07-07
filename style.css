@@ -76,6 +76,7 @@ body::before {
 }
 
 .header {
+    margin-top: 50px;
     margin-bottom: 28px;
     text-align: center;
     color: white;
@@ -210,6 +211,9 @@ input:focus {
     position: relative;
     padding-bottom: 100px; 
     box-sizing: border-box;
+}
+#btn{
+    margin-top: 30px;
 }
 
 /* --- DASHBOARD HEADER --- */
