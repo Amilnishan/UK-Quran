@@ -16,8 +16,12 @@
 }
 
 /* --- GLOBAL & LOGIN STYLES --- */
-body {
+html, body {
     margin: 0;
+    padding: 0;
+}
+
+body {
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
     display: flex;
@@ -26,7 +30,6 @@ body {
     background-color: var(--white);
     background-position: center;
     position: relative;
-    padding: 0;
 }
 
 body::before {
@@ -42,7 +45,7 @@ body::before {
     z-index: 1;
     width: min(320px, 92%);
     border-radius: 28px;
-    padding: 12px 36px;
+    padding: 20px;
     
     text-align: left;
         /* Transparent Background */
