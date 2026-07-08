@@ -24,6 +24,9 @@
         .attendance-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px; border: 1px solid #eaeaea; border-radius: 12px; }
         .toggle-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; background: #f1f3f4; color: #888; transition: 0.2s;}
         .toggle-btn.active { background: #34A853; color: white; }
+        .heard-by-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f3f3f3; }
+        .heard-by-row label { min-width: 90px; color: #4b5563; font-size: 13px; font-weight: 600; }
+        .heard-by-row input { flex: 1 1 100%; max-width: 100%; border: 1px solid #d1d5db; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #111827; }
     </style>
 </head>
 <body>
@@ -84,6 +87,10 @@
                 <input type="number" id="inp-rev" value="0" readonly>
                 <button type="button" id="btn-rev-plus">+</button>
             </div>
+        </div>
+        <div class="heard-by-row">
+            <label for="inp-rev-heard-by">Heard by</label>
+            <input type="text" id="inp-rev-heard-by" placeholder="Enter name">
         </div>
 
         <button class="btn-primary" id="btn-submit-progress" style="width: 100%; background:  #47c845;">Submit Progress</button>

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UK Quran LMS - Login</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#111827">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="UK Quran LMS">
+    <link rel="apple-touch-icon" href="log.webp">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -47,6 +52,23 @@
 
         <div class="footer">
             <p>© 2026 UK QURAN • PRIVACY & TERMS</p>
+        </div>
+    </div>
+
+    <div id="a2hs-prompt" class="a2hs-prompt hidden" aria-live="polite">
+        <div class="a2hs-card">
+            <div class="a2hs-content">
+                <span class="a2hs-icon">📱</span>
+                <div>
+                    <p class="a2hs-title">Add UK Quran to your Home Screen</p>
+                    <p id="a2hs-description" class="a2hs-description">Install the app for faster access and a better experience.</p>
+                </div>
+            </div>
+            <div class="a2hs-actions">
+                <button id="btn-add-home" class="btn-primary" type="button">Add</button>
+                <button id="btn-dismiss-a2hs" class="btn-link" type="button">Maybe later</button>
+            </div>
+            <p id="ios-a2hs-tip" class="a2hs-ios-tip hidden">Tap the share icon, then choose <strong>Add to Home Screen</strong>.</p>
         </div>
     </div>
 
