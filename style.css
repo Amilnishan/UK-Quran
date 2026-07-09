@@ -426,15 +426,15 @@ input:focus {
 .pill-badge .pill-count { display: inline-flex; min-width: 26px; height: 22px; padding: 0 6px; align-items: center; justify-content: center; background: var(--pill-count-bg); color: var(--pill-count-color); border-radius: 999px; font-weight: 700; font-size: 12px; box-shadow: none; border: 1px solid transparent; }
 .pill-badge[hidden], .pill-badge.hidden { display: none !important; }
 
-..progress-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
-.progress-item { display: grid; gap: 6px; }
-.progress-item span { font-size: 12px; color: #4b5563; font-weight: 600; }
-.progress-item .stepper-controls { display: inline-flex; align-items: center; gap: 6px; background: #f1f3f4; border-radius: 12px; padding: 6px 8px; }
-.progress-item .stepper-controls button { width: 28px; height: 28px; border: none; border-radius: 50%; background: white; color: #333; font-size: 16px; font-weight: bold; cursor: pointer; }
-.progress-item .stepper-controls span { min-width: 28px; text-align: center; font-weight: 700; }
-.progress-button-row { grid-column: 1 / -1; }
-.btn-monthly-progress { width: 100%; border: 1px solid #4A90E2; border-radius: 12px; color: #4A90E2; background: white; padding: 12px 14px; font-size: 13px; cursor: pointer; }
+.progress-row { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.progress-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #f7f8fb; border-radius: 16px; padding: 12px 14px; }
+.progress-item span { font-size: 13px; color: #242424; font-weight: 700; }
+.progress-item .stepper-controls { display: inline-flex; align-items: center; gap: 12px; background: #fff; border-radius: 999px; padding: 8px 12px; box-shadow: 0 8px 18px rgba(17,24,39,0.05); }
+.progress-item .stepper-controls button { width: 34px; height: 34px; border: none; border-radius: 50%; background: #fff; color: #4A90E2; font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 14px rgba(74,144,226,0.14); }
+.progress-item .stepper-controls span { min-width: 28px; text-align: center; font-weight: 700; font-size: 14px; }
+.btn-monthly-progress { border: 1px solid #4A90E2; border-radius: 16px; color: #4A90E2; background: white; padding: 14px 16px; font-size: 14px; cursor: pointer; margin-top: 4px; }
 .btn-monthly-progress:hover { background: #eef4ff; }
+.btn-monthly-progress.full-width { width: 100%; }
 
 /* --- FIXED SAVE BUTTON --- */
 .save-container { position: fixed; bottom: 0; width: 100%; max-width: 414px; padding: 20px; box-sizing: border-box; background: linear-gradient(to top, var(--bg-light) 70%, transparent); z-index: 100; }
