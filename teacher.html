@@ -61,7 +61,7 @@
                     <line x1="18" y1="20" x2="18" y2="4"></line>
                     <line x1="6" y1="20" x2="6" y2="14"></line>
                 </svg>
-                View Reports
+                View Monthly Reports
             </button>
         </div>
     </section>
@@ -119,6 +119,63 @@
             <div class="modal-actions">
                 <button type="button" class="btn-outline" id="btn-cancel-delete">Cancel</button>
                 <button type="button" class="btn-danger" id="btn-confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Monthly Progress Modal -->
+    <div id="student-progress-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 420px; width: 95%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
+                <h3 id="progress-modal-title">Monthly Progress</h3>
+                <button type="button" class="icon-btn" id="btn-close-progress" title="Close" style="background: transparent; border: none; color:#8E785C; font-size:18px;">×</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+                <div>
+                    <label style="font-size:12px; color:#555;">Month</label>
+                    <select id="progress-filter-month" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid #ddd; margin-top:6px; font-family:inherit;">
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; color:#555;">Year</label>
+                    <select id="progress-filter-year" style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid #ddd; margin-top:6px; font-family:inherit;">
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-container" style="margin-bottom:0;">
+                <table class="excel-table" style="min-width:100%; font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th class="th-blue sticky-col">Date</th>
+                            <th class="th-blue">New</th>
+                            <th class="th-blue">Rev</th>
+                            <th class="th-blue">Present</th>
+                            <th class="th-blue">Absent</th>
+                            <th class="th-blue">Remarks</th>
+                            <th class="th-blue">Heard by</th>
+                        </tr>
+                    </thead>
+                    <tbody id="progress-modal-table-body">
+                        <tr><td colspan="7" style="padding:16px; color:#888;">Select a student and month to view progress.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

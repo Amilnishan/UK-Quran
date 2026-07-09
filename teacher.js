@@ -21,6 +21,14 @@ const btnSaveReport = document.getElementById('btn-save-report');
 const btnSaveLabel = document.getElementById('btn-save-label');
 const btnViewReports = document.getElementById('btn-view-reports');
 
+const studentProgressModal = document.getElementById('student-progress-modal');
+const progressModalTitle = document.getElementById('progress-modal-title');
+const progressModalTableBody = document.getElementById('progress-modal-table-body');
+const progressFilterMonth = document.getElementById('progress-filter-month');
+const progressFilterYear = document.getElementById('progress-filter-year');
+const btnCloseProgressModal = document.getElementById('btn-close-progress');
+let currentProgressStudentId = null;
+
 const btnAddStudent = document.getElementById('btn-add-student');
 const addStudentModal = document.getElementById('add-student-modal');
 const btnCancelAdd = document.getElementById('btn-cancel-add');
@@ -62,13 +70,20 @@ function loadDataFromDB() {
             snapshot.forEach((child) => {
                 loadedStudents.push({
                     id: child.key, name: child.val().name, pin: child.val().pin,
-                    isPresent: true, newPages: 0, rev: 0, remarks: ""
+                    isPresent: true, newPages: 0, rev: 0, remarks: "", revHeardBy: ""
                 });
             });
         }
         if (logSnap.exists()) {
             const logData = logSnap.val();
-            loadedStudents = loadedStudents.map(st => logData[st.id] ? { ...st, ...logData[st.id] } : st);
+            loadedStudents = loadedStudents.map(st => {
+                const todaysLog = logData[st.id] || {};
+                return {
+                    ...st,
+                    ...todaysLog,
+                    revHeardBy: todaysLog.revHeardBy || ''
+                };
+            });
         }
         students = loadedStudents;
         renderStudents();
@@ -159,15 +174,28 @@ function renderStudents() {
                 </div>
             </div>
             <div class="sc-bottom">
-                <div class="badges" role="list" aria-label="Learning progress">
-                    <div class="pill-badge" role="listitem" data-count="${student.newPages}" aria-label="New pages ${student.newPages}">
-                        <span class="pill-label">New</span>
-                        <span class="pill-count">${student.newPages}</span>
+                <div class="progress-row">
+                    <div class="progress-item">
+                        <span>New</span>
+                        <div class="stepper-controls">
+                            <button type="button" data-action="new-minus" data-student-id="${student.id}">-</button>
+                            <span>${student.newPages}</span>
+                            <button type="button" data-action="new-plus" data-student-id="${student.id}">+</button>
+                        </div>
                     </div>
-                    <div class="pill-badge" role="listitem" data-count="${student.rev}" aria-label="Revision pages ${student.rev}">
-                        <span class="pill-label">Revision</span>
-                        <span class="pill-count">${student.rev}</span>
+                    <div class="progress-item">
+                        <span>Revision</span>
+                        <div class="stepper-controls">
+                            <button type="button" data-action="rev-minus" data-student-id="${student.id}">-</button>
+                            <span>${student.rev}</span>
+                            <button type="button" data-action="rev-plus" data-student-id="${student.id}">+</button>
+                        </div>
                     </div>
+                    <button class="btn-outline btn-monthly-progress" data-action="monthly-progress" data-student-id="${student.id}" style="height: 40px; align-self: center;">Monthly Progress</button>
+                </div>
+                <div class="heard-by-row">
+                    <label for="heard-by-${student.id}">Heard by</label>
+                    <input type="text" id="heard-by-${student.id}" value="${student.revHeardBy || ''}" data-action="heardby" data-student-id="${student.id}" placeholder="Enter name">
                 </div>
                 <input type="text" class="remark-input" placeholder="Remarks..." value="${student.remarks}" data-action="remark" data-student-id="${student.id}">
             </div>
@@ -206,17 +234,137 @@ studentListContainer.addEventListener('click', (e) => {
         renderStudents();
     } else if (action === 'delete') {
         openDeleteModal(studentId);
+    } else if (action === 'new-plus') {
+        student.newPages = Number(student.newPages || 0) + 1;
+        renderStudents();
+    } else if (action === 'new-minus') {
+        student.newPages = Math.max(0, Number(student.newPages || 0) - 1);
+        renderStudents();
+    } else if (action === 'rev-plus') {
+        student.rev = Number(student.rev || 0) + 1;
+        renderStudents();
+    } else if (action === 'rev-minus') {
+        student.rev = Math.max(0, Number(student.rev || 0) - 1);
+        renderStudents();
+    } else if (action === 'monthly-progress') {
+        openStudentProgressModal(studentId);
     }
 });
 
-studentListContainer.addEventListener('change', (e) => {
-    const input = e.target.closest('[data-action="remark"]');
-    if (!input) return;
-    const student = students.find((item) => item.id === input.dataset.studentId);
-    if (student) {
-        student.remarks = input.value;
+studentListContainer.addEventListener('input', (e) => {
+    const input = e.target.closest('[data-action="heardby"]');
+    if (input) {
+        const student = students.find((item) => item.id === input.dataset.studentId);
+        if (student) {
+            student.revHeardBy = input.value;
+        }
+        return;
+    }
+
+    const remarkInput = e.target.closest('[data-action="remark"]');
+    if (remarkInput) {
+        const student = students.find((item) => item.id === remarkInput.dataset.studentId);
+        if (student) {
+            student.remarks = remarkInput.value;
+        }
     }
 });
+
+function openStudentProgressModal(studentId) {
+    const student = students.find((item) => item.id === studentId);
+    if (!student || !studentProgressModal) return;
+    currentProgressStudentId = studentId;
+    progressModalTitle.innerText = `Monthly Progress - ${student.name}`;
+    const today = new Date();
+    if (progressFilterMonth) {
+        progressFilterMonth.value = String(today.getMonth() + 1).padStart(2, '0');
+    }
+    if (progressFilterYear) {
+        progressFilterYear.value = String(today.getFullYear());
+    }
+    studentProgressModal.classList.remove('hidden');
+    loadStudentProgressReport(studentId);
+}
+
+function closeStudentProgressModal() {
+    if (!studentProgressModal) return;
+    studentProgressModal.classList.add('hidden');
+    currentProgressStudentId = null;
+}
+
+function loadStudentProgressReport(studentId) {
+    if (!studentProgressModal || !progressModalTableBody || !progressFilterMonth || !progressFilterYear) return;
+    const month = progressFilterMonth.value;
+    const year = progressFilterYear.value;
+    const prefix = `${year}-${month}`;
+    progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">Loading monthly data...</td></tr>';
+
+    get(ref(database, `teachers/${currentTeacherUid}/logs`)).then((snap) => {
+        const rows = [];
+        if (snap.exists()) {
+            const logs = snap.val();
+            Object.keys(logs)
+                .filter(dateKey => dateKey.startsWith(prefix))
+                .sort((a, b) => b.localeCompare(a))
+                .forEach((dateKey) => {
+                    const entry = logs[dateKey][studentId];
+                    if (entry) {
+                        rows.push({
+                            date: dateKey,
+                            newPages: entry.newPages || 0,
+                            rev: entry.rev || 0,
+                            present: entry.isPresent ? 1 : 0,
+                            absent: entry.isPresent ? 0 : 1,
+                            remarks: entry.remarks || '',
+                            heardBy: entry.revHeardBy || ''
+                        });
+                    }
+                });
+        }
+
+        if (rows.length === 0) {
+            progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">No data found for this month.</td></tr>';
+            return;
+        }
+
+        progressModalTableBody.innerHTML = '';
+        rows.forEach((row) => {
+            const [yearStr, monthStr, dayStr] = row.date.split('-');
+            const dateObj = new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
+            const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="sticky-col" style="font-size:11px;">${formattedDate}</td>
+                <td>${row.newPages || ''}</td>
+                <td>${row.rev || ''}</td>
+                <td style="color:#137333; font-weight:bold;">${row.present}</td>
+                <td style="color:#b71c1c; font-weight:bold; background:#ffebee;">${row.absent}</td>
+                <td style="font-size:11px;">${row.remarks}</td>
+                <td style="font-size:11px;">${row.heardBy}</td>
+            `;
+            progressModalTableBody.appendChild(tr);
+        });
+    }).catch((err) => {
+        console.error(err);
+        progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">Unable to load monthly data.</td></tr>';
+    });
+}
+
+if (btnCloseProgressModal) {
+    btnCloseProgressModal.addEventListener('click', closeStudentProgressModal);
+}
+
+if (progressFilterMonth) {
+    progressFilterMonth.addEventListener('change', () => {
+        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
+    });
+}
+
+if (progressFilterYear) {
+    progressFilterYear.addEventListener('change', () => {
+        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
+    });
+}
 
 // 5. Basic Button Listeners
 if (btnMarkAll) btnMarkAll.addEventListener('click', () => { students.forEach(s => s.isPresent = true); renderStudents(); });
@@ -266,12 +414,12 @@ if (addStudentForm) {
 
         if (pinVal.length < 4 || !/^\d+$/.test(pinVal)) {
             newStudentPinInput.classList.add('input-error');
-        if (newStudentPinHint) {
-            newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
-            newStudentPinHint.style.color = '#b71c1c';
+            if (newStudentPinHint) {
+                newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
+                newStudentPinHint.style.color = '#b71c1c';
+            }
+            return;
         }
-        return;
-    }
         if (newStudentPinHint) {
             newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
             newStudentPinHint.style.color = '#8E785C';
@@ -399,7 +547,13 @@ if (btnSaveReport) {
 
         let logData = {};
         students.forEach(s => {
-            logData[s.id] = { isPresent: s.isPresent, newPages: s.newPages, rev: s.rev, remarks: s.remarks };
+            logData[s.id] = {
+                isPresent: s.isPresent,
+                newPages: s.newPages,
+                rev: s.rev,
+                revHeardBy: s.revHeardBy || '',
+                remarks: s.remarks
+            };
         });
 
         const logRef = ref(database, `teachers/${currentTeacherUid}/logs/${todayStr}`);
