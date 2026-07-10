@@ -51,6 +51,7 @@ document.getElementById('current-date').innerText = new Date().toLocaleDateStrin
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentTeacherUid = user.uid;
+        showLoadingIndicators();
         loadDataFromDB();
     } else {
         window.location.href = 'index.html';
@@ -87,7 +88,25 @@ function loadDataFromDB() {
         }
         students = loadedStudents;
         renderStudents();
+        hideLoadingIndicators();
     });
+}
+
+function showLoadingIndicators() {
+    // Replace totals with loaders
+    if (totalStudentsEl) totalStudentsEl.innerHTML = '<span class="loader-inline"></span>';
+    if (presentStudentsEl) presentStudentsEl.innerHTML = '<span class="loader-inline"></span>';
+    // Show a block loader in student list
+    if (studentListContainer) studentListContainer.innerHTML = '<div class="loader-block"><div class="loader-inline"></div><div>Loading students...</div></div>';
+}
+
+function hideLoadingIndicators() {
+    // If students already rendered, counts will be set in renderStudents
+    // But ensure placeholders are removed if no students
+    if (!students.length) {
+        if (totalStudentsEl) totalStudentsEl.innerHTML = '0';
+        if (presentStudentsEl) presentStudentsEl.innerHTML = '0';
+    }
 }
 
 // --- Toast helper (single source of truth, used everywhere in this file) ---

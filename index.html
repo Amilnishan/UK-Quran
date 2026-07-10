@@ -14,6 +14,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Preloader overlay shown until login page and background image fully load -->
+    <div id="preloader" class="preloader" aria-hidden="false">
+        <div class="preloader-content">
+            <img src="logo.webp" alt="UK Quran" class="preloader-logo" width="84" height="84">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+                <p class="preloader-text">UK Quran</p>
+
+                <div class="loader-inline" aria-hidden="true"></div>
+            </div>
+        </div>
+    </div>
     <div class="login-container">
         <!-- Logo Header -->
         <div class="header">
@@ -74,6 +85,41 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Firebase SDK (Modular V10) -->
+    <script>
+    // Preloader logic: wait for window load and CSS background image
+    (function(){
+        const preloader = document.getElementById('preloader');
+        function getBgImageUrl(){
+            try{
+                const bg = getComputedStyle(document.body).backgroundImage || '';
+                const m = bg.match(/url\((['"]?)(.*)\1\)/);
+                return m ? m[2] : null;
+            }catch(e){ return null; }
+        }
+        function loadImage(src){
+            return new Promise((resolve) => {
+                if(!src) return resolve();
+                const img = new Image();
+                img.onload = img.onerror = () => resolve();
+                img.src = src;
+                if (img.complete) resolve();
+            });
+        }
+
+        async function waitForReady(){
+            // Wait for full window load
+            await new Promise(r => { if (document.readyState === 'complete') return r(); window.addEventListener('load', r); });
+            // Ensure background image loaded
+            const bg = getBgImageUrl();
+            await loadImage(bg);
+            // Small visual delay and fade-out
+            if(preloader){ preloader.classList.add('preloader-fade'); setTimeout(()=>{ preloader.remove(); }, 420); }
+        }
+
+        // Kick off
+        waitForReady();
+    })();
+    </script>
     <script type="module" src="app.js"></script>
 </body>
 </html>

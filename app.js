@@ -161,7 +161,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const passwordOrPin = inputPassword.value.trim();
     const submitBtn = document.querySelector('.btn-primary');
 
-    submitBtn.innerText = "Loading...";
+    submitBtn.innerHTML = '<div class="loader-inline" aria-hidden="true"></div>';
 
     if (currentRole === 'teacher') {
         // Teacher Login uses standard Firebase Auth directly.
