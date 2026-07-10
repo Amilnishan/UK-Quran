@@ -416,7 +416,9 @@ input:focus {
 .toggle-p-a .active-p { background: #80e27e; color: #004d40; }
 .toggle-p-a .active-a { background: #ff8a80; color: #b71c1c; }
 
-.sc-bottom { display: flex; flex-direction: column; gap: 10px; }
+.sc-bottom { display: none; flex-direction: column; gap: 10px; }
+.student-card.expanded .sc-bottom { display: flex; }
+.sc-top { cursor: pointer; }
 .remark-input { width: 100%; box-sizing: border-box; border: 1px solid #eaeaea; border-radius: 8px; padding: 8px; font-size: 12px; }
 
 /* --- COMPACT PILL BADGES --- */

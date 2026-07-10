@@ -152,10 +152,10 @@ function renderStudents() {
         if (student.isPresent) presentCount++;
 
         const card = document.createElement('div');
-        card.className = `student-card ${student.isPresent ? '' : 'absent'}`;
+        card.className = `student-card ${student.isPresent ? '' : 'absent'}${student.expanded ? ' expanded' : ''}`;
 
         card.innerHTML = `
-            <div class="sc-top">
+            <div class="sc-top" data-action="toggle-card" data-student-id="${student.id}">
                 <div class="sc-info">
                     <div class="av">${userIconSVG}</div>
                     <div>
@@ -230,6 +230,9 @@ studentListContainer.addEventListener('click', (e) => {
         renderStudents();
     } else if (action === 'absent') {
         student.isPresent = false;
+        renderStudents();
+    } else if (action === 'toggle-card') {
+        student.expanded = !student.expanded;
         renderStudents();
     } else if (action === 'delete') {
         openDeleteModal(studentId);
