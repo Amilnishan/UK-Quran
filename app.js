@@ -49,7 +49,7 @@ btnStudent.addEventListener('click', () => {
     btnTeacher.classList.remove('active');
     lblId.innerText = 'Student ID';
     inputId.type = 'text';
-    inputId.placeholder = '12345-XXX';
+    inputId.placeholder = 'name';
     lblPassword.innerText = 'PIN';
     inputPassword.value = '';
     inputId.value = '';
@@ -77,6 +77,82 @@ togglePassword.addEventListener('click', function () {
     togglePassword.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
 });
 
+const a2hsPrompt = document.getElementById('a2hs-prompt');
+const btnAddHome = document.getElementById('btn-add-home');
+const btnDismissA2HS = document.getElementById('btn-dismiss-a2hs');
+const iosA2HSTip = document.getElementById('ios-a2hs-tip');
+let deferredPrompt = null;
+
+function isIos() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function isInStandaloneMode() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function shouldShowPrompt() {
+    return !localStorage.getItem('ukquran_a2hs_added') && !localStorage.getItem('ukquran_a2hs_dismissed');
+}
+
+function showA2HSPrompt() {
+    if (!a2hsPrompt) return;
+    a2hsPrompt.classList.remove('hidden');
+}
+
+function hideA2HSPrompt() {
+    if (!a2hsPrompt) return;
+    a2hsPrompt.classList.add('hidden');
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    if (shouldShowPrompt()) {
+        showA2HSPrompt();
+        iosA2HSTip.classList.add('hidden');
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    localStorage.setItem('ukquran_a2hs_added', 'true');
+    hideA2HSPrompt();
+});
+
+btnAddHome.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choiceResult = await deferredPrompt.userChoice;
+
+    if (choiceResult.outcome === 'accepted') {
+        localStorage.setItem('ukquran_a2hs_added', 'true');
+        hideA2HSPrompt();
+    } else {
+        localStorage.setItem('ukquran_a2hs_dismissed', 'true');
+        hideA2HSPrompt();
+    }
+
+    deferredPrompt = null;
+});
+
+btnDismissA2HS.addEventListener('click', () => {
+    localStorage.setItem('ukquran_a2hs_dismissed', 'true');
+    hideA2HSPrompt();
+});
+
+window.addEventListener('load', () => {
+    if (!shouldShowPrompt()) {
+        hideA2HSPrompt();
+    } else if (isIos() && !isInStandaloneMode()) {
+        showA2HSPrompt();
+        iosA2HSTip.classList.remove('hidden');
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+});
+
 // Login Logic
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -85,7 +161,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const passwordOrPin = inputPassword.value.trim();
     const submitBtn = document.querySelector('.btn-primary');
 
-    submitBtn.innerText = "Loading...";
+    submitBtn.innerHTML = '<div class="loader-inline" aria-hidden="true"></div>';
 
     if (currentRole === 'teacher') {
         // Teacher Login uses standard Firebase Auth directly.

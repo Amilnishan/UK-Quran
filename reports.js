@@ -45,6 +45,7 @@ if (btnDownload) {
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentTeacherUid = user.uid;
+        showReportLoading();
         loadAllData();
     } else {
         window.location.href = 'index.html';
@@ -69,7 +70,27 @@ function loadAllData() {
         studentsObj = studentSnap.exists() ? studentSnap.val() : {};
         logsData = logSnap.exists() ? logSnap.val() : {};
         generateReport();
+        hideReportLoading();
     });
+}
+
+function showReportLoading() {
+    const totalEl = document.getElementById('report-total-students');
+    const avgPresenceEl = document.getElementById('report-avg-presence');
+    const avgGradeEl = document.getElementById('report-avg-grade');
+    if (totalEl) totalEl.innerHTML = '<span class="loader-inline"></span>';
+    if (avgPresenceEl) avgPresenceEl.innerHTML = '<span class="loader-inline"></span>';
+    if (avgGradeEl) avgGradeEl.innerHTML = '<span class="loader-inline"></span>';
+    // table body loader
+    if (tableBody) tableBody.innerHTML = '<tr><td colspan="6" style="padding:20px; text-align:center;"><div class="loader-block"><div class="loader-inline"></div><div>Loading report...</div></div></td></tr>';
+}
+
+function hideReportLoading() {
+    // nothing special; generateReport will overwrite
+    if (!Object.keys(studentsObj).length) {
+        const totalEl = document.getElementById('report-total-students');
+        if (totalEl) totalEl.innerText = '0';
+    }
 }
 
 // Function to analyze text remarks and calculate an overall average grade

@@ -27,6 +27,7 @@ const btnNewMinus = document.getElementById('btn-new-minus');
 const inpRev = document.getElementById('inp-rev');
 const btnRevPlus = document.getElementById('btn-rev-plus');
 const btnRevMinus = document.getElementById('btn-rev-minus');
+const inpRevHeardBy = document.getElementById('inp-rev-heard-by');
 
 const btnSubmit = document.getElementById('btn-submit-progress');
 
@@ -100,6 +101,9 @@ function loadTodayData() {
             updatePresentUI();
             inpNew.value = data.newPages || 0;
             inpRev.value = data.rev || 0;
+            if (inpRevHeardBy) {
+                inpRevHeardBy.value = data.revHeardBy || '';
+            }
             btnSubmit.innerHTML = "✅ Update Progress";
         }
     });
@@ -188,7 +192,8 @@ btnSubmit.addEventListener('click', () => {
     const payload = {
         isPresent: isPresent,
         newPages: parseInt(inpNew.value),
-        rev: parseInt(inpRev.value)
+        rev: parseInt(inpRev.value),
+        revHeardBy: inpRevHeardBy ? inpRevHeardBy.value.trim() : ''
         // Students do not submit remarks — teacher-only field.
     };
 
