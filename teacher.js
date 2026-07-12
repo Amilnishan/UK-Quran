@@ -28,7 +28,8 @@ const progressFilterMonth = document.getElementById('progress-filter-month');
 const progressFilterYear = document.getElementById('progress-filter-year');
 const btnCloseProgressModal = document.getElementById('btn-close-progress');
 const btnToggleProgressEdit = document.getElementById('btn-toggle-progress-edit');
-const progressEditPanel = document.getElementById('progress-edit-panel');
+const progressDateEditModal = document.getElementById('progress-date-edit-modal');
+const progressEditModalTitle = document.getElementById('progress-edit-modal-title');
 const progressEditDateLabel = document.getElementById('progress-edit-date-label');
 const progressEditNew = document.getElementById('progress-edit-new');
 const progressEditRev = document.getElementById('progress-edit-rev');
@@ -38,6 +39,7 @@ const progressEditRemarks = document.getElementById('progress-edit-remarks');
 const progressEditHeardBy = document.getElementById('progress-edit-heard-by');
 const btnSaveProgressEdit = document.getElementById('btn-save-progress-edit');
 const btnCancelProgressEdit = document.getElementById('btn-cancel-progress-edit');
+const btnCloseProgressEditModal = document.getElementById('btn-close-progress-edit');
 let currentProgressStudentId = null;
 let currentProgressLogSnapshot = {};
 let currentProgressEditDateKey = null;
@@ -187,32 +189,37 @@ function updateProgressEditAttendanceUI() {
     }
 }
 
-function closeProgressEditPanel() {
-    if (progressEditPanel) progressEditPanel.classList.add('hidden');
+function closeProgressEditModal() {
+    if (progressDateEditModal) progressDateEditModal.classList.add('hidden');
     currentProgressEditDateKey = null;
     if (progressEditNew) progressEditNew.innerHTML = '';
     if (progressEditRev) progressEditRev.innerHTML = '';
     if (progressEditRemarks) progressEditRemarks.value = '';
     if (progressEditHeardBy) progressEditHeardBy.value = '';
+    if (progressEditModalTitle) progressEditModalTitle.innerText = 'Edit Daily Progress';
 }
 
-function openProgressEditPanel(dateKey) {
-    if (!currentProgressStudentId || !progressEditPanel || !progressEditNew || !progressEditRev) return;
+function openProgressEditModal(dateKey) {
+    if (!currentProgressStudentId || !progressDateEditModal || !progressEditNew || !progressEditRev) return;
 
     const entry = currentProgressLogSnapshot[dateKey]?.[currentProgressStudentId] || {};
     currentProgressEditDateKey = dateKey;
     isProgressEditPresent = entry.isPresent === true;
 
-    progressEditDateLabel.innerText = `Editing ${formatProgressDateLabel(dateKey)}`;
+    const student = students.find((item) => item.id === currentProgressStudentId);
+    const studentName = student ? student.name : 'Student';
+
+    progressEditDateLabel.innerText = formatProgressDateLabel(dateKey);
+    progressEditModalTitle.innerText = `${studentName}`;
     progressEditNew.innerHTML = buildNumberSelectOptions(entry.newPages || 0);
     progressEditRev.innerHTML = buildNumberSelectOptions(entry.rev || 0);
     progressEditRemarks.value = entry.remarks || '';
     progressEditHeardBy.value = entry.revHeardBy || '';
     updateProgressEditAttendanceUI();
-    progressEditPanel.classList.remove('hidden');
+    progressDateEditModal.classList.remove('hidden');
 }
 
-function saveProgressEditPanel() {
+function saveProgressEditModal() {
     if (!currentProgressStudentId || !currentProgressEditDateKey || !currentTeacherUid) return;
 
     const payload = {
@@ -238,7 +245,7 @@ function saveProgressEditPanel() {
             matchedStudent.remarks = payload.remarks;
             renderStudents();
         }
-        closeProgressEditPanel();
+        closeProgressEditModal();
         loadStudentProgressReport(currentProgressStudentId);
         showToast('Monthly progress updated successfully.', 'success');
     }).catch((error) => {
@@ -415,7 +422,7 @@ function closeStudentProgressModal() {
         btnToggleProgressEdit.innerText = 'Edit';
         btnToggleProgressEdit.classList.remove('active-p');
     }
-    closeProgressEditPanel();
+    closeProgressEditModal();
 }
 
 function loadStudentProgressReport(studentId) {
@@ -498,7 +505,7 @@ if (btnToggleProgressEdit) {
             btnToggleProgressEdit.classList.toggle('active-p', isProgressEditMode);
         }
         if (!isProgressEditMode) {
-            closeProgressEditPanel();
+            closeProgressEditModal();
         }
         if (currentProgressStudentId) {
             loadStudentProgressReport(currentProgressStudentId);
@@ -521,18 +528,22 @@ if (progressEditAbsentBtn) {
 }
 
 if (btnSaveProgressEdit) {
-    btnSaveProgressEdit.addEventListener('click', saveProgressEditPanel);
+    btnSaveProgressEdit.addEventListener('click', saveProgressEditModal);
 }
 
 if (btnCancelProgressEdit) {
-    btnCancelProgressEdit.addEventListener('click', closeProgressEditPanel);
+    btnCancelProgressEdit.addEventListener('click', closeProgressEditModal);
+}
+
+if (btnCloseProgressEditModal) {
+    btnCloseProgressEditModal.addEventListener('click', closeProgressEditModal);
 }
 
 if (progressModalTableBody) {
     progressModalTableBody.addEventListener('click', (e) => {
         const editBtn = e.target.closest('[data-action="edit-progress-row"]');
         if (!editBtn) return;
-        openProgressEditPanel(editBtn.dataset.date);
+        openProgressEditModal(editBtn.dataset.date);
     });
 }
 
