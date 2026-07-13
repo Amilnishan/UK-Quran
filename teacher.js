@@ -223,6 +223,7 @@ function saveProgressEditModal() {
     if (!currentProgressStudentId || !currentProgressEditDateKey || !currentTeacherUid) return;
 
     const payload = {
+        name: students.find((s) => s.id === currentProgressStudentId)?.name || '',
         isPresent: isProgressEditPresent,
         newPages: Math.max(0, Math.min(1000, Number(progressEditNew.value) || 0)),
         rev: Math.max(0, Math.min(1000, Number(progressEditRev.value) || 0)),
@@ -302,12 +303,14 @@ function renderStudents() {
                     </div>
                 </div>
                 <div class="sc-actions">
-                    <div class="toggle-p-a">
-                        <button class="${student.isPresent ? 'active-p' : ''}" data-action="present" data-student-id="${student.id}">P</button>
-                        <button class="${!student.isPresent ? 'active-a' : ''}" data-action="absent" data-student-id="${student.id}">A</button>
-                    </div>
-
+                <div class="toggle-p-a">
+                    <button class="${student.isPresent ? 'active-p' : ''}" data-action="present" data-student-id="${student.id}">P</button>
+                    <button class="${!student.isPresent ? 'active-a' : ''}" data-action="absent" data-student-id="${student.id}">A</button>
                 </div>
+                    <button class="icon-btn-delete" data-action="delete" data-student-id="${student.id}" title="Remove student">
+                    ${trashIconSVG}
+                    </button>
+            </div>
             </div>
             <div class="sc-bottom">
                 <div class="progress-row">
@@ -719,25 +722,15 @@ if (btnConfirmDelete) {
         btnConfirmDelete.innerText = "Deleting...";
 
         try {
+            // Only remove the roster entry — old logs (and old reports) are
+            // left untouched on purpose so history survives the student
+            // leaving.
             await remove(ref(database, `teachers/${currentTeacherUid}/students/${idToDelete}`));
-
-            const logsSnap = await get(ref(database, `teachers/${currentTeacherUid}/logs`));
-            if (logsSnap.exists()) {
-                const updates = {};
-                logsSnap.forEach((daySnap) => {
-                    if (daySnap.hasChild(idToDelete)) {
-                        updates[`teachers/${currentTeacherUid}/logs/${daySnap.key}/${idToDelete}`] = null;
-                    }
-                });
-                if (Object.keys(updates).length > 0) {
-                    await update(ref(database), updates);
-                }
-            }
 
             students = students.filter(s => s.id !== idToDelete);
             renderStudents();
             closeDeleteModal();
-            showToast("Student removed.", "success");
+            showToast("Student removed from active roster.", "success");
         } catch (err) {
             console.error(err);
             showToast("Could not remove student. Please try again.", "error");
@@ -757,6 +750,7 @@ if (btnSaveReport) {
         let logData = {};
         students.forEach(s => {
             logData[s.id] = {
+                name: s.name,
                 isPresent: s.isPresent,
                 newPages: s.newPages,
                 rev: s.rev,
