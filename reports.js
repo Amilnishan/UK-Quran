@@ -1,6 +1,7 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get, query, orderByKey, startAt, endAt } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, database } from "./firebase-config.js";
+import { archivedReports } from './archived-data.js';
 
 let currentTeacherUid = null;
 let studentsObj = {}; // Quick lookup for student names
@@ -143,6 +144,7 @@ function generateReport() {
 
     const month = filterMonth.value;
     const year = filterYear.value;
+    const key = `${year}-${month}`;
 
     const monthName = filterMonth.options[filterMonth.selectedIndex].text;
     tableTitle.innerText = `Month of ${monthName} ${year}`;
@@ -150,41 +152,56 @@ function generateReport() {
 
     const prefix = `${year}-${month}`;
 
-    let totals = {};
-    for (let studentId in studentsObj) {
-        totals[studentId] = {
-            name: studentsObj[studentId].name,
-            newPages: 0, rev: 0, present: 0, absent: 0,
-            loggedDays: 0, // days THIS student actually has a log entry for
-            remarksList: []
-        };
+    if (archivedReports[key]) {
+        renderArchivedReport(archivedReports[key], month, year);
+        return; // skip the live Firebase-based logic entirely for this month
     }
+    
+let totals = {};
+for (let studentId in studentsObj) {
+    totals[studentId] = {
+        name: studentsObj[studentId].name,
+        newPages: 0, rev: 0, present: 0, absent: 0,
+        loggedDays: 0, remarksList: []
+    };
+}
 
-    let allRemarksList = [];
+let allRemarksList = [];
 
-    for (let dateKey in logsData) {
-        if (dateKey.startsWith(prefix)) {
-            let dailyLog = logsData[dateKey];
+for (let dateKey in logsData) {
+    if (dateKey.startsWith(prefix)) {
+        let dailyLog = logsData[dateKey];
 
-            for (let studentId in dailyLog) {
-                if (totals[studentId]) {
-                    totals[studentId].loggedDays += 1;
-                    const entry = dailyLog[studentId];
-                    if (entry.isPresent) {
-                        totals[studentId].present += 1;
-                        totals[studentId].newPages += Number(entry.newPages || 0);
-                        totals[studentId].rev += Number(entry.rev || 0);
-                    } else {
-                        totals[studentId].absent += 1;
-                    }
-                    if (entry.remarks && entry.remarks.trim() !== "") {
-                        totals[studentId].remarksList.push(entry.remarks.trim());
-                        allRemarksList.push(entry.remarks.trim());
-                    }
-                }
+        for (let studentId in dailyLog) {
+            const entry = dailyLog[studentId];
+
+            // Not on current roster (removed since this log was written) —
+            // use the name stored on the log entry itself.
+            if (!totals[studentId]) {
+                totals[studentId] = {
+                    name: entry.name || "Former Student",
+                    newPages: 0, rev: 0, present: 0, absent: 0,
+                    loggedDays: 0, remarksList: []
+                };
+            }
+
+            totals[studentId].loggedDays += 1;
+            totals[studentId].newPages += Number(entry.newPages || 0);
+            totals[studentId].rev += Number(entry.rev || 0);
+
+            if (entry.isPresent) {
+                totals[studentId].present += 1;
+            } else {
+                totals[studentId].absent += 1;
+            }
+
+            if (entry.remarks && entry.remarks.trim() !== "") {
+                totals[studentId].remarksList.push(entry.remarks.trim());
+                allRemarksList.push(entry.remarks.trim());
             }
         }
     }
+}
 
     let totalPresencePercentage = 0;
     let studentsWithData = 0;
@@ -248,6 +265,55 @@ function generateReport() {
 filterMonth.addEventListener('change', loadAllData);
   filterYear.addEventListener('change', loadAllData);
 
+function renderArchivedReport(monthData, month, year) {
+    const monthName = filterMonth.options[filterMonth.selectedIndex].text;
+    tableTitle.innerText = `Month of ${monthName} ${year}`;
+    tableBody.innerHTML = '';
+
+    document.getElementById('report-total-students').innerText = monthData.students.length;
+
+    let totalPresencePct = 0;
+    let studentsWithData = 0;
+    latestReportRows = [];
+
+    monthData.students.forEach(s => {
+        const totalDays = s.present + s.absent;
+        if (totalDays > 0) {
+            totalPresencePct += (s.present / totalDays) * 100;
+            studentsWithData++;
+        }
+
+        const presentStyle = s.present > 0 ? "color: #137333; font-weight:bold;" : "";
+        const absentStyle = s.absent > 0 ? "color: #b71c1c; font-weight:bold; background:#ffebee;" : "";
+        const remarkStyle = s.remarks ? "background:#e8f5e9; color:#1b5e20;" : "";
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${s.name}</td>
+            <td></td>
+            <td>${s.rev > 0 ? s.rev : ""}</td>
+            <td style="${presentStyle}">${s.present}</td>
+            <td style="${absentStyle}">${s.absent}</td>
+            <td style="${remarkStyle}; font-size:11px;">${s.remarks || "-"}</td>
+        `;
+        tableBody.appendChild(tr);
+
+        latestReportRows.push({
+            name: s.name, newPages: '', rev: s.rev > 0 ? s.rev : '',
+            present: s.present, absent: s.absent, remark: s.remarks || "-"
+        });
+    });
+
+    document.getElementById('report-avg-presence').innerText =
+        studentsWithData > 0 ? `${(totalPresencePct / studentsWithData).toFixed(0)}%` : '0%';
+    document.getElementById('report-avg-grade').innerText = '-';
+
+    latestReportSummary = {
+        totalStudents: monthData.students.length,
+        avgGrade: '-',
+        avgPresence: document.getElementById('report-avg-presence').innerText
+    };
+}
 
 // ---------------------------------------------------------------------------
 // PDF EXPORT

@@ -193,6 +193,7 @@ btnSubmit.addEventListener('click', () => {
     btnSubmit.innerHTML = "Saving...";
 
     const payload = {
+        name: myName,
         isPresent: isPresent,
         newPages: parseInt(inpNew.value),
         rev: parseInt(inpRev.value),
