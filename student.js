@@ -24,6 +24,36 @@ const btnMenu = document.getElementById('btn-menu');
 const menuDropdown = document.getElementById('student-dropdown-menu');
 const btnMenuLogout = document.getElementById('btn-menu-logout');
 
+function lockBodyScroll() {
+    document.body.classList.add('modal-open');
+}
+
+function unlockBodyScroll() {
+    if (!document.querySelector('.modal-overlay:not(.hidden), .modal.open')) {
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function pushModalState() {
+    if (!history.state || !history.state.modalOpen) {
+        history.pushState({ modalOpen: true }, '');
+    }
+}
+
+function closeMonthlyModal() {
+    if (!monthlyModal || monthlyModal.classList.contains('hidden')) return;
+    monthlyModal.classList.add('hidden');
+    unlockBodyScroll();
+}
+
+function closeMonthlyModalWithHistory() {
+    if (history.state && history.state.modalOpen) {
+        history.back();
+    } else {
+        closeMonthlyModal();
+    }
+}
+
 // Input Elements
 let isPresent = false;
 
@@ -196,7 +226,11 @@ document.getElementById('btn-mark-absent').addEventListener('click', () => {
 if (btnViewMonthly) {
     btnViewMonthly.addEventListener('click', () => {
         if (!myTeacherUid) return;
-        if (monthlyModal) monthlyModal.classList.remove('hidden');
+        if (monthlyModal) {
+            monthlyModal.classList.remove('hidden');
+            lockBodyScroll();
+            pushModalState();
+        }
         loadMonthlyHistory();
     });
 }
@@ -209,17 +243,23 @@ if (btnOpenThajweed) {
 
 if (btnCloseMonthly) {
     btnCloseMonthly.addEventListener('click', () => {
-        if (monthlyModal) monthlyModal.classList.add('hidden');
+        closeMonthlyModalWithHistory();
     });
 }
 
 if (monthlyModal) {
     monthlyModal.addEventListener('click', (event) => {
         if (event.target === monthlyModal) {
-            monthlyModal.classList.add('hidden');
+            closeMonthlyModalWithHistory();
         }
     });
 }
+
+window.addEventListener('popstate', () => {
+    if (monthlyModal && !monthlyModal.classList.contains('hidden')) {
+        closeMonthlyModal();
+    }
+});
 
 // --- 4. SUBMIT TO FIREBASE ---
 btnSubmit.addEventListener('click', () => {

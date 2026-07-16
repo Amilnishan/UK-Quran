@@ -189,6 +189,22 @@ function updateProgressEditAttendanceUI() {
     }
 }
 
+function lockBodyScroll() {
+    document.body.classList.add('modal-open');
+}
+
+function unlockBodyScroll() {
+    if (!document.querySelector('.modal-overlay:not(.hidden)')) {
+        document.body.classList.remove('modal-open');
+    }
+}
+
+function pushModalState() {
+    if (!history.state || !history.state.modalOpen) {
+        history.pushState({ modalOpen: true }, '');
+    }
+}
+
 function closeProgressEditModal() {
     if (progressDateEditModal) progressDateEditModal.classList.add('hidden');
     currentProgressEditDateKey = null;
@@ -197,6 +213,7 @@ function closeProgressEditModal() {
     if (progressEditRemarks) progressEditRemarks.value = '';
     if (progressEditHeardBy) progressEditHeardBy.value = '';
     if (progressEditModalTitle) progressEditModalTitle.innerText = 'Edit Daily Progress';
+    unlockBodyScroll();
 }
 
 function openProgressEditModal(dateKey) {
@@ -429,6 +446,8 @@ function openStudentProgressModal(studentId) {
         progressFilterYear.value = String(today.getFullYear());
     }
     studentProgressModal.classList.remove('hidden');
+    lockBodyScroll();
+    pushModalState();
     loadStudentProgressReport(studentId);
 }
 
@@ -442,6 +461,7 @@ function closeStudentProgressModal() {
         btnToggleProgressEdit.classList.remove('active-p');
     }
     closeProgressEditModal();
+    unlockBodyScroll();
 }
 
 function loadStudentProgressReport(studentId) {
@@ -513,7 +533,25 @@ function loadStudentProgressReport(studentId) {
 }
 
 if (btnCloseProgressModal) {
-    btnCloseProgressModal.addEventListener('click', closeStudentProgressModal);
+    btnCloseProgressModal.addEventListener('click', () => {
+        if (history.state && history.state.modalOpen) {
+            history.back();
+        } else {
+            closeStudentProgressModal();
+        }
+    });
+}
+
+if (studentProgressModal) {
+    studentProgressModal.addEventListener('click', (e) => {
+        if (e.target === studentProgressModal) {
+            if (history.state && history.state.modalOpen) {
+                history.back();
+            } else {
+                closeStudentProgressModal();
+            }
+        }
+    });
 }
 
 if (btnToggleProgressEdit) {
@@ -556,6 +594,14 @@ if (btnCancelProgressEdit) {
 
 if (btnCloseProgressEditModal) {
     btnCloseProgressEditModal.addEventListener('click', closeProgressEditModal);
+}
+
+if (progressDateEditModal) {
+    progressDateEditModal.addEventListener('click', (e) => {
+        if (e.target === progressDateEditModal) {
+            closeProgressEditModal();
+        }
+    });
 }
 
 if (progressModalTableBody) {
@@ -608,8 +654,27 @@ function resetAddForm() {
     }
 }
 
-if (btnAddStudent) btnAddStudent.addEventListener('click', () => addStudentModal.classList.remove('hidden'));
-if (btnCancelAdd) btnCancelAdd.addEventListener('click', () => { addStudentModal.classList.add('hidden'); resetAddForm(); });
+function openAddStudentModal() {
+    if (!addStudentModal) return;
+    addStudentModal.classList.remove('hidden');
+    lockBodyScroll();
+    pushModalState();
+}
+
+function closeAddStudentModal() {
+    if (!addStudentModal) return;
+    addStudentModal.classList.add('hidden');
+    resetAddForm();
+    unlockBodyScroll();
+}
+
+if (btnAddStudent) btnAddStudent.addEventListener('click', openAddStudentModal);
+if (btnCancelAdd) btnCancelAdd.addEventListener('click', closeAddStudentModal);
+if (addStudentModal) {
+    addStudentModal.addEventListener('click', (e) => {
+        if (e.target === addStudentModal) closeAddStudentModal();
+    });
+}
 
 if (addStudentForm) {
     addStudentForm.addEventListener('submit', (e) => {
@@ -699,16 +764,25 @@ if (addStudentForm) {
 // small backend (Cloud Function + Admin SDK) — ask if you want that added.
 function openDeleteModal(studentId) {
     const student = students.find((item) => item.id === studentId);
-    if (!student) return;
+    if (!student || !deleteStudentModal) return;
 
     pendingDeleteId = student.id;
     deleteStudentNameEl.innerText = student.name;
     deleteStudentModal.classList.remove('hidden');
+    lockBodyScroll();
+    pushModalState();
 }
 
 function closeDeleteModal() {
     pendingDeleteId = null;
-    deleteStudentModal.classList.add('hidden');
+    if (deleteStudentModal) deleteStudentModal.classList.add('hidden');
+    unlockBodyScroll();
+}
+
+if (deleteStudentModal) {
+    deleteStudentModal.addEventListener('click', (e) => {
+        if (e.target === deleteStudentModal) closeDeleteModal();
+    });
 }
 
 if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);

@@ -41,13 +41,13 @@
         
 
         /* Modal (lightbox) */
-        .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 1000; }
+        .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .modal.open { display: flex; }
-        .modal-content { position: relative; width: 90%; max-width: 920px; }
+        .modal-content { position: relative; width: 90%; max-width: 920px; padding-top: 20px; }
         .modal-img { width: 100%; height: auto; border-radius: 12px; display: block; }
-        .modal-close { position: absolute; right: -12px; top: -12px; width: 36px; height: 36px; background: #fff; border-radius: 50%; display:flex;align-items:center;justify-content:center;cursor:pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
-        .modal-actions-bar { position: absolute; right: 32px; top: -12px; display: flex; gap: 8px; z-index: 3; }
-        .modal-download, .modal-fullscreen { width: 36px; height: 36px; border: 0; border-radius: 50%; background: #fff; color: #111827; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+        .modal-close { position: absolute; right: 16px; top: 16px; width: 36px; height: 36px; background: #fff; border-radius: 50%; display:flex;align-items:center;justify-content:center;cursor:pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+        .modal-actions-bar { position: absolute; right: 72px; top: 16px; display: flex; gap: 8px; z-index: 3; }
+        .modal-download, .modal-fullscreen { width: 36px; height: 36px; min-width: 0; border: 0; border-radius: 50%; background: #fff; color: #111827; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
         .modal-download { text-decoration: none; }
         .modal-download:hover, .modal-fullscreen:hover, .modal-close:hover { background: #f3f4f6; }
         .modal-download svg, .modal-fullscreen svg { width: 18px; height: 18px; stroke: currentColor; }
@@ -231,6 +231,22 @@
         const modalDownload = modal.querySelector('.modal-download');
         const modalFullscreen = modal.querySelector('.modal-fullscreen');
 
+        function lockBodyScroll() {
+            document.body.classList.add('modal-open');
+        }
+
+        function unlockBodyScroll() {
+            if (!document.querySelector('.modal-overlay:not(.hidden), .modal.open')) {
+                document.body.classList.remove('modal-open');
+            }
+        }
+
+        function pushModalState() {
+            if (!history.state || !history.state.modalOpen) {
+                history.pushState({ modalOpen: true }, '');
+            }
+        }
+
         function openModal(fileName) {
             const existingVideo = modalContent.querySelector('video');
             if (existingVideo) existingVideo.remove();
@@ -248,6 +264,8 @@
             modalDownload.href = getVideoUrl(fileName);
             modalDownload.download = fileName;
             modal.classList.add('open');
+            lockBodyScroll();
+            pushModalState();
         }
 
         function closeModal() {
@@ -258,11 +276,26 @@
                 v.remove();
             }
             modal.classList.remove('open');
+            unlockBodyScroll();
         }
 
-        modalClose.addEventListener('click', closeModal);
+        function closeModalWithHistory() {
+            if (history.state && history.state.modalOpen) {
+                history.back();
+            } else {
+                closeModal();
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            if (modal.classList.contains('open')) {
+                closeModal();
+            }
+        });
+
+        modalClose.addEventListener('click', closeModalWithHistory);
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
+            if (e.target === modal) closeModalWithHistory();
         });
 
         modalFullscreen.addEventListener('click', () => {
