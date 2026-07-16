@@ -15,6 +15,24 @@
     --pill-gap: 8px;
 }
 
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) and (pointer: coarse) {
+    a:focus,
+    button:focus,
+    input:focus,
+    select:focus,
+    textarea:focus,
+    [tabindex]:focus,
+    a:focus-visible,
+    button:focus-visible,
+    [tabindex]:focus-visible {
+        outline: none;
+    }
+}
+
 /* --- GLOBAL & LOGIN STYLES --- */
 body {
     margin: 0;
