@@ -5,7 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QIRA'AT</title>
     <link rel="stylesheet" href="style.css">
-    
+    <style>
+        .student-action-card {
+            background: white;
+            margin: 10px;
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .student-action-card h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #5C4B37;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 28px;
+        }
+        .student-action-card h3::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+            color: #5C4B37;
+        }
+        .student-action-card.open h3::after {
+            transform: rotate(180deg);
+        }
+        .student-action-card p {
+            margin: 0 0 10px;
+            font-size: 14px;
+            color: #444;
+        }
+        .audio-list {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .student-action-card.open .audio-list {
+            display: flex;
+        }
+        .audio-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+        }
+        .audio-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .audio-play-button {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            background: #f1f3f4;
+            color: #1f2937;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .audio-play-button:hover {
+            background: #e2e8f0;
+        }
+        .audio-play-button.playing,
+        .audio-play-button.hidden {
+            display: none;
+        }
+        .audio-play-button svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        .audio-title {
+            font-size: 12px;
+            font-weight: 520;
+            color: #1f2937;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .audio-controls {
+            width: 100%;
+            height: 35px;
+            margin-top: 10px;
+        }
+        .toggle-label {
+            margin-left: 7px;
+            font-size: 14px;
+            color: #444;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -19,17 +121,205 @@
                 <button class="icon-btn" id="btn-back" type="button" aria-label="Go back">←</button>
             </div>
         </header>
-    <div class="student-action-card">
-        <div class="qiraat">
-        <h3 style="margin-left: 7px; margin-top: 20px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-            Coming soon.....
-        </h3>
-         <p style="margin-left: 7px; margin-right: 12px; font-size: 14px;">
-            JUZ 30
-        </p>
+        <div class="student-action-card" id="juz30-card">
+            <div class="qiraat">
+                <h3 style="margin-left: 10px; margin-top: 20px;margin-bottom: 18px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    Qur'an 
+                </h3>
+                <p style="margin-left: 12px; margin-right: 22px; font-size: 14px;">
+                     JUZ 30
+                </p>
+                
+            </div>
 
-    </div> 
+            
+            <div class="audio-list" id="audio-list">
+             <div class="audio-search" id="audio-search">
+                <input style="width: 100%;margin-top: 10px; height: 30px;font-size: 0.80rem;" id="audio-search-input" type="search" placeholder="Search ......" aria-label="Search JUZ 30 audio">
+            </div>
+                <!-- Audio cards will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+    <script>
+        const audioFolder = 'audios/JUZ-30/';
+        const audioFiles = [
+            '100 - Adiyat.mp3',
+            "101 - Qari'ah.mp3",
+            '102 - Takathur.mp3',
+            '103 - Asr.mp3',
+            '104 - Humazah.mp3',
+            '105 - Fil.mp3',
+            '106 - Quraysh.mp3',
+            '107 - Ma\'un.mp3',
+            '108 - Kawthar.mp3',
+            '109 - Kafirun.mp3',
+            '110 - Nasr.mp3',
+            '111 - Masad.mp3',
+            '112 - Ikhlas.mp3',
+            '113 - Falaq.mp3',
+            '114 - Nas.mp3',
+            '78 - Naba.mp3',
+            '79 - Nazi\'at.mp3',
+            '80 - Abasa.mp3',
+            '81 - Takwir.mp3',
+            '82 - Infitar.mp3',
+            '83 - Mutaffifin.mp3',
+            '84 - Inshiqaq.mp3',
+            '85 - Buruj.mp3',
+            '86 - Tariq.mp3',
+            '87 - A\'la.mp3',
+            '88 - Ghashiyah.mp3',
+            '89 - Fajar.mp3',
+            '90 - Balad.mp3',
+            '91 - Shams.mp3',
+            '92 - Layl.mp3',
+            '93 - Duhaa.mp3',
+            '94 - Sharh.mp3',
+            '95 - Tin.mp3',
+            '96 - Alaq.mp3',
+            '97 - Qadar.mp3',
+            '98 - Bayyinah.mp3',
+            '99 - Zalzalah.mp3'
+        ];
 
+        function extractAudioNumber(name) {
+            const match = name.match(/^(\d+)/);
+            return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+        }
+
+        audioFiles.sort((a, b) => extractAudioNumber(a) - extractAudioNumber(b) || a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+        const audioList = document.getElementById('audio-list');
+        const searchInput = document.getElementById('audio-search-input');
+        let currentAudio = null;
+        let currentAudioData = null;
+
+        function renderAudioCards(filter = '') {
+            audioList.querySelectorAll('.audio-card, .no-results').forEach((node) => node.remove());
+
+            const normalizedFilter = filter.trim().toLowerCase();
+            const filteredFiles = audioFiles.filter((fileName) => {
+                return fileName.toLowerCase().includes(normalizedFilter);
+            });
+
+            if (filteredFiles.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'no-results';
+                noResults.textContent = 'No audio files match your search.';
+                noResults.style.color = '#666';
+                noResults.style.padding = '12px 8px';
+                audioList.appendChild(noResults);
+                return;
+            }
+
+            filteredFiles.forEach((fileName) => {
+                const card = document.createElement('div');
+                card.className = 'audio-card';
+                card.dataset.filename = fileName.toLowerCase();
+
+                const row = document.createElement('div');
+                row.className = 'audio-row';
+
+                const playButton = document.createElement('button');
+                playButton.className = 'audio-play-button';
+                playButton.type = 'button';
+                playButton.setAttribute('aria-label', `Play ${fileName.replace(/\.mp3$/i, '')}`);
+                playButton.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>';
+
+                const title = document.createElement('div');
+                title.className = 'audio-title';
+                title.textContent = fileName.replace(/\.mp3$/i, '');
+
+                row.appendChild(playButton);
+                row.appendChild(title);
+
+                const audioContainer = document.createElement('div');
+                audioContainer.className = 'audio-container';
+
+                let audio = null;
+
+                function createAudioElement() {
+                    audio = document.createElement('audio');
+                    audio.className = 'audio-controls';
+                    audio.controls = true;
+                    audio.preload = 'none';
+                    audio.src = audioFolder + encodeURIComponent(fileName);
+
+                    audio.addEventListener('play', () => {
+                        if (currentAudioData && currentAudioData.audio !== audio) {
+                            const { audio: previousAudio, button: previousButton, container: previousContainer } = currentAudioData;
+                            previousAudio.pause();
+                            if (previousContainer.contains(previousAudio)) {
+                                previousContainer.removeChild(previousAudio);
+                            }
+                            previousButton.classList.remove('hidden');
+                            currentAudioData = null;
+                        }
+                        currentAudio = audio;
+                        currentAudioData = { audio, button: playButton, container: audioContainer };
+                        playButton.classList.add('hidden');
+                    });
+
+                    audio.addEventListener('pause', () => {
+                        if (currentAudio === audio) {
+                            currentAudio = null;
+                        }
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        if (currentAudio === audio) {
+                            currentAudio = null;
+                        }
+                        if (currentAudioData && currentAudioData.audio === audio) {
+                            currentAudioData = null;
+                        }
+                    });
+                }
+
+                playButton.addEventListener('click', () => {
+                    if (currentAudioData && currentAudioData.audio !== audio) {
+                        const { audio: previousAudio, button: previousButton, container: previousContainer } = currentAudioData;
+                        previousAudio.pause();
+                        if (previousContainer.contains(previousAudio)) {
+                            previousContainer.removeChild(previousAudio);
+                        }
+                        previousButton.classList.remove('hidden');
+                        currentAudioData = null;
+                        currentAudio = null;
+                    }
+                    if (!audio) {
+                        createAudioElement();
+                    }
+                    if (!audioContainer.contains(audio)) {
+                        audioContainer.appendChild(audio);
+                    }
+                    if (audio.paused) {
+                        audio.play();
+                    } else {
+                        audio.pause();
+                    }
+                });
+
+                card.appendChild(row);
+                card.appendChild(audioContainer);
+                audioList.appendChild(card);
+            });
+        }
+
+        renderAudioCards();
+
+        searchInput.addEventListener('input', (event) => {
+            renderAudioCards(event.target.value);
+        });
+
+        const card = document.getElementById('juz30-card');
+        card.addEventListener('click', (event) => {
+            const ignoreClick = event.target.closest('.audio-list, .audio-search, input, audio, button');
+            if (ignoreClick) return;
+            card.classList.toggle('open');
+        });
+    </script>
 </body>
 </html>

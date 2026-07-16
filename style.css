@@ -126,7 +126,7 @@ body::before {
         .student-action-card h3 { margin: 0 0 20px; font-size: 16px; color: #5C4B37; display: flex; align-items: center; gap: 8px;}
         .student-action-card h3 { cursor: pointer; }
         .student-action-card { background: white; margin: 10px; border-radius: 16px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .qiraat{background-image: url(banner-2-reverse.jpg);background-size: 100% 100%;border-radius: 16px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);}
+        .qiraat{height: 90px; background-image: url(banner-3-reverse.webp);background-size: 100% 100%;border-radius: 16px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);}
 
 .role-toggle {
     display: flex;
@@ -185,8 +185,6 @@ input {
     color: #111827;
     font-family: inherit;
     font-size: 0.98rem;
-
-
 }
 
 input::placeholder {
@@ -506,9 +504,9 @@ input:focus {
 .student-action-row { display: flex; padding: 0 20px 10px; }
 .btn-square { display: inline-flex; align-items: center; justify-content: start; min-height: 120px; border-radius: 20px; border: 1px solid #e5e7eb; background: #ffffff; color: #1f2937; font-weight: 700; cursor: pointer; font-size: 14px; text-align: center; padding: 0 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; }
 .btn-square:hover { transform: translateY(-1px); background: #f8fafc; }
-.btn-square1 {width: 100%; display: flex; align-items: center; justify-content: end; min-height: 120px; border-radius: 20px; border: 1px solid #fff; background-image: url(banner-3.webp);background-size: 100% 100%; color: black; font-weight: 700; cursor: pointer; font-size: 14px; text-align: center; padding: 0 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; }
+.btn-square1 {width: 100%; display: flex; align-items: center; justify-content: end; min-height: 120px; border-radius: 20px; border: 1px solid #fff; background-image: url(banner-2.webp);background-size: 100% 100%; color: black; font-weight: 700; cursor: pointer; font-size: 14px; text-align: center; padding: 0 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; }
 .btn-square1:hover { transform: translateY(-1px);  }
-.btn-square3 {width: 100%; display: flex; align-items: center; justify-content: end; min-height: 120px; border-radius: 20px; border: 1px solid #fff; background-image: url(banner-2.webp);background-size: 100% 100%; color: black; font-weight: 700; cursor: pointer; font-size: 14px; text-align: center; padding: 0 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; }
+.btn-square3 {width: 100%; display: flex; align-items: center; justify-content: end; min-height: 120px; border-radius: 20px; border: 1px solid #fff; background-image: url(banner-3.webp);background-size: 100% 100%; color: black; font-weight: 700; cursor: pointer; font-size: 14px; text-align: center; padding: 0 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; }
 .btn-square3:hover { transform: translateY(-1px);  }
 .btn-secondary {width: 100%; border-color: #fff; color:#5C4B37; }
 .btn-secondary:hover { background: #0f5132; }
@@ -532,11 +530,11 @@ input:focus {
     z-index: 9999;
     backdrop-filter: blur(3px);
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch;   
 }
 .modal-overlay.hidden { display: none !important; }
 body.modal-open { overflow: hidden; }
-.modal-content { background: var(--white); padding: 24px; border-radius: 16px; width: 85%; max-width: 350px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+.modal-content { background: var(--white); padding: 24px; border-radius: 16px; width: 85%; max-width: 350px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);}
 .modal-content h3 { margin: 0 0 15px 0; color: #5C4B37; }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions button { flex: 1; padding: 12px; }
