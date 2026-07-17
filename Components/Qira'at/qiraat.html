@@ -107,6 +107,18 @@
             font-size: 14px;
             color: #444;
         }
+        .menu-btn { font-size: 22px; line-height: 1; width: 42px; height: 42px; border-radius: 50%; border: none; background: transparent; color: #111; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .menu-btn:hover { background: rgba(0, 0, 0, 0.05); }
+        .menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.24); opacity: 0; visibility: hidden; transition: opacity 0.28s ease; z-index: 1050; }
+        .menu-backdrop.open { opacity: 1; visibility: visible; }
+        .side-menu { position: fixed; top: 0; right: -100%; width: 60vw; max-width: 340px; height: 100vh; background: #fff; box-shadow: -18px 0 45px rgba(0,0,0,0.12); z-index: 1100; transition: right 0.28s ease; display: flex; flex-direction: column; padding: 32px 32px 28px; }
+        .side-menu.open { right: 0; }
+        .side-menu .menu-close-btn { margin-left: auto; border: none; background: transparent; font-size: 28px; line-height: 1; color: #333; cursor: pointer; }
+        .side-menu .menu-title { margin: 0; font-size: 22px; letter-spacing: 0.18em; text-transform: uppercase; color: #888; font-weight: 700; }
+        .side-menu .menu-list { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; }
+        .side-menu .menu-list button { border: none; background: transparent; text-align: left; color: #111; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 0; cursor: pointer; }
+        .side-menu .menu-list button + button { padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.08); }
+        .side-menu .menu-list button:hover { color: #0f4ad6; }
     </style>
 </head>
 <body>
@@ -118,9 +130,20 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button class="icon-btn" id="btn-back" type="button" aria-label="Go back">←</button>
+                <button class="menu-btn" id="btn-menu" type="button" aria-label="Open menu">☰</button>
             </div>
         </header>
+        <div id="qiraat-menu-backdrop" class="menu-backdrop"></div>
+        <aside id="qiraat-side-menu" class="side-menu" aria-hidden="true">
+            <button type="button" class="menu-close-btn" id="btn-menu-close">×</button>
+            <p class="menu-title">UK QURAN</p>
+            <div class="menu-list">
+                <button type="button" id="btn-menu-home">HOME</button>
+                <button type="button" id="btn-menu-thajweed">THAJWEED</button>
+                <button type="button" id="btn-menu-qiraat">QIRA'AT</button>
+                <button type="button" id="btn-menu-logout">LOGOUT</button>
+            </div>
+        </aside>
         <div class="student-action-card" id="juz30-card">
             <div class="qiraat">
                 <h3 style="margin-left: 10px; margin-top: 20px;margin-bottom: 18px;">
@@ -320,8 +343,53 @@
             if (ignoreClick) return;
             card.classList.toggle('open');
         });
-                document.getElementById('btn-back').addEventListener('click', () => {
+        document.getElementById('btn-back').addEventListener('click', () => {
             window.location.href = '../Student/student.html';
+        });
+
+        const btnMenu = document.getElementById('btn-menu');
+        const qiraatMenuBackdrop = document.getElementById('qiraat-menu-backdrop');
+        const qiraatSideMenu = document.getElementById('qiraat-side-menu');
+        const btnMenuClose = document.getElementById('btn-menu-close');
+        const btnMenuHome = document.getElementById('btn-menu-home');
+        const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
+        const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
+        const btnMenuLogout = document.getElementById('btn-menu-logout');
+
+        const openMenu = () => {
+            qiraatSideMenu.classList.add('open');
+            qiraatMenuBackdrop.classList.add('open');
+            qiraatSideMenu.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeMenu = () => {
+            qiraatSideMenu.classList.remove('open');
+            qiraatMenuBackdrop.classList.remove('open');
+            qiraatSideMenu.setAttribute('aria-hidden', 'true');
+        };
+
+        btnMenu?.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openMenu();
+        });
+        btnMenuClose?.addEventListener('click', closeMenu);
+        qiraatMenuBackdrop?.addEventListener('click', closeMenu);
+
+        btnMenuHome?.addEventListener('click', () => {
+            closeMenu();
+            window.location.href = '../Student/student.html';
+        });
+        btnMenuThajweed?.addEventListener('click', () => {
+            closeMenu();
+            window.location.href = '../Thajweed/thajweed.html';
+        });
+        btnMenuQiraat?.addEventListener('click', () => {
+            closeMenu();
+            window.location.href = 'qiraat.html';
+        });
+        btnMenuLogout?.addEventListener('click', () => {
+            closeMenu();
+            window.location.href = '../../index.html';
         });
     </script>
 </body>

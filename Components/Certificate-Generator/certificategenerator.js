@@ -74,6 +74,14 @@
   const printBtn = document.getElementById('printBtn');
   const resetBtn = document.getElementById('resetBtn');
 
+  const btnMenu = document.getElementById('btn-menu');
+  const btnMenuClose = document.getElementById('btn-menu-close');
+  const menuBackdrop = document.getElementById('cert-menu-backdrop');
+  const menuHome = document.getElementById('btn-menu-home');
+  const menuCert = document.getElementById('btn-menu-cert-generator');
+  const menuReport = document.getElementById('btn-menu-report');
+  const menuLogout = document.getElementById('btn-menu-logout');
+
   let bgImage = null;
   let bgLoadPromise = null;
   let hasGenerated = false;
@@ -278,10 +286,10 @@
       canvas.classList.remove('hidden');
       downloadBtn.disabled = false;
       printBtn.disabled = false;
-      showToast('Certificate generated.');
+      showToast('Certificate Generated.');
     } catch (err) {
       console.error(err);
-      showToast('Something went wrong generating the certificate.');
+      showToast('');
     } finally {
       generateBtnSetLoading(false);
     }
@@ -339,7 +347,7 @@
     const filename = `certificate-${sanitizeFilename(currentStudentName)}.png`;
     const dataUrl = canvas.toDataURL('image/png');
     triggerDownload(dataUrl, filename);
-    showToast('Certificate downloaded.');
+    showToast('Certificate downloading....');
   });
 
   /* ----------------------------------------------------------------
@@ -371,6 +379,29 @@
     `);
     printWindow.document.close();
   });
+
+  /* ----------------------------------------------------------------
+     Menu open/close helpers
+     ---------------------------------------------------------------- */
+  function openMenu() {
+    document.getElementById('cert-side-menu').classList.add('open');
+    menuBackdrop.classList.add('open');
+    document.getElementById('cert-side-menu').setAttribute('aria-hidden', 'false');
+  }
+
+  function closeMenu() {
+    document.getElementById('cert-side-menu').classList.remove('open');
+    menuBackdrop.classList.remove('open');
+    document.getElementById('cert-side-menu').setAttribute('aria-hidden', 'true');
+  }
+
+  if (btnMenu) btnMenu.addEventListener('click', openMenu);
+  if (btnMenuClose) btnMenuClose.addEventListener('click', closeMenu);
+  if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+  if (menuHome) menuHome.addEventListener('click', () => { window.location.href = '../Teacher/teacher.html'; });
+  if (menuCert) menuCert.addEventListener('click', () => { window.location.href = './certificategenerator.html'; });
+  if (menuReport) menuReport.addEventListener('click', () => { window.location.href = '../Report/reports.html'; });
+  if (menuLogout) menuLogout.addEventListener('click', () => { window.location.href = '../../index.html'; });
 
   /* ----------------------------------------------------------------
      Preload the background artwork as soon as the page is ready so

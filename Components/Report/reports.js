@@ -18,6 +18,13 @@ const tableTitle = document.getElementById('table-title');
 const btnDownload = document.getElementById('btn-download-pdf');
 const btnDownloadLabel = document.getElementById('btn-download-label') || btnDownload; // Fallback if label span is missing
 const toastContainer = document.getElementById('toast-container');
+const btnMenu = document.getElementById('btn-menu');
+const btnMenuClose = document.getElementById('btn-menu-close');
+const menuBackdrop = document.getElementById('report-menu-backdrop');
+const menuHome = document.getElementById('btn-menu-home');
+const menuCert = document.getElementById('btn-menu-cert-generator');
+const menuReport = document.getElementById('btn-menu-report');
+const menuLogout = document.getElementById('btn-menu-logout');
 
 function showToast(message, type = 'success') {
     if (!toastContainer) return;
@@ -41,6 +48,26 @@ btnBack.addEventListener('click', () => { window.location.href = '../Teacher/tea
 if (btnDownload) {
     btnDownload.addEventListener('click', downloadPdfReport);
 }
+
+function openMenu() {
+    document.getElementById('report-side-menu').classList.add('open');
+    menuBackdrop.classList.add('open');
+    document.getElementById('report-side-menu').setAttribute('aria-hidden', 'false');
+}
+
+function closeMenu() {
+    document.getElementById('report-side-menu').classList.remove('open');
+    menuBackdrop.classList.remove('open');
+    document.getElementById('report-side-menu').setAttribute('aria-hidden', 'true');
+}
+
+if (btnMenu) btnMenu.addEventListener('click', openMenu);
+if (btnMenuClose) btnMenuClose.addEventListener('click', closeMenu);
+if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+if (menuHome) menuHome.addEventListener('click', () => { window.location.href = '../Teacher/teacher.html'; });
+if (menuCert) menuCert.addEventListener('click', () => { window.location.href = '../Certificate-Generator/certificategenerator.html'; });
+if (menuReport) menuReport.addEventListener('click', () => { window.location.href = './reports.html'; });
+if (menuLogout) menuLogout.addEventListener('click', () => { window.location.href = '../../index.html'; });
 
 // Check Auth & Load Data
 onAuthStateChanged(auth, (user) => {
