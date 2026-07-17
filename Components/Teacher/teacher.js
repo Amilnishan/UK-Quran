@@ -16,7 +16,10 @@ const presentStudentsEl = document.getElementById('present-students');
 const toastContainer = document.getElementById('toast-container');
 
 const btnMarkAll = document.getElementById('btn-mark-all');
-const btnLogout = document.getElementById('btn-logout');
+const btnMenu = document.getElementById('btn-menu');
+const teacherMenuDropdown = document.getElementById('teacher-dropdown-menu');
+const btnMenuLogout = document.getElementById('btn-menu-logout');
+const btnMenuCertGenerator = document.getElementById('btn-menu-cert-generator');
 const btnSaveReport = document.getElementById('btn-save-report');
 const btnSaveLabel = document.getElementById('btn-save-label');
 const btnViewReports = document.getElementById('btn-view-reports');
@@ -626,7 +629,18 @@ if (progressFilterYear) {
 
 // 5. Basic Button Listeners
 if (btnMarkAll) btnMarkAll.addEventListener('click', () => { students.forEach(s => s.isPresent = true); renderStudents(); });
-if (btnLogout) btnLogout.addEventListener('click', () => { signOut(auth).then(() => window.location.href = '../../index.html'); });
+if (btnMenu && teacherMenuDropdown) {
+    btnMenu.addEventListener('click', () => {
+        teacherMenuDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (event) => {
+        if (!btnMenu.contains(event.target) && !teacherMenuDropdown.contains(event.target)) {
+            teacherMenuDropdown.classList.add('hidden');
+        }
+    });
+}
+if (btnMenuLogout) btnMenuLogout.addEventListener('click', () => { signOut(auth).then(() => window.location.href = '../../index.html'); });
+if (btnMenuCertGenerator) btnMenuCertGenerator.addEventListener('click', () => { window.location.href = '../Certificate-Generator/certificategenerator.html'; });
 if (btnViewReports) btnViewReports.addEventListener('click', () => window.location.href = '../Report/reports.html');
 
 // --- 6. ADD STUDENT (creates real Auth account + duplicate check) ---
