@@ -224,9 +224,12 @@
             videoList.appendChild(card);
         });
 
-        document.getElementById('btn-back').addEventListener('click', () => {
-            window.location.href = '../Student/student.html';
-        });
+        const btnBack = document.getElementById('btn-back');
+        if (btnBack) {
+            btnBack.addEventListener('click', () => {
+                window.location.href = '../Student/student.html';
+            });
+        }
 
         // make lesson cards collapsible; start closed by default
         (function setupLessonCollapse(){

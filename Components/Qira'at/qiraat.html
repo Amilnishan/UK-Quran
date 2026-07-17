@@ -343,9 +343,12 @@
             if (ignoreClick) return;
             card.classList.toggle('open');
         });
-        document.getElementById('btn-back').addEventListener('click', () => {
-            window.location.href = '../Student/student.html';
-        });
+        const btnBack = document.getElementById('btn-back');
+        if (btnBack) {
+            btnBack.addEventListener('click', () => {
+                window.location.href = '../Student/student.html';
+            });
+        }
 
         const btnMenu = document.getElementById('btn-menu');
         const qiraatMenuBackdrop = document.getElementById('qiraat-menu-backdrop');
