@@ -18,9 +18,14 @@ const historyTable = document.getElementById('modal-history-table-body');
 const toastContainer = document.getElementById('toast-container');
 const btnViewMonthly = document.getElementById('btn-view-monthly-progress');
 const btnOpenThajweed = document.getElementById('btn-open-thajweed');
+const donateButtons = document.querySelectorAll('.btn-open-donate');
 const monthlyModal = document.getElementById('modal-monthly-progress');
+const donateModal = document.getElementById('modal-donate');
 const btnCloseMonthly = document.getElementById('btn-close-monthly-progress');
+const btnCloseDonate = document.getElementById('btn-close-donate');
+const btnCopyUpi = document.getElementById('btn-copy-upi');
 const btnMenu = document.getElementById('btn-menu');
+const donationUpi = 'abutaubha123-3@okaxis';
 const studentMenuBackdrop = document.getElementById('student-menu-backdrop');
 const studentSideMenu = document.getElementById('student-side-menu');
 const btnMenuClose = document.getElementById('btn-menu-close');
@@ -246,6 +251,17 @@ if (btnOpenThajweed) {
     });
 }
 
+if (donateButtons && donateButtons.length > 0) {
+    donateButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            if (donateModal) {
+                donateModal.classList.remove('hidden');
+                lockBodyScroll();
+            }
+        });
+    });
+}
+
 const btnOpenQiraat = document.getElementById('btn-open-qiraat');
 if (btnOpenQiraat) {
     btnOpenQiraat.addEventListener('click', () => {
@@ -253,9 +269,39 @@ if (btnOpenQiraat) {
     });
 }
 
+if (btnCloseDonate) {
+    btnCloseDonate.addEventListener('click', () => {
+        if (donateModal) {
+            donateModal.classList.add('hidden');
+            unlockBodyScroll();
+        }
+    });
+}
+
 if (btnCloseMonthly) {
     btnCloseMonthly.addEventListener('click', () => {
         closeMonthlyModalWithHistory();
+    });
+}
+
+if (btnCopyUpi) {
+    btnCopyUpi.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(donationUpi);
+            showToast('UPI ID copied');
+        } catch (error) {
+            console.error('Copy failed', error);
+            showToast('Copy failed. Please copy manually.', 'error');
+        }
+    });
+}
+
+if (donateModal) {
+    donateModal.addEventListener('click', (event) => {
+        if (event.target === donateModal) {
+            donateModal.classList.add('hidden');
+            unlockBodyScroll();
+        }
     });
 }
 

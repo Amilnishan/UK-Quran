@@ -551,6 +551,38 @@ input.input-error {
     box-shadow: 0 0 0 3px rgba(216, 130, 18, 0.12);
 }
 
+.donation-upi-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px;
+    background: #f8f9fb;
+    border: 1px solid #e3e7ed;
+    border-radius: 14px;
+    margin-top: 12px;
+}
+.donation-upi-text {
+    flex: 1;
+    font-size: 14px;
+    color: #2b2b2b;
+    word-break: break-all;
+}
+.copy-button {
+    border: 1px solid #c5cdd6;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+.copy-button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
 /* --- TOAST NOTIFICATIONS --- */
 .toast-container {
     position: fixed;
