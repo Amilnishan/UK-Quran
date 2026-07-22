@@ -302,17 +302,9 @@ if (btnCopyUpi) {
 
 if (btnQrPay) {
     btnQrPay.addEventListener('click', () => {
-        const upiLink = `upi://pay?pa=${encodeURIComponent(donationUpi)}&pn=${encodeURIComponent('UK Quran')}&tn=${encodeURIComponent('Donation')}&cu=INR`;
+        const upiLink = `upi://pay?pa=${encodeURIComponent(donationUpi)}&pn=${encodeURIComponent('UK Quran')}&tn=${encodeURIComponent('Donation for UK Quran')}&cu=INR`;
         window.location.href = upiLink;
     });
-}
-
-function showUpiAppSelector() {
-    // This function is no longer needed - using native device app selector
-}
-
-function closeUpiSelector() {
-    // This function is no longer needed - using native device app selector
 }
 
 if (btnQrShare) {
@@ -454,5 +446,12 @@ if (btnMenuLogout) {
         studentSideMenu.classList.remove('open');
         studentMenuBackdrop.classList.remove('open');
         signOut(auth).then(() => window.location.href = '../../index.html');
+    });
+}
+
+function qrImageClick(){
+        btnQrPay.addEventListener('click', () => {
+        const upiLink = `upi://pay?pa=${encodeURIComponent(donationUpi)}&pn=${encodeURIComponent('UK Quran')}&tn=${encodeURIComponent('Donation for UK Quran')}&cu=INR`;
+        window.location.href = upiLink;
     });
 }
