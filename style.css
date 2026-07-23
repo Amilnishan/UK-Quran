@@ -807,6 +807,16 @@ input.input-error {
     width: 16px;
     height: 16px;
     border: 2.5px solid rgba(0,0,0,0.08);
+    border-top: 2.5px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    vertical-align: middle;
+}
+.loader-inline5 {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(0,0,0,0.08);
     border-top: 2.5px solid black;
     border-radius: 50%;
     animation: spin 0.9s linear infinite;
