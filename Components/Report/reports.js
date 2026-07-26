@@ -8,6 +8,7 @@ let studentsObj = {}; // Quick lookup for student names
 let logsData = {};    // All logs for the teacher
 let latestReportRows = [];
 let latestReportSummary = { totalStudents: 0, avgGrade: '-', avgPresence: '0%' };
+let currentTeacherEmail = '';
 
 const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F]/;
 
@@ -83,6 +84,7 @@ if (menuLogout) menuLogout.addEventListener('click', () => { window.location.hre
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentTeacherUid = user.uid;
+        currentTeacherEmail = user.email ? user.email.toLowerCase() : ''; // Save email
         showReportLoading();
         loadAllData();
     } else {
@@ -189,9 +191,11 @@ function generateReport() {
 
     const prefix = `${year}-${month}`;
 
-    if (archivedReports[key]) {
+    const isMainTeacher = currentTeacherEmail === 'teacher@uk-quran.com';
+
+    if (isMainTeacher && archivedReports[key]) {
         renderArchivedReport(archivedReports[key], month, year);
-        return; // skip the live Firebase-based logic entirely for this month
+        return; // skip the live Firebase-based logic for main teacher's archived month
     }
     
 let totals = {};

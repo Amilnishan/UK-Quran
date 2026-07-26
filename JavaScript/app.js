@@ -2,20 +2,20 @@ import { signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/fir
 import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, database } from "./firebase-config.js";
 
-// UI Logic: Toggle Roles
-const btnStudent = document.getElementById('btn-student');
-const btnTeacher = document.getElementById('btn-teacher');
-const lblId = document.getElementById('lbl-id');
-const lblPassword = document.getElementById('lbl-password');
+// DOM Elements
+const toastContainer = document.getElementById('toast-container');
+const landingContent = document.getElementById("landing-content");
+const loginForm = document.getElementById("login-form");
+const loginFooter = document.getElementById("login-footer");
+
+const btnShowLogin = document.getElementById("btn-show-login");
+const btnGuestLogin = document.getElementById("btn-guest-login");
+const btnBackToLanding = document.getElementById("btn-back-to-landing");
+
 const inputId = document.getElementById('input-id');
 const inputPassword = document.getElementById('input-password');
-const toastContainer = document.getElementById('toast-container');
 
-let currentRole = 'student';
-
-// If student.js redirected here because a deleted student's old login
-// still worked but their data was gone, show a clear message instead of
-// silently landing back on the login screen.
+// Handle Account Removed Error
 const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('error') === 'account_removed') {
     showToast("This account no longer exists. Please contact your teacher.", "error");
@@ -35,39 +35,30 @@ function showToast(message, type = 'error') {
     }, 2600);
 }
 
-// Turns a short PIN into a Firebase-valid password (min 6 chars).
-// Invisible to the student — they still only ever type their real PIN.
-// IMPORTANT: this exact function must also exist in teacher.js, unchanged,
-// or a student created with one version won't be able to log in with the other.
 function toAuthPassword(pin) {
     return String(pin).padEnd(6, '0');
 }
 
-btnStudent.addEventListener('click', () => {
-    currentRole = 'student';
-    btnStudent.classList.add('active');
-    btnTeacher.classList.remove('active');
-    lblId.innerText = 'Student ID';
-    inputId.type = 'text';
-    inputId.placeholder = 'name';
-    lblPassword.innerText = 'PIN';
-    inputPassword.value = '';
-    inputId.value = '';
+// Landing Navigation
+btnShowLogin.addEventListener("click", () => {
+    landingContent.classList.add("hidden");
+    loginForm.classList.remove("hidden");
+    loginFooter.classList.remove("hidden");
 });
 
-btnTeacher.addEventListener('click', () => {
-    currentRole = 'teacher';
-    btnTeacher.classList.add('active');
-    btnStudent.classList.remove('active');
-    lblId.innerText = 'Email Address';
-    inputId.type = 'email';
-    inputId.placeholder = 'teacher@ukquran.com';
-    lblPassword.innerText = 'Password';
-    inputPassword.value = '';
-    inputId.value = '';
+btnBackToLanding.addEventListener("click", () => {
+    loginForm.classList.add("hidden");
+    loginFooter.classList.add("hidden");
+    landingContent.classList.remove("hidden");
 });
 
-// Password visibility toggle
+// Guest Access Handler
+btnGuestLogin.addEventListener("click", () => {
+    sessionStorage.setItem("isGuest", "true");
+    window.location.href = "Components/Guest/guest.html";
+});
+
+// Password Visibility Toggle
 const togglePassword = document.getElementById('togglePassword');
 if (togglePassword) {
     togglePassword.addEventListener('click', function () {
@@ -79,6 +70,69 @@ if (togglePassword) {
     });
 }
 
+// Unified Form Submission (Auto-detects Teacher vs Student)
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const userInput = inputId.value.trim();
+    const userPass = inputPassword.value.trim();
+    const submitBtn = document.getElementById('btn');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>';
+
+    // If user input contains '@', treat as Teacher Email. Otherwise, treat as Student ID.
+    const isTeacher = userInput.includes('@');
+
+    if (isTeacher) {
+    signInWithEmailAndPassword(auth, userInput, userPass)
+        .then((userCredential) => {
+            if (userInput.toLowerCase() === 'teacher@uk-quran.com') {
+                window.location.href = "Components/Admin/admin.html";
+            } else {
+                window.location.href = "Components/Teacher/teacher.html";
+            }
+        })
+        .catch(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "Login ➔";
+            showToast("Login Failed: Invalid Credentials", "error");
+        });
+    } else {
+        const studentEmail = `${userInput.toLowerCase()}@student.ukquran.com`;
+        const authPassword = toAuthPassword(userPass);
+
+        try {
+            await signInWithEmailAndPassword(auth, studentEmail, authPassword);
+
+            const studentId = userInput.toLowerCase();
+            const teachersSnap = await get(ref(database, 'teachers'));
+            let stillExists = false;
+
+            if (teachersSnap.exists()) {
+                teachersSnap.forEach((teacherSnap) => {
+                    const students = teacherSnap.child('students').val();
+                    if (students && students[studentId]) stillExists = true;
+                });
+            }
+
+            if (stillExists) {
+                window.location.href = "Components/Student/student.html";
+            } else {
+                await signOut(auth);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "Login ➔";
+                showToast("This account no longer exists. Please contact your teacher.", "error");
+            }
+        } catch (error) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "Login ➔";
+            showToast("Invalid Student ID or PIN.", "error");
+        }
+    }
+});
+
+// PWA Installation Prompt Logic
 const a2hsPrompt = document.getElementById('a2hs-prompt');
 const btnAddHome = document.getElementById('btn-add-home');
 const btnDismissA2HS = document.getElementById('btn-dismiss-a2hs');
@@ -97,47 +151,26 @@ function shouldShowPrompt() {
     return !localStorage.getItem('ukquran_a2hs_added') && !localStorage.getItem('ukquran_a2hs_dismissed');
 }
 
-function showA2HSPrompt() {
-    if (!a2hsPrompt) return;
-    a2hsPrompt.classList.remove('hidden');
-}
-
-function hideA2HSPrompt() {
-    if (!a2hsPrompt) return;
-    a2hsPrompt.classList.add('hidden');
-}
-
 window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredPrompt = event;
-    if (shouldShowPrompt()) {
-        showA2HSPrompt();
+    if (shouldShowPrompt() && a2hsPrompt) {
+        a2hsPrompt.classList.remove('hidden');
         if (iosA2HSTip) iosA2HSTip.classList.add('hidden');
     }
 });
 
-window.addEventListener('appinstalled', () => {
-    localStorage.setItem('ukquran_a2hs_added', 'true');
-    hideA2HSPrompt();
-});
-
 if (btnAddHome) {
     btnAddHome.addEventListener('click', async () => {
-        if (!deferredPrompt) {
-            showToast('Install not available for this browser or context.', 'error');
-            return;
-        }
+        if (!deferredPrompt) return;
         deferredPrompt.prompt();
         const choiceResult = await deferredPrompt.userChoice;
-
         if (choiceResult.outcome === 'accepted') {
             localStorage.setItem('ukquran_a2hs_added', 'true');
-            hideA2HSPrompt();
         } else {
             localStorage.setItem('ukquran_a2hs_dismissed', 'true');
-            hideA2HSPrompt();
         }
-
+        if (a2hsPrompt) a2hsPrompt.classList.add('hidden');
         deferredPrompt = null;
     });
 }
@@ -145,81 +178,16 @@ if (btnAddHome) {
 if (btnDismissA2HS) {
     btnDismissA2HS.addEventListener('click', () => {
         localStorage.setItem('ukquran_a2hs_dismissed', 'true');
-        hideA2HSPrompt();
+        if (a2hsPrompt) a2hsPrompt.classList.add('hidden');
     });
 }
 
 window.addEventListener('load', () => {
-    if (!shouldShowPrompt()) {
-        hideA2HSPrompt();
-    } else if (isIos() && !isInStandaloneMode()) {
-        showA2HSPrompt();
+    if (isIos() && !isInStandaloneMode() && shouldShowPrompt() && a2hsPrompt) {
+        a2hsPrompt.classList.remove('hidden');
         if (iosA2HSTip) iosA2HSTip.classList.remove('hidden');
     }
-
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/JavaScript/sw.js').catch(() => {});
     }
 });
-
-// Login Logic
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const idOrEmail = inputId.value.trim();
-    const passwordOrPin = inputPassword.value.trim();
-    const submitBtn = document.getElementById('btn');
-
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>';
-
-    if (currentRole === 'teacher') {
-        // Teacher Login uses standard Firebase Auth directly.
-        signInWithEmailAndPassword(auth, idOrEmail, passwordOrPin)
-            .then(() => {
-                window.location.href = "Components/Teacher/teacher.html";
-            })
-            .catch(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = "Login ➔";
-                showToast("Login failed: Invalid Input", "error");
-            });
-
-    } else if (currentRole === 'student') {
-    const studentEmail = `${idOrEmail.toLowerCase()}@student.ukquran.com`;
-    const authPassword = toAuthPassword(passwordOrPin);
-
-    try {
-        await signInWithEmailAndPassword(auth, studentEmail, authPassword);
-
-        // Login succeeded, but that only proves the old Auth account still
-        // exists — it doesn't mean the student record is still in the
-        // database (a teacher may have deleted them since). Check that
-        // BEFORE navigating anywhere, so a removed student never even
-        // briefly sees the dashboard.
-        const studentId = idOrEmail.toLowerCase();
-        const teachersSnap = await get(ref(database, 'teachers'));
-        let stillExists = false;
-
-        if (teachersSnap.exists()) {
-            teachersSnap.forEach((teacherSnap) => {
-                const students = teacherSnap.child('students').val();
-                if (students && students[studentId]) stillExists = true;
-            });
-        }
-
-        if (stillExists) {
-            window.location.href = "Components/Student/student.html";
-        } else {
-            await signOut(auth);
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = "Login ➔";
-            showToast("This account no longer exists. Please contact your teacher.", "error");
-        }
-    } catch (error) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = "Login ➔";
-        showToast("Invalid Student ID or PIN.", "error");
-    }
-}
-})
