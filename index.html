@@ -11,41 +11,63 @@
     <meta name="apple-mobile-web-app-title" content="UK Quran LMS">
     <link rel="apple-touch-icon" href="images/Logo/logo.webp">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Preloader overlay shown until login page and background image fully load -->
+
+    <!-- 1. PRELOADER SCREEN (Minimum 3 seconds) -->
     <div id="preloader" class="preloader" aria-hidden="false">
         <div class="preloader-content">
-            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-                
-
-                <div class="loader-inline5" aria-hidden="true"></div>
-            </div>
+            <img src="images/Logo/logo-black-icon.webp" width="90" alt="UK Quran Logo" class="preloader-logo">
+            <h2 class="preloader-title">UK Quran</h2>
+            <div class="loader-inline5"></div>
+            <p class="preloader-text">Loading Quran Academy...</p>
         </div>
     </div>
     
+    <!-- MAIN CONTAINER -->
     <div id="login-container" class="login-container hidden">
 
         <!-- Logo Header -->
         <div class="header">
-            <div class="logo"><img src="images/Logo/logo-black-icon.webp" alt="logo" height="70px" width="70px" style="border-radius: 100px; border: white 4px solid ;"></div>
+            <div class="logo">
+                <img src="images/Logo/logo-black-icon.webp" alt="logo" height="70px" width="70px" style="border-radius: 100px; border: white 4px solid;">
+            </div>
             <h1>UK Quran</h1>
         </div>
 
-        <!-- Role Toggle -->
-        <div class="role-toggle">
-            <button id="btn-student" class="active">👤 Student</button>
-            <button id="btn-teacher">🎓 Teacher</button>
+        <!-- 2. LANDING CONTENT (Tajweed & Qira'at Intro + Choices) -->
+        <div id="landing-content" class="landing-content">
+            <h2 class="landing-title">Learn the Holy Quran</h2>
+            <p class="landing-subtitle">with Tajweed & Qira'at</p>
+            <p class="landing-description">
+                Master Quran recitation, practice Tajweed rules, and track your journey under guided instruction.
+            </p>
+
+            <div class="landing-actions">
+                <!-- Option A: Standard Login -->
+                <button id="btn-show-login" class="btn-primary1">
+                    Login to Account ➔
+                </button>
+                
+                <!-- Option B: Guest Access -->
+                <button id="btn-guest-login" class="btn-guest">
+                    📖 Explore Free Lessons (Guest)
+                </button>
+            </div>
         </div>
 
-        <!-- Login Form -->
-        <form id="login-form">
-            <!-- Dynamic Labels based on Role -->
-            <label1 id="lbl-id" style="color:white;">Student ID</label1>
-            <input class="nameinput" type="text" id="input-id" placeholder="name-123" required>
+        <!-- 3. STANDARD USER LOGIN FORM -->
+        <form id="login-form" class="hidden">
+            <div class="form-header-row">
+                <button type="button" id="btn-back-to-landing" class="btn-back">← Back</button>
+                <span class="form-title">Account Login</span>
+            </div>
 
-            <label1 id="lbl-password" style="color: white;">PIN</label1>
+            <label1 id="lbl-id" style="color:white;">Student ID or Email</label1>
+            <input class="nameinput" type="text" id="input-id" placeholder="ID or email@domain.com" required>
+
+            <label1 id="lbl-password" style="color: white;">PIN / Password</label1>
             <div class="password-container">
                 <input type="password" id="input-password" placeholder="••••" required>
                 <button type="button" id="togglePassword" class="password-toggle" aria-label="Show password" aria-pressed="false">
@@ -61,12 +83,13 @@
             <button type="submit" class="btn-primary1" id="btn">Login ➔</button>
         </form>
 
-        <div class="footer">
+        <div class="footer hidden" id="login-footer">
             <p>© 2026 UK QURAN • PRIVACY & TERMS</p>
         </div>
     </div>
 
-    <div id="a2hs-prompt" class="a2hs-prompt " aria-live="polite">
+    <!-- PWA Install Prompt -->
+    <div id="a2hs-prompt" class="a2hs-prompt hidden" aria-live="polite">
         <div class="a2hs-card">
             <div class="a2hs-content">
                 <span class="a2hs-icon">📱</span>
@@ -85,28 +108,11 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Firebase SDK (Modular V10) -->
+    <!-- Loader Script -->
     <script>
-    // Preloader logic: keep the splash screen visible until the login page is fully ready,
-    // while still showing it for at least 10 seconds.
     (function(){
         const preloader = document.getElementById('preloader');
         const loginContainer = document.getElementById('login-container');
-
-        function getBackgroundImageUrls(element){
-            try {
-                const bg = getComputedStyle(element).backgroundImage || '';
-                const urls = [];
-                const regex = /url\((['"]?)(.*?)\1\)/g;
-                let match;
-                while ((match = regex.exec(bg)) !== null) {
-                    if (match[2]) urls.push(match[2]);
-                }
-                return urls;
-            } catch (error) {
-                return [];
-            }
-        }
 
         function loadImage(src){
             return new Promise((resolve) => {
@@ -118,42 +124,25 @@
             });
         }
 
-        function waitForAssets(){
-            const imagePromises = Array.from(document.images || []).filter((img) => img.src).map((img) => {
-                if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-                return new Promise((resolve) => {
-                    img.addEventListener('load', resolve, { once: true });
-                    img.addEventListener('error', resolve, { once: true });
-                });
-            });
-
-            const backgroundElements = [document.body, loginContainer];
-            const bgUrls = backgroundElements.flatMap((element) => element ? getBackgroundImageUrls(element) : []);
-            const bgPromises = bgUrls.map(loadImage);
-            return Promise.all([...imagePromises, ...bgPromises]);
-        }
-
-        function showLoginPage(){
-            if (preloader) {
-                preloader.classList.add('preloader-fade');
-                setTimeout(() => preloader.remove(), 420);
-            }
-            if (loginContainer) {
-                loginContainer.classList.remove('hidden');
-            }
-        }
-
-        async function waitForReady(){
+        function waitForReady(){
             const pageReady = new Promise((resolve) => {
                 if (document.readyState === 'complete') return resolve();
                 window.addEventListener('load', resolve, { once: true });
             });
 
+            // Enforce minimum 3 seconds loading delay as requested
             const minimumDelay = new Promise((resolve) => setTimeout(resolve, 3000));
-            const assetsReady = waitForAssets();
+            const bgPromise = loadImage('images/Background/download.webp');
 
-            await Promise.all([pageReady, assetsReady, minimumDelay]);
-            showLoginPage();
+            Promise.all([pageReady, bgPromise, minimumDelay]).then(() => {
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => preloader.remove(), 400);
+                }
+                if (loginContainer) {
+                    loginContainer.classList.remove('hidden');
+                }
+            });
         }
 
         waitForReady();

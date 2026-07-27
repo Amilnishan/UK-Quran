@@ -7,11 +7,14 @@
     <link rel="stylesheet" href="../../style.css">
     <style>
         .student-action-card {
-            background: white;
-            margin: 10px;
-            border-radius: 16px;
-            padding: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            background: #ffffff;
+            margin: 20px 32px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            width: calc(100% - 64px); /* Matches header 32px side paddings symmetrically */
+            max-width: 1280px;
         }
         .student-action-card h3 {
             margin: 0 0 10px;
@@ -41,24 +44,63 @@
             font-size: 14px;
             color: #444;
         }
+        @media (max-width: 768px) {
+            .student-action-card {
+                margin: 16px 16px;
+                width: calc(100% - 32px);
+                padding: 16px;
+            }
+        }
+
+        .qiraat {
+            height: 100px;
+            background-image: url(../../images/Banner/banner-3-reverse.webp), url(images/Banner/banner-3-reverse.webp);
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            width: 100%;
+        }
+
         .audio-list {
             display: none;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 16px;
+            margin-top: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .audio-search {
+            grid-column: 1 / -1;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .audio-search input {
+            width: 100% !important;
+            height: 44px;
+            padding: 0 18px;
+            border-radius: 999px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #ffffff;
         }
         .student-action-card.open .audio-list {
-            display: flex;
+            display: grid;
         }
         .audio-card {
             background: #ffffff;
             border-radius: 16px;
             padding: 14px 16px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            width: 90%;
+            width: 100% !important; /* Expands to full cell width, eliminating right side gap */
+            box-sizing: border-box;
         }
         .audio-row {
             display: flex;
@@ -119,6 +161,12 @@
         .side-menu .menu-list button { border: none; background: transparent; text-align: left; color: #111; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 0; cursor: pointer; }
         .side-menu .menu-list button + button { padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.08); }
         .side-menu .menu-list button:hover { color: #0f4ad6; }
+        @media (max-width: 500px) {
+        .audio-list {
+            grid-template-columns: 1fr; /* Single col on mobilephones*/
+            gap: 12px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -351,55 +399,76 @@
             });
         }
 
-        const btnMenu = document.getElementById('btn-menu');
-        const qiraatMenuBackdrop = document.getElementById('qiraat-menu-backdrop');
-        const qiraatSideMenu = document.getElementById('qiraat-side-menu');
-        const btnMenuClose = document.getElementById('btn-menu-close');
-        const btnMenuHome = document.getElementById('btn-menu-home');
-        const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
-        const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
-        const btnMenuCertificates = document.getElementById('btn-menu-certificates');
-        const btnMenuLogout = document.getElementById('btn-menu-logout');
+        // --- DYNAMIC GUEST MENU CHECK ---
+const isGuest = sessionStorage.getItem('isGuest') === 'true';
+const btnMenuCertificates = document.getElementById('btn-menu-certificates');
+const btnMenuLogout = document.getElementById('btn-menu-logout');
 
-        const openMenu = () => {
-            qiraatSideMenu.classList.add('open');
-            qiraatMenuBackdrop.classList.add('open');
-            qiraatSideMenu.setAttribute('aria-hidden', 'false');
-        };
+// Hide student-only menu items if user is a Guest
+if (isGuest) {
+    if (btnMenuCertificates) btnMenuCertificates.style.display = 'none';
+    if (btnMenuLogout) btnMenuLogout.textContent = 'EXIT GUEST MODE';
+}
 
-        const closeMenu = () => {
-            qiraatSideMenu.classList.remove('open');
-            qiraatMenuBackdrop.classList.remove('open');
-            qiraatSideMenu.setAttribute('aria-hidden', 'true');
-        };
+const btnMenu = document.getElementById('btn-menu');
+const qiraatMenuBackdrop = document.getElementById('qiraat-menu-backdrop');
+const qiraatSideMenu = document.getElementById('qiraat-side-menu');
+const btnMenuClose = document.getElementById('btn-menu-close');
+const btnMenuHome = document.getElementById('btn-menu-home');
+const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
+const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
 
-        btnMenu?.addEventListener('click', (event) => {
-            event.stopPropagation();
-            openMenu();
-        });
-        btnMenuClose?.addEventListener('click', closeMenu);
-        qiraatMenuBackdrop?.addEventListener('click', closeMenu);
+const openMenu = () => {
+    qiraatSideMenu.classList.add('open');
+    qiraatMenuBackdrop.classList.add('open');
+    qiraatSideMenu.setAttribute('aria-hidden', 'false');
+};
 
-        btnMenuHome?.addEventListener('click', () => {
-            closeMenu();
-            window.location.href = '../Student/student.html';
-        });
-        btnMenuThajweed?.addEventListener('click', () => {
-            closeMenu();
-            window.location.href = '../Thajweed/thajweed.html';
-        });
-        btnMenuQiraat?.addEventListener('click', () => {
-            closeMenu();
-            window.location.href = 'qiraat.html';
-        });
-        btnMenuCertificates?.addEventListener('click', () => {
-            closeMenu();
-            window.location.href = '../Certificates/certificates.html';
-        });
-        btnMenuLogout?.addEventListener('click', () => {
-            closeMenu();
-            window.location.href = '../../index.html';
-        });
+const closeMenu = () => {
+    qiraatSideMenu.classList.remove('open');
+    qiraatMenuBackdrop.classList.remove('open');
+    qiraatSideMenu.setAttribute('aria-hidden', 'true');
+};
+
+btnMenu?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    openMenu();
+});
+btnMenuClose?.addEventListener('click', closeMenu);
+qiraatMenuBackdrop?.addEventListener('click', closeMenu);
+
+// Route HOME based on user role (Guest vs Student)
+btnMenuHome?.addEventListener('click', () => {
+    closeMenu();
+    if (isGuest) {
+        window.location.href = '../Guest/guest.html';
+    } else {
+        window.location.href = '../Student/student.html';
+    }
+});
+
+btnMenuThajweed?.addEventListener('click', () => {
+    closeMenu();
+    window.location.href = '../Thajweed/thajweed.html';
+});
+
+btnMenuQiraat?.addEventListener('click', () => {
+    closeMenu();
+    window.location.href = 'qiraat.html';
+});
+
+btnMenuCertificates?.addEventListener('click', () => {
+    closeMenu();
+    window.location.href = '../Certificates/certificates.html';
+});
+
+btnMenuLogout?.addEventListener('click', () => {
+    closeMenu();
+    if (isGuest) {
+        sessionStorage.removeItem('isGuest');
+    }
+    window.location.href = '../../index.html';
+});
     </script>
 </body>
 </html>

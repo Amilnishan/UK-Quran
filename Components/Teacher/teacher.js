@@ -8,7 +8,15 @@ let pendingDeleteId = null;
 let searchTerm = '';
 const todayStr = new Date().toISOString().split('T')[0];
 
-// --- DOM refs ---
+// Pre-cached Quran Page Options (0-604) for 100x Faster Card Rendering
+const PRECACHED_OPTIONS_TEMPLATE = Array.from({ length: 605 }, (_, i) => `<option value="${i}">${i}</option>`).join('');
+
+function buildNumberSelectOptions(selectedValue = 0) {
+    const val = String(Math.max(0, Math.min(604, Number(selectedValue) || 0)));
+    return PRECACHED_OPTIONS_TEMPLATE.replace(`value="${val}"`, `value="${val}" selected`);
+}
+
+// --- DOM Refs ---
 const studentListContainer = document.getElementById('student-list');
 const studentSearchInput = document.getElementById('student-search');
 const totalStudentsEl = document.getElementById('total-students');
@@ -29,6 +37,7 @@ const btnSaveReport = document.getElementById('btn-save-report');
 const btnSaveLabel = document.getElementById('btn-save-label');
 const btnViewReports = document.getElementById('btn-view-reports');
 
+// Modals
 const studentProgressModal = document.getElementById('student-progress-modal');
 const progressModalTitle = document.getElementById('progress-modal-title');
 const progressModalTableBody = document.getElementById('progress-modal-table-body');
@@ -36,6 +45,7 @@ const progressFilterMonth = document.getElementById('progress-filter-month');
 const progressFilterYear = document.getElementById('progress-filter-year');
 const btnCloseProgressModal = document.getElementById('btn-close-progress');
 const btnToggleProgressEdit = document.getElementById('btn-toggle-progress-edit');
+
 const progressDateEditModal = document.getElementById('progress-date-edit-modal');
 const progressEditModalTitle = document.getElementById('progress-edit-modal-title');
 const progressEditDateLabel = document.getElementById('progress-edit-date-label');
@@ -48,6 +58,7 @@ const progressEditHeardBy = document.getElementById('progress-edit-heard-by');
 const btnSaveProgressEdit = document.getElementById('btn-save-progress-edit');
 const btnCancelProgressEdit = document.getElementById('btn-cancel-progress-edit');
 const btnCloseProgressEditModal = document.getElementById('btn-close-progress-edit');
+
 let currentProgressStudentId = null;
 let currentProgressLogSnapshot = {};
 let currentProgressEditDateKey = null;
@@ -69,72 +80,89 @@ const deleteStudentNameEl = document.getElementById('delete-student-name');
 const btnCancelDelete = document.getElementById('btn-cancel-delete');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
-// 1. Setup Date
-document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+// 1. Setup Header Date
+const currentDateEl = document.getElementById('current-date');
+if (currentDateEl) {
+    currentDateEl.innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
 
-// 2. Auth Check & Fetch from Firebase
+// 2. Auth State Observer
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentTeacherUid = user.uid;
         showLoadingIndicators();
         loadDataFromDB();
     } else {
-        window.location.href = 'index.html';
+        window.location.href = '../../index.html';
     }
 });
 
-// 3. Load Data — both fetches run in parallel instead of nested/sequential
+// 3. Load Data from Firebase Realtime DB
 function loadDataFromDB() {
+    if (!currentTeacherUid) return;
+
     const studentsRef = ref(database, `teachers/${currentTeacherUid}/students`);
     const todayLogRef = ref(database, `teachers/${currentTeacherUid}/logs/${todayStr}`);
 
-    studentListContainer.innerHTML = '<p style="padding:20px; color:#888;">Loading students...</p>';
-
     Promise.all([get(studentsRef), get(todayLogRef)]).then(([snapshot, logSnap]) => {
         let loadedStudents = [];
+        
         if (snapshot.exists()) {
             snapshot.forEach((child) => {
+                const val = child.val();
                 loadedStudents.push({
-                    id: child.key, name: child.val().name, pin: child.val().pin,
-                    isPresent: false, newPages: 0, rev: 0, remarks: "", revHeardBy: ""
+                    id: child.key,
+                    name: val.name || 'Student',
+                    pin: val.pin || '0000',
+                    isPresent: false,
+                    newPages: 0,
+                    rev: 0,
+                    remarks: "",
+                    revHeardBy: "",
+                    expanded: false
                 });
             });
         }
+
         if (logSnap.exists()) {
             const logData = logSnap.val();
             loadedStudents = loadedStudents.map(st => {
                 const todaysLog = logData[st.id] || {};
                 return {
                     ...st,
-                    ...todaysLog,
-                    revHeardBy: todaysLog.revHeardBy || ''
+                    isPresent: todaysLog.isPresent === true,
+                    newPages: Number(todaysLog.newPages) || 0,
+                    rev: Number(todaysLog.rev) || 0,
+                    remarks: String(todaysLog.remarks || ''),
+                    revHeardBy: String(todaysLog.revHeardBy || '')
                 };
             });
         }
+
         students = loadedStudents;
         renderStudents();
+        hideLoadingIndicators();
+    }).catch((err) => {
+        console.error("Error loading student data:", err);
+        showToast("Error loading student data", "error");
         hideLoadingIndicators();
     });
 }
 
 function showLoadingIndicators() {
-    // Replace totals with loaders
-    if (totalStudentsEl) totalStudentsEl.innerHTML = '<span class="loader-inline"></span>';
-    if (presentStudentsEl) presentStudentsEl.innerHTML = '<span class="loader-inline"></span>';
-    // Show a block loader in student list
-    if (studentListContainer) studentListContainer.innerHTML = '<div class="loader-block"><div class="loader-inline"></div><div>Loading students...</div></div>';
+    if (totalStudentsEl) totalStudentsEl.innerHTML = '<span class="loader-inline1"></span>';
+    if (presentStudentsEl) presentStudentsEl.innerHTML = '<span class="loader-inline1"></span>';
+    if (studentListContainer) studentListContainer.innerHTML = '<div class="loader-block"><div class="loader-inline1"></div><div>Loading students...</div></div>';
 }
 
 function hideLoadingIndicators() {
-    // If students already rendered, counts will be set in renderStudents
-    // But ensure placeholders are removed if no students
     if (!students.length) {
-        if (totalStudentsEl) totalStudentsEl.innerHTML = '0';
-        if (presentStudentsEl) presentStudentsEl.innerHTML = '0';
+        if (totalStudentsEl) totalStudentsEl.innerText = '0';
+        if (presentStudentsEl) presentStudentsEl.innerText = '0';
     }
 }
 
-// --- Toast helper (single source of truth, used everywhere in this file) ---
+// Toast Helper
 function showToast(message, type = 'success') {
     if (!toastContainer) return;
     const toast = document.createElement('div');
@@ -148,9 +176,6 @@ function showToast(message, type = 'success') {
     }, 2600);
 }
 
-// Turns a short PIN into a Firebase-valid password (min 6 chars).
-// Invisible to the user — they still only ever type/set the real PIN.
-// IMPORTANT: this exact function must also exist in app.js, unchanged.
 function toAuthPassword(pin) {
     return String(pin).padEnd(6, '0');
 }
@@ -168,18 +193,10 @@ const trashIconSVG = `
     <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
 </svg>`;
 
-// 4. Render — one DocumentFragment write instead of rebuilding innerHTML
-// per change, plus event delegation instead of inline onclick handlers.
 function getFilteredStudents() {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return students;
     return students.filter((student) => student.name.toLowerCase().includes(term));
-}
-
-function buildNumberSelectOptions(selectedValue = 0) {
-    return Array.from({ length: 1001 }, (_, value) => {
-        return `<option value="${value}" ${Number(selectedValue) === value ? 'selected' : ''}>${value}</option>`;
-    }).join('');
 }
 
 function formatProgressDateLabel(dateKey) {
@@ -188,19 +205,7 @@ function formatProgressDateLabel(dateKey) {
     return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function updateProgressEditAttendanceUI() {
-    if (progressEditPresentBtn) {
-        progressEditPresentBtn.classList.toggle('active-p', isProgressEditPresent);
-    }
-    if (progressEditAbsentBtn) {
-        progressEditAbsentBtn.classList.toggle('active-a', !isProgressEditPresent);
-    }
-}
-
-function lockBodyScroll() {
-    document.body.classList.add('modal-open');
-}
-
+function lockBodyScroll() { document.body.classList.add('modal-open'); }
 function unlockBodyScroll() {
     if (!document.querySelector('.modal-overlay:not(.hidden)')) {
         document.body.classList.remove('modal-open');
@@ -213,93 +218,11 @@ function pushModalState() {
     }
 }
 
-function closeProgressEditModal() {
-    if (progressDateEditModal) progressDateEditModal.classList.add('hidden');
-    currentProgressEditDateKey = null;
-    if (progressEditNew) progressEditNew.innerHTML = '';
-    if (progressEditRev) progressEditRev.innerHTML = '';
-    if (progressEditRemarks) progressEditRemarks.value = '';
-    if (progressEditHeardBy) progressEditHeardBy.value = '';
-    if (progressEditModalTitle) progressEditModalTitle.innerText = 'Edit Daily Progress';
-    unlockBodyScroll();
-}
-
-function openProgressEditModal(dateKey) {
-    if (!currentProgressStudentId || !progressDateEditModal || !progressEditNew || !progressEditRev) return;
-
-    const entry = currentProgressLogSnapshot[dateKey]?.[currentProgressStudentId] || {};
-    currentProgressEditDateKey = dateKey;
-    isProgressEditPresent = entry.isPresent === true;
-
-    const student = students.find((item) => item.id === currentProgressStudentId);
-    const studentName = student ? student.name : 'Student';
-
-    progressEditDateLabel.innerText = formatProgressDateLabel(dateKey);
-    progressEditModalTitle.innerText = `${studentName}`;
-    progressEditNew.innerHTML = buildNumberSelectOptions(entry.newPages || 0);
-    progressEditRev.innerHTML = buildNumberSelectOptions(entry.rev || 0);
-    progressEditRemarks.value = entry.remarks || '';
-    progressEditHeardBy.value = entry.revHeardBy || '';
-    updateProgressEditAttendanceUI();
-    progressDateEditModal.classList.remove('hidden');
-}
-
-function saveProgressEditModal() {
-    if (!currentProgressStudentId || !currentProgressEditDateKey || !currentTeacherUid) return;
-
-    const payload = {
-        name: students.find((s) => s.id === currentProgressStudentId)?.name || '',
-        isPresent: isProgressEditPresent,
-        newPages: Math.max(0, Math.min(1000, Number(progressEditNew.value) || 0)),
-        rev: Math.max(0, Math.min(1000, Number(progressEditRev.value) || 0)),
-        remarks: progressEditRemarks.value.trim(),
-        revHeardBy: progressEditHeardBy.value.trim()
-    };
-
-    if (btnSaveProgressEdit) {
-        btnSaveProgressEdit.disabled = true;
-        btnSaveProgressEdit.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>';
-    }
-
-    const logRef = ref(database, `teachers/${currentTeacherUid}/logs/${currentProgressEditDateKey}`);
-    update(logRef, {
-        [currentProgressStudentId]: payload
-    }).then(() => {
-        currentProgressLogSnapshot[currentProgressEditDateKey] = currentProgressLogSnapshot[currentProgressEditDateKey] || {};
-        currentProgressLogSnapshot[currentProgressEditDateKey][currentProgressStudentId] = payload;
-        const matchedStudent = students.find((item) => item.id === currentProgressStudentId);
-        if (matchedStudent && currentProgressEditDateKey === todayStr) {
-            matchedStudent.isPresent = payload.isPresent;
-            matchedStudent.newPages = payload.newPages;
-            matchedStudent.rev = payload.rev;
-            matchedStudent.revHeardBy = payload.revHeardBy;
-            matchedStudent.remarks = payload.remarks;
-            renderStudents();
-        }
-
-        setTimeout(() => {
-            if (btnSaveProgressEdit) {
-                btnSaveProgressEdit.disabled = false;
-                btnSaveProgressEdit.innerHTML = 'Save Changes';
-            }
-            closeProgressEditModal();
-            loadStudentProgressReport(currentProgressStudentId);
-            showToast('Monthly progress updated successfully.', 'success');
-        }, 3000);
-    }).catch((error) => {
-        console.error(error);
-        if (btnSaveProgressEdit) {
-            btnSaveProgressEdit.disabled = false;
-            btnSaveProgressEdit.innerHTML = 'Save Changes';
-        }
-        showToast('Unable to update monthly progress.', 'error');
-    });
-}
-
+// Render Student Cards
 function renderStudents() {
+    if (!studentListContainer) return;
     const fragment = document.createDocumentFragment();
     const visibleStudents = getFilteredStudents();
-    let presentCount = 0;
 
     if (!visibleStudents.length) {
         const emptyState = document.createElement('div');
@@ -307,14 +230,12 @@ function renderStudents() {
         emptyState.innerHTML = `<p>No student found matching “${searchTerm.trim()}”.</p>`;
         studentListContainer.innerHTML = '';
         studentListContainer.appendChild(emptyState);
-        totalStudentsEl.innerText = students.length;
-        presentStudentsEl.innerText = students.filter((student) => student.isPresent).length;
+        if (totalStudentsEl) totalStudentsEl.innerText = students.length;
+        if (presentStudentsEl) presentStudentsEl.innerText = students.filter((s) => s.isPresent).length;
         return;
     }
 
     visibleStudents.forEach((student) => {
-        if (student.isPresent) presentCount++;
-
         const card = document.createElement('div');
         card.className = `student-card ${student.isPresent ? '' : 'absent'}${student.expanded ? ' expanded' : ''}`;
 
@@ -328,14 +249,14 @@ function renderStudents() {
                     </div>
                 </div>
                 <div class="sc-actions">
-                <div class="toggle-p-a">
-                    <button class="${student.isPresent ? 'active-p' : ''}" data-action="present" data-student-id="${student.id}">P</button>
-                    <button class="${!student.isPresent ? 'active-a' : ''}" data-action="absent" data-student-id="${student.id}">A</button>
-                </div>
-                    <button class="icon-btn-delete" data-action="delete" data-student-id="${student.id}" title="Remove student">
-                    ${trashIconSVG}
+                    <div class="toggle-p-a">
+                        <button type="button" class="${student.isPresent ? 'active-p' : ''}" data-action="present" data-student-id="${student.id}">P</button>
+                        <button type="button" class="${!student.isPresent ? 'active-a' : ''}" data-action="absent" data-student-id="${student.id}">A</button>
+                    </div>
+                    <button type="button" class="icon-btn-delete" data-action="delete" data-student-id="${student.id}" title="Remove student">
+                        ${trashIconSVG}
                     </button>
-            </div>
+                </div>
             </div>
             <div class="sc-bottom">
                 <div class="progress-row">
@@ -352,13 +273,15 @@ function renderStudents() {
                         </select>
                     </div>
                 </div>
-                <div class="heard-by-row">
+                <div>
                     <label for="heard-by-${student.id}">Revision heard by</label>
-                    <input type="text" id="heard-by-${student.id}" value="${student.revHeardBy || ''}" data-action="heardby" data-student-id="${student.id}" placeholder="Enter name">
+                    <input type="text" id="heard-by-${student.id}" class="remark-input" value="${student.revHeardBy || ''}" data-action="heardby" data-student-id="${student.id}" placeholder="Enter name">
                 </div>
-                <input type="text" class="remark-input" placeholder="Remarks..." value="${student.remarks}" data-action="remark" data-student-id="${student.id}">
-                <button class="btn-outline btn-monthly-progress full-width" data-action="monthly-progress" data-student-id="${student.id}">View Monthly Progress</button>
-
+                <div>
+                    <label for="remark-${student.id}">Remarks</label>
+                    <input type="text" id="remark-${student.id}" class="remark-input" placeholder="Remarks..." value="${student.remarks || ''}" data-action="remark" data-student-id="${student.id}">
+                </div>
+                <button type="button" class="btn-outline btn-monthly-progress full-width" data-action="monthly-progress" data-student-id="${student.id}">View Monthly Progress</button>
             </div>
         `;
         fragment.appendChild(card);
@@ -367,10 +290,11 @@ function renderStudents() {
     studentListContainer.innerHTML = '';
     studentListContainer.appendChild(fragment);
 
-    totalStudentsEl.innerText = students.length;
-    presentStudentsEl.innerText = students.filter((student) => student.isPresent).length;
+    if (totalStudentsEl) totalStudentsEl.innerText = students.length;
+    if (presentStudentsEl) presentStudentsEl.innerText = students.filter((student) => student.isPresent).length;
 }
 
+// Search Listener
 if (studentSearchInput) {
     studentSearchInput.addEventListener('input', (event) => {
         searchTerm = event.target.value;
@@ -378,11 +302,13 @@ if (studentSearchInput) {
     });
 }
 
+// Event Delegation for Student Cards
 studentListContainer.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-action]');
-    if (!btn) return;
-    const studentId = btn.dataset.studentId;
-    const action = btn.dataset.action;
+    const actionTarget = e.target.closest('[data-action]');
+    if (!actionTarget) return;
+
+    const action = actionTarget.dataset.action;
+    const studentId = actionTarget.dataset.studentId;
     const student = students.find((item) => item.id === studentId);
 
     if (!student) return;
@@ -394,6 +320,8 @@ studentListContainer.addEventListener('click', (e) => {
         student.isPresent = false;
         renderStudents();
     } else if (action === 'toggle-card') {
+        // Prevent card toggle if clicking P/A toggle or Delete button
+        if (e.target.closest('.sc-actions')) return;
         student.expanded = !student.expanded;
         renderStudents();
     } else if (action === 'delete') {
@@ -407,18 +335,14 @@ studentListContainer.addEventListener('change', (e) => {
     const selectEl = e.target.closest('[data-action="new-pages"]');
     if (selectEl) {
         const student = students.find((item) => item.id === selectEl.dataset.studentId);
-        if (student) {
-            student.newPages = Math.max(0, Math.min(1000, Number(selectEl.value) || 0));
-        }
+        if (student) student.newPages = Math.max(0, Math.min(604, Number(selectEl.value) || 0));
         return;
     }
 
     const revSelectEl = e.target.closest('[data-action="rev-pages"]');
     if (revSelectEl) {
         const student = students.find((item) => item.id === revSelectEl.dataset.studentId);
-        if (student) {
-            student.rev = Math.max(0, Math.min(1000, Number(revSelectEl.value) || 0));
-        }
+        if (student) student.rev = Math.max(0, Math.min(604, Number(revSelectEl.value) || 0));
     }
 });
 
@@ -426,33 +350,27 @@ studentListContainer.addEventListener('input', (e) => {
     const input = e.target.closest('[data-action="heardby"]');
     if (input) {
         const student = students.find((item) => item.id === input.dataset.studentId);
-        if (student) {
-            student.revHeardBy = input.value;
-        }
+        if (student) student.revHeardBy = input.value;
         return;
     }
 
     const remarkInput = e.target.closest('[data-action="remark"]');
     if (remarkInput) {
         const student = students.find((item) => item.id === remarkInput.dataset.studentId);
-        if (student) {
-            student.remarks = remarkInput.value;
-        }
+        if (student) student.remarks = remarkInput.value;
     }
 });
 
+// --- Monthly Progress Modal ---
 function openStudentProgressModal(studentId) {
     const student = students.find((item) => item.id === studentId);
     if (!student || !studentProgressModal) return;
     currentProgressStudentId = studentId;
     progressModalTitle.innerText = `Monthly Progress - ${student.name}`;
     const today = new Date();
-    if (progressFilterMonth) {
-        progressFilterMonth.value = String(today.getMonth() + 1).padStart(2, '0');
-    }
-    if (progressFilterYear) {
-        progressFilterYear.value = String(today.getFullYear());
-    }
+    if (progressFilterMonth) progressFilterMonth.value = String(today.getMonth() + 1).padStart(2, '0');
+    if (progressFilterYear) progressFilterYear.value = String(today.getFullYear());
+    
     studentProgressModal.classList.remove('hidden');
     lockBodyScroll();
     pushModalState();
@@ -477,7 +395,7 @@ function loadStudentProgressReport(studentId) {
     const month = progressFilterMonth.value;
     const year = progressFilterYear.value;
     const prefix = `${year}-${month}`;
-    progressModalTableBody.innerHTML = '<tr><td colspan="8" style="padding:16px; color:#888;">Loading monthly data...</td></tr>';
+    progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">Loading monthly data...</td></tr>';
 
     get(ref(database, `teachers/${currentTeacherUid}/logs`)).then((snap) => {
         const rows = [];
@@ -505,7 +423,7 @@ function loadStudentProgressReport(studentId) {
         }
 
         if (rows.length === 0) {
-            progressModalTableBody.innerHTML = '<tr><td colspan="8" style="padding:16px; color:#888;">No data found for this month.</td></tr>';
+            progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">No data found for this month.</td></tr>';
             return;
         }
 
@@ -515,7 +433,7 @@ function loadStudentProgressReport(studentId) {
             const dateObj = new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
             const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
             const editButtonMarkup = isProgressEditMode
-                ? `<button type="button" class="icon-btn" data-action="edit-progress-row" data-date="${row.date}" title="Edit ${formattedDate}" style="padding:4px 7px; font-size:11px; line-height:1; background:#eef2ff; color:#1d4ed8;">✎</button>`
+                ? `<button type="button" class="icon-btn" data-action="edit-progress-row" data-date="${row.date}" title="Edit ${formattedDate}" style="padding:4px 7px; font-size:11px; background:#eef2ff; color:#1d4ed8;">✎</button>`
                 : '';
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -536,7 +454,7 @@ function loadStudentProgressReport(studentId) {
         });
     }).catch((err) => {
         console.error(err);
-        progressModalTableBody.innerHTML = '<tr><td colspan="8" style="padding:16px; color:#888;">Unable to load monthly data.</td></tr>';
+        progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">Unable to load monthly data.</td></tr>';
     });
 }
 
@@ -550,90 +468,9 @@ if (btnCloseProgressModal) {
     });
 }
 
-if (studentProgressModal) {
-    studentProgressModal.addEventListener('click', (e) => {
-        if (e.target === studentProgressModal) {
-            if (history.state && history.state.modalOpen) {
-                history.back();
-            } else {
-                closeStudentProgressModal();
-            }
-        }
-    });
-}
-
-if (btnToggleProgressEdit) {
-    btnToggleProgressEdit.addEventListener('click', () => {
-        isProgressEditMode = !isProgressEditMode;
-        if (btnToggleProgressEdit) {
-            btnToggleProgressEdit.innerText = isProgressEditMode ? 'Done' : 'Edit';
-            btnToggleProgressEdit.classList.toggle('active-p', isProgressEditMode);
-        }
-        if (!isProgressEditMode) {
-            closeProgressEditModal();
-        }
-        if (currentProgressStudentId) {
-            loadStudentProgressReport(currentProgressStudentId);
-        }
-    });
-}
-
-if (progressEditPresentBtn) {
-    progressEditPresentBtn.addEventListener('click', () => {
-        isProgressEditPresent = true;
-        updateProgressEditAttendanceUI();
-    });
-}
-
-if (progressEditAbsentBtn) {
-    progressEditAbsentBtn.addEventListener('click', () => {
-        isProgressEditPresent = false;
-        updateProgressEditAttendanceUI();
-    });
-}
-
-if (btnSaveProgressEdit) {
-    btnSaveProgressEdit.addEventListener('click', saveProgressEditModal);
-}
-
-if (btnCancelProgressEdit) {
-    btnCancelProgressEdit.addEventListener('click', closeProgressEditModal);
-}
-
-if (btnCloseProgressEditModal) {
-    btnCloseProgressEditModal.addEventListener('click', closeProgressEditModal);
-}
-
-if (progressDateEditModal) {
-    progressDateEditModal.addEventListener('click', (e) => {
-        if (e.target === progressDateEditModal) {
-            closeProgressEditModal();
-        }
-    });
-}
-
-if (progressModalTableBody) {
-    progressModalTableBody.addEventListener('click', (e) => {
-        const editBtn = e.target.closest('[data-action="edit-progress-row"]');
-        if (!editBtn) return;
-        openProgressEditModal(editBtn.dataset.date);
-    });
-}
-
-if (progressFilterMonth) {
-    progressFilterMonth.addEventListener('change', () => {
-        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
-    });
-}
-
-if (progressFilterYear) {
-    progressFilterYear.addEventListener('change', () => {
-        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
-    });
-}
-
-// 5. Basic Button Listeners
+// Side Menu Navigation
 if (btnMarkAll) btnMarkAll.addEventListener('click', () => { students.forEach(s => s.isPresent = true); renderStudents(); });
+
 if (btnMenu && teacherMenuBackdrop && teacherSideMenu) {
     const closeTeacherMenu = () => {
         teacherSideMenu.classList.remove('open');
@@ -645,47 +482,61 @@ if (btnMenu && teacherMenuBackdrop && teacherSideMenu) {
         teacherMenuBackdrop.classList.add('open');
         teacherSideMenu.setAttribute('aria-hidden', 'false');
     };
-    btnMenu.addEventListener('click', (event) => {
-        event.stopPropagation();
-        openTeacherMenu();
-    });
+    btnMenu.addEventListener('click', (e) => { e.stopPropagation(); openTeacherMenu(); });
     btnMenuClose?.addEventListener('click', closeTeacherMenu);
     teacherMenuBackdrop?.addEventListener('click', closeTeacherMenu);
 }
-if (btnMenuHome) btnMenuHome.addEventListener('click', () => { teacherSideMenu.classList.remove('open'); teacherMenuBackdrop.classList.remove('open'); window.location.href = 'teacher.html'; });
-if (btnMenuCertGenerator) btnMenuCertGenerator.addEventListener('click', () => { teacherSideMenu.classList.remove('open'); teacherMenuBackdrop.classList.remove('open'); window.location.href = '../Certificate-Generator/certificategenerator.html'; });
-if (btnMenuUpload) btnMenuUpload.addEventListener('click', () => { window.location.href = '../Upload/upload.html'; });
-if (btnMenuReport) btnMenuReport.addEventListener('click', () => { teacherSideMenu.classList.remove('open'); teacherMenuBackdrop.classList.remove('open'); window.location.href = '../Report/reports.html'; });
-if (btnMenuLogout) btnMenuLogout.addEventListener('click', () => { teacherSideMenu.classList.remove('open'); teacherMenuBackdrop.classList.remove('open'); signOut(auth).then(() => window.location.href = '../../index.html'); });
+
+if (btnMenuHome) btnMenuHome.addEventListener('click', () => window.location.href = 'teacher.html');
+if (btnMenuCertGenerator) btnMenuCertGenerator.addEventListener('click', () => window.location.href = '../Certificate-Generator/certificategenerator.html');
+if (btnMenuUpload) btnMenuUpload.addEventListener('click', () => window.location.href = '../Upload/upload.html');
+if (btnMenuReport) btnMenuReport.addEventListener('click', () => window.location.href = '../Report/reports.html');
+if (btnMenuLogout) btnMenuLogout.addEventListener('click', () => signOut(auth).then(() => window.location.href = '../../index.html'));
 if (btnViewReports) btnViewReports.addEventListener('click', () => window.location.href = '../Report/reports.html');
 
-// --- 6. ADD STUDENT (creates real Auth account + duplicate check) ---
-function updateStudentNameHint() {
-    if (!newStudentNameInput || !newStudentNameHint) return;
-    const value = newStudentNameInput.value.trim();
-    const isValid = value.length >= 3;
-    newStudentNameInput.classList.toggle('input-error', value.length > 0 && !isValid);
-    newStudentNameHint.textContent = isValid ? 'Name looks good.' : 'Name must be at least 3 characters.';
-    newStudentNameHint.style.color = isValid ? '#137333' : '#8E785C';
-}
-if (newStudentNameInput) newStudentNameInput.addEventListener('input', updateStudentNameHint);
-
+// Reset Add Student Form
 function resetAddForm() {
-    addStudentForm.reset();
+    if (addStudentForm) addStudentForm.reset();
     if (newStudentNameInput) newStudentNameInput.classList.remove('input-error');
     if (newStudentPinInput) newStudentPinInput.classList.remove('input-error');
     if (newStudentNameHint) {
         newStudentNameHint.textContent = 'Name must be at least 3 characters.';
-        newStudentNameHint.style.color = '#8E785C';
+        newStudentNameHint.className = 'field-hint';
     }
     if (newStudentPinHint) {
         newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
-        newStudentPinHint.style.color = '#8E785C';
+        newStudentPinHint.className = 'field-hint';
     }
+}
+
+// Live Validation Listeners for Teacher Modal
+if (newStudentNameInput) {
+    newStudentNameInput.addEventListener('input', () => {
+        const val = newStudentNameInput.value.trim();
+        const isValid = val.length >= 3;
+        newStudentNameInput.classList.toggle('input-error', !isValid && val.length > 0);
+        if (newStudentNameHint) {
+            newStudentNameHint.textContent = isValid ? 'Name looks good.' : 'Name must be at least 3 characters.';
+            newStudentNameHint.className = `field-hint ${isValid ? 'valid' : 'error'}`;
+        }
+    });
+}
+
+if (newStudentPinInput) {
+    newStudentPinInput.addEventListener('input', () => {
+        const val = newStudentPinInput.value.trim();
+        const isValid = /^\d{4,}$/.test(val);
+        newStudentPinInput.classList.toggle('input-error', !isValid && val.length > 0);
+        if (newStudentPinHint) {
+            newStudentPinHint.textContent = isValid ? 'PIN looks good.' : 'PIN must be at least 4 digits.';
+            newStudentPinHint.className = `field-hint ${isValid ? 'valid' : 'error'}`;
+        }
+    });
 }
 
 function openAddStudentModal() {
     if (!addStudentModal) return;
+    resetAddForm();
     addStudentModal.classList.remove('hidden');
     lockBodyScroll();
     pushModalState();
@@ -700,11 +551,6 @@ function closeAddStudentModal() {
 
 if (btnAddStudent) btnAddStudent.addEventListener('click', openAddStudentModal);
 if (btnCancelAdd) btnCancelAdd.addEventListener('click', closeAddStudentModal);
-if (addStudentModal) {
-    addStudentModal.addEventListener('click', (e) => {
-        if (e.target === addStudentModal) closeAddStudentModal();
-    });
-}
 
 if (addStudentForm) {
     addStudentForm.addEventListener('submit', (e) => {
@@ -714,33 +560,13 @@ if (addStudentForm) {
         const pinVal = newStudentPinInput.value.trim();
 
         if (nameVal.length < 3) {
-            newStudentNameInput.classList.add('input-error');
-            updateStudentNameHint();
+            showToast("Name must be at least 3 characters", "error");
             return;
         }
 
-        if (pinVal.length < 4 || !/^\d+$/.test(pinVal)) {
-            newStudentPinInput.classList.add('input-error');
-            if (newStudentPinHint) {
-                newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
-                newStudentPinHint.style.color = '#b71c1c';
-            }
-            return;
-        }
-        if (newStudentPinHint) {
-            newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
-            newStudentPinHint.style.color = '#8E785C';
-        }
-
-        const nameLower = nameVal.toLowerCase();
-        const duplicate = students.find(s =>
-            s.name.trim().toLowerCase() === nameLower ||
-            String(s.id) === idVal ||
-            String(s.pin) === pinVal
-        );
-
+        const duplicate = students.find(s => s.id === idVal);
         if (duplicate) {
-            showToast("Student already exists.", "error");
+            showToast("Student ID already exists.", "error");
             return;
         }
 
@@ -749,15 +575,9 @@ if (addStudentForm) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving...";
 
-        const studentEmail = `${idVal.toLowerCase()}@student.ukquran.com`;
+        const studentEmail = `${idVal}@student.ukquran.com`;
         const authPassword = toAuthPassword(pinVal);
 
-        // Create the student's real login on the SECONDARY Firebase app
-        // instance. Calling createUserWithEmailAndPassword on the primary
-        // `auth` (the teacher's own session) would immediately switch the
-        // active session to the new student account and kick the teacher
-        // out. Using `secondaryAuth` avoids that entirely — it's a separate,
-        // throwaway session, so the teacher's real session never moves.
         createUserWithEmailAndPassword(secondaryAuth, studentEmail, authPassword)
             .then(() => secondarySignOut(secondaryAuth))
             .then(() => {
@@ -765,19 +585,17 @@ if (addStudentForm) {
                 return set(newStudentRef, { name: nameVal, pin: pinVal });
             })
             .then(() => {
-                students.push({ id: idVal, name: nameVal, pin: pinVal, isPresent: false, newPages: 0, rev: 0, remarks: "" });
-                resetAddForm();
-                addStudentModal.classList.add('hidden');
+                students.push({
+                    id: idVal, name: nameVal, pin: pinVal,
+                    isPresent: false, newPages: 0, rev: 0, remarks: "", revHeardBy: "", expanded: false
+                });
+                closeAddStudentModal();
                 renderStudents();
-                showToast("Saved successfully! Student added.", "success");
+                showToast("Student added successfully!", "success");
             })
             .catch((err) => {
                 console.error(err);
-                if (err.code === 'auth/email-already-in-use') {
-                    showToast("Student already exists.", "error");
-                } else {
-                    showToast("Could not save student. Please try again.", "error");
-                }
+                showToast(err.code === 'auth/email-already-in-use' ? "Student ID already exists." : "Could not save student.", "error");
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -786,18 +604,12 @@ if (addStudentForm) {
     });
 }
 
-// --- 7. DELETE STUDENT ---
-// Removes the database record + all their logs. Does NOT delete the
-// Firebase Auth account itself (client SDK can only delete the currently
-// signed-in user). With no data left, the student dashboard has nothing
-// to show even if they log in again. Full Auth-account deletion needs a
-// small backend (Cloud Function + Admin SDK) — ask if you want that added.
+// --- Delete Student ---
 function openDeleteModal(studentId) {
     const student = students.find((item) => item.id === studentId);
     if (!student || !deleteStudentModal) return;
-
     pendingDeleteId = student.id;
-    deleteStudentNameEl.innerText = student.name;
+    if (deleteStudentNameEl) deleteStudentNameEl.innerText = student.name;
     deleteStudentModal.classList.remove('hidden');
     lockBodyScroll();
     pushModalState();
@@ -809,35 +621,25 @@ function closeDeleteModal() {
     unlockBodyScroll();
 }
 
-if (deleteStudentModal) {
-    deleteStudentModal.addEventListener('click', (e) => {
-        if (e.target === deleteStudentModal) closeDeleteModal();
-    });
-}
-
 if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
 
 if (btnConfirmDelete) {
     btnConfirmDelete.addEventListener('click', async () => {
-        if (!pendingDeleteId) return;
+        if (!pendingDeleteId || !currentTeacherUid) return;
         const idToDelete = pendingDeleteId;
 
         btnConfirmDelete.disabled = true;
         btnConfirmDelete.innerText = "Deleting...";
 
         try {
-            // Only remove the roster entry — old logs (and old reports) are
-            // left untouched on purpose so history survives the student
-            // leaving.
             await remove(ref(database, `teachers/${currentTeacherUid}/students/${idToDelete}`));
-
             students = students.filter(s => s.id !== idToDelete);
             renderStudents();
             closeDeleteModal();
-            showToast("Student removed from active roster.", "success");
+            showToast("Student removed successfully.", "success");
         } catch (err) {
             console.error(err);
-            showToast("Could not remove student. Please try again.", "error");
+            showToast("Could not remove student.", "error");
         } finally {
             btnConfirmDelete.disabled = false;
             btnConfirmDelete.innerText = "Delete";
@@ -845,21 +647,22 @@ if (btnConfirmDelete) {
     });
 }
 
-// --- 8. SAVE DAILY REPORT ---
+// --- Save Daily Report ---
 if (btnSaveReport) {
     btnSaveReport.addEventListener('click', () => {
+        if (!currentTeacherUid) return;
         btnSaveReport.disabled = true;
-        btnSaveLabel.innerText = "Saving to Database...";
+        if (btnSaveLabel) btnSaveLabel.innerText = "Saving to Database...";
 
         let logData = {};
         students.forEach(s => {
             logData[s.id] = {
                 name: s.name,
                 isPresent: s.isPresent,
-                newPages: s.newPages,
-                rev: s.rev,
+                newPages: s.newPages || 0,
+                rev: s.rev || 0,
                 revHeardBy: s.revHeardBy || '',
-                remarks: s.remarks
+                remarks: s.remarks || ''
             };
         });
 
@@ -867,13 +670,13 @@ if (btnSaveReport) {
         set(logRef, logData)
             .then(() => {
                 showToast("Daily report saved successfully!", "success");
-                btnSaveLabel.innerText = "✅ Saved Successfully!";
-                setTimeout(() => { btnSaveLabel.innerText = "Save Daily Report"; }, 2000);
+                if (btnSaveLabel) btnSaveLabel.innerText = "✅ Saved Successfully!";
+                setTimeout(() => { if (btnSaveLabel) btnSaveLabel.innerText = "Save Daily Report"; }, 2000);
             })
             .catch((err) => {
                 console.error(err);
-                showToast("Could not save report. Please try again.", "error");
-                btnSaveLabel.innerText = "Save Daily Report";
+                showToast("Could not save report.", "error");
+                if (btnSaveLabel) btnSaveLabel.innerText = "Save Daily Report";
             })
             .finally(() => {
                 btnSaveReport.disabled = false;
