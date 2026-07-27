@@ -460,11 +460,7 @@ function loadStudentProgressReport(studentId) {
 
 if (btnCloseProgressModal) {
     btnCloseProgressModal.addEventListener('click', () => {
-        if (history.state && history.state.modalOpen) {
-            history.back();
-        } else {
-            closeStudentProgressModal();
-        }
+        closeStudentProgressModal();
     });
 }
 

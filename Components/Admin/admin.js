@@ -150,7 +150,7 @@ async function loadAllTeachersAndStudents() {
                 <div class="teacher-header-row" onclick="window.toggleTeacherAccordion('${teacherUid}')">
                     <div class="teacher-info-box">
                         <h3 class="teacher-name">${teacherName}</h3>
-                        <p class="teacher-meta"> : $ID : {teacherEmail}</p>
+                        <p class="teacher-meta">ID : ${teacherEmail}</p>
                         ${teacherPin ? `<p class="teacher-meta">PIN : ${teacherPin}</p>` : ''}
                         <span class="teacher-badge-count">${studentKeys.length} Students</span>
                     </div>
@@ -159,9 +159,10 @@ async function loadAllTeachersAndStudents() {
 
                 <div class="teacher-actions-bar">
                     <button type="button" class="btn-sm-primary" onclick="event.stopPropagation(); window.adminOpenAddStudent('${teacherUid}', '${teacherName}')">+ Add Student</button>
+                    ${!isMainAdmin ? `
                     <button type="button" class="icon-btn-edit" title="Edit Teacher Info" onclick="event.stopPropagation(); window.adminOpenEditTeacher('${teacherUid}', '${teacherName}', '${teacherEmail}', '${teacherPin}')">
                         ${editIconSVG}
-                    </button>
+                    </button>` : ''}
                     ${!isMainAdmin ? `
                     <button type="button" class="icon-btn-delete" title="Delete Teacher" onclick="event.stopPropagation(); window.adminConfirmDeleteTeacher('${teacherUid}', '${teacherName}')">
                         ${trashIconSVG}
