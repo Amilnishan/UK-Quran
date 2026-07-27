@@ -596,7 +596,7 @@ input:focus {
 .student-action-card,
 .action-cards-grid,
 .table-container {
-    max-width: 1200px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -764,7 +764,7 @@ input:focus {
 /* Action Rows Grid Layout for Tablet/Desktop */
 .student-action-row { 
     display: flex; 
-    padding: 0 32px 16px; 
+    padding: 0 10px 16px; 
     width: 100%;
 }
 

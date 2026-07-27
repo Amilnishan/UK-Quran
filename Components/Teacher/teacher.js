@@ -490,9 +490,7 @@ if (btnMenu && teacherMenuBackdrop && teacherSideMenu) {
 if (btnMenuHome) btnMenuHome.addEventListener('click', () => window.location.href = 'teacher.html');
 if (btnMenuCertGenerator) btnMenuCertGenerator.addEventListener('click', () => window.location.href = '../Certificate-Generator/certificategenerator.html');
 if (btnMenuUpload) btnMenuUpload.addEventListener('click', () => window.location.href = '../Upload/upload.html');
-if (btnMenuReport) btnMenuReport.addEventListener('click', () => window.location.href = '../Report/reports.html');
 if (btnMenuLogout) btnMenuLogout.addEventListener('click', () => signOut(auth).then(() => window.location.href = '../../index.html'));
-if (btnViewReports) btnViewReports.addEventListener('click', () => window.location.href = '../Report/reports.html');
 
 // Reset Add Student Form
 function resetAddForm() {
@@ -644,6 +642,26 @@ if (btnConfirmDelete) {
             btnConfirmDelete.disabled = false;
             btnConfirmDelete.innerText = "Delete";
         }
+    });
+}
+
+function showButtonLoader(button) {
+    if (!button) return;
+    button.disabled = true;
+    button.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>';
+}
+
+if (btnMenuReport) {
+    btnMenuReport.addEventListener('click', () => {
+        showButtonLoader(btnMenuReport);
+        window.location.href = '../Report/reports.html';
+    });
+}
+
+if (btnViewReports) {
+    btnViewReports.addEventListener('click', () => {
+        showButtonLoader(btnViewReports);
+        window.location.href = '../Report/reports.html';
     });
 }
 

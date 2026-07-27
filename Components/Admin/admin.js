@@ -110,13 +110,13 @@ async function loadAllTeachersAndStudents() {
 
             const teacherName = info.name || (teacherUid === auth.currentUser.uid ? 'Main Admin Teacher' : 'Teacher');
             const teacherEmail = info.email || (teacherUid === auth.currentUser.uid ? ADMIN_EMAIL : `UID: ${teacherUid}`);
+            const teacherPin = info.pin || '';
 
             const studentKeys = Object.keys(studentsObj);
 
             const card = document.createElement('div');
-            // Accordion starts open for Admin Teacher, closed for others
             const isMainAdmin = teacherUid === auth.currentUser.uid;
-            card.className = `teacher-card-admin ${isMainAdmin ? 'open' : ''}`;
+            card.className = 'teacher-card-admin';
             card.id = `teacher-card-${teacherUid}`;
 
             let studentsHTML = '';
@@ -150,7 +150,8 @@ async function loadAllTeachersAndStudents() {
                 <div class="teacher-header-row" onclick="window.toggleTeacherAccordion('${teacherUid}')">
                     <div class="teacher-info-box">
                         <h3 class="teacher-name">${teacherName}</h3>
-                        <p class="teacher-meta">${teacherEmail}</p>
+                        <p class="teacher-meta"> : $ID : {teacherEmail}</p>
+                        ${teacherPin ? `<p class="teacher-meta">PIN : ${teacherPin}</p>` : ''}
                         <span class="teacher-badge-count">${studentKeys.length} Students</span>
                     </div>
                     <span class="accordion-arrow">▾</span>
@@ -158,7 +159,7 @@ async function loadAllTeachersAndStudents() {
 
                 <div class="teacher-actions-bar">
                     <button type="button" class="btn-sm-primary" onclick="event.stopPropagation(); window.adminOpenAddStudent('${teacherUid}', '${teacherName}')">+ Add Student</button>
-                    <button type="button" class="icon-btn-edit" title="Edit Teacher Info" onclick="event.stopPropagation(); window.adminOpenEditTeacher('${teacherUid}', '${teacherName}', '${teacherEmail}')">
+                    <button type="button" class="icon-btn-edit" title="Edit Teacher Info" onclick="event.stopPropagation(); window.adminOpenEditTeacher('${teacherUid}', '${teacherName}', '${teacherEmail}', '${teacherPin}')">
                         ${editIconSVG}
                     </button>
                     ${!isMainAdmin ? `
@@ -223,18 +224,21 @@ btnOpenAddTeacher?.addEventListener('click', () => {
     teacherEmailInput.disabled = false;
     teacherPasswordGroup.style.display = 'block';
     teacherPasswordInput.required = true;
+    teacherPasswordInput.placeholder = '••••••••';
     modalTeacher.classList.remove('hidden');
 });
 
-window.adminOpenEditTeacher = (teacherUid, name, email) => {
+window.adminOpenEditTeacher = (teacherUid, name, email, pin = '') => {
     teacherModeInput.value = 'edit';
     editingTeacherUidInput.value = teacherUid;
-    modalTeacherTitle.innerText = `Edit Teacher Info`;
+    modalTeacherTitle.innerText = 'Edit Teacher Info';
     teacherNameInput.value = name;
     teacherEmailInput.value = email;
-    teacherEmailInput.disabled = true;
-    teacherPasswordGroup.style.display = 'none';
+    teacherEmailInput.disabled = false;
+    teacherPasswordGroup.style.display = 'block';
+    teacherPasswordInput.value = pin;
     teacherPasswordInput.required = false;
+    teacherPasswordInput.placeholder = 'Leave blank to keep current password/PIN';
     modalTeacher.classList.remove('hidden');
 };
 
@@ -249,6 +253,11 @@ formTeacher?.addEventListener('submit', async (e) => {
 
     if (name.length < 3) {
         showToast('Name must be at least 3 characters.', 'error');
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('Enter a valid email address.', 'error');
         return;
     }
 
@@ -269,11 +278,13 @@ formTeacher?.addEventListener('submit', async (e) => {
             const newTeacherUid = userCred.user.uid;
             await secondarySignOut(secondaryAuth);
 
-            await set(ref(database, `teachers/${newTeacherUid}/info`), { name, email });
+            await set(ref(database, `teachers/${newTeacherUid}/info`), { name, email, pin: password });
             showToast('Teacher created successfully!', 'success');
         } else {
             const uid = editingTeacherUidInput.value;
-            await update(ref(database, `teachers/${uid}/info`), { name });
+            const updateData = { name, email };
+            if (password) updateData.pin = password;
+            await update(ref(database, `teachers/${uid}/info`), updateData);
             showToast('Teacher updated successfully!', 'success');
         }
 
