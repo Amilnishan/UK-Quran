@@ -53,10 +53,14 @@ btnBackToLanding.addEventListener("click", () => {
 });
 
 // Guest Access Handler
-btnGuestLogin.addEventListener("click", () => {
-    sessionStorage.setItem("isGuest", "true");
-    window.location.href = "Components/Guest/guest.html";
-});
+if (btnGuestLogin) {
+    btnGuestLogin.addEventListener("click", () => {
+        btnGuestLogin.disabled = true;
+        btnGuestLogin.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>';
+        sessionStorage.setItem("isGuest", "true");
+        window.location.href = "Components/Guest/guest.html";
+    });
+}
 
 // Password Visibility Toggle
 const togglePassword = document.getElementById('togglePassword');
