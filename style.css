@@ -949,7 +949,7 @@ body.modal-open { overflow: hidden; }
 .half-card-green span { font-size: 12px; color: #137333; font-weight: 600; }
 .half-card-green p { margin: 6px 0 0; color: #137333; font-weight: bold; font-size: 20px;}
 
-.table-container { padding: 0 32px; overflow-x: auto; margin-bottom: 120px; }
+.table-container { padding: 0 0px; overflow-x: auto; margin-bottom: 120px; }
 .excel-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; font-size: 13px; text-align: center; background: white; }
 .excel-table th, .excel-table td { border: 1px solid #ddd; padding: 12px 10px; }
 .excel-table .th-orange { background-color: var(--primary-orange); color: white; padding: 14px;}

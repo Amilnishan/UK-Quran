@@ -124,7 +124,7 @@ async function loadAllTeachersAndStudents() {
 
             const card = document.createElement('div');
             const isMainAdmin = teacherUid === auth.currentUser.uid;
-            card.className = `teacher-card-admin ${isMainAdmin ? 'open' : ''}`;
+            card.className = 'teacher-card-admin';
             card.id = `teacher-card-${teacherUid}`;
 
             let studentsHTML = '';
@@ -472,5 +472,14 @@ btnConfirmDelete?.addEventListener('click', async () => {
     }
 });
 
-btnGotoTeacherView?.addEventListener('click', () => window.location.href = '../Teacher/teacher.html');
+btnGotoTeacherView?.addEventListener('click', () => {
+    if (!btnGotoTeacherView) return;
+
+    btnGotoTeacherView.disabled = true;
+    btnGotoTeacherView.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>Teacher View';
+
+    setTimeout(() => {
+        window.location.href = '../Teacher/teacher.html';
+    }, 120);
+});
 btnAdminLogout?.addEventListener('click', () => signOut(auth).then(() => window.location.href = '../../index.html'));

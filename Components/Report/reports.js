@@ -377,6 +377,7 @@ function downloadPdfReport() {
     if (btnDownloadLabel) {
         btnDownloadLabel.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span> Downloading...';
     }
+    showToast('downloading....');
 
     try {
         const doc = new jsPDFLib({ orientation: 'landscape', unit: 'mm', format: 'a4' });

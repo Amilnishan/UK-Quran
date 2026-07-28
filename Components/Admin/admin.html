@@ -21,8 +21,15 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
+            gap: 12px;
         }
-        .admin-title { font-size: 18px; font-weight: 700; margin: 0; color: #ffffff; }
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .admin-title { font-size: 18px; font-weight: 700; margin: 0; color: #ffffff; line-height: 1; }
         .admin-email-sub { font-size: 12px; color: #94a3b8; }
         
         .admin-header-actions { display: flex; align-items: center; gap: 8px; }
@@ -194,8 +201,11 @@
     <!-- Responsive Admin Top Bar -->
     <header class="admin-header">
         <div class="admin-header-top">
-            <div>
-                <h1 class="admin-title">UK Quran Admin</h1>
+            <div class="admin-brand">
+                <div class="avatar">
+                    <img src="../../images/Logo/logo-black-icon.webp" alt="logo" height="55px" width="55px" style="border-radius: 100px; margin: white; border: black 2px solid;">
+                </div>
+                <h1 class="admin-title">UK Quran</h1>
             </div>
             <div class="admin-header-actions">
                 <button type="button" id="btn-goto-teacher-view" class="btn-nav-action">🏫 Teacher View</button>
