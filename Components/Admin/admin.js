@@ -1,4 +1,9 @@
-import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signOut as secondarySignOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+    onAuthStateChanged, 
+    signOut, 
+    createUserWithEmailAndPassword, 
+    signOut as secondarySignOut 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get, set, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, database, secondaryAuth } from "../../JavaScript/firebase-config.js";
 
@@ -80,6 +85,9 @@ function toAuthPassword(pin) {
     return String(pin).padEnd(6, '0');
 }
 
+function lockBodyScroll() { document.body.classList.add('modal-open'); }
+function unlockBodyScroll() { document.body.classList.remove('modal-open'); }
+
 // Auth Observer
 onAuthStateChanged(auth, (user) => {
     if (user && user.email && user.email.toLowerCase() === ADMIN_EMAIL) {
@@ -116,7 +124,7 @@ async function loadAllTeachersAndStudents() {
 
             const card = document.createElement('div');
             const isMainAdmin = teacherUid === auth.currentUser.uid;
-            card.className = 'teacher-card-admin';
+            card.className = `teacher-card-admin ${isMainAdmin ? 'open' : ''}`;
             card.id = `teacher-card-${teacherUid}`;
 
             let studentsHTML = '';
@@ -190,32 +198,7 @@ window.toggleTeacherAccordion = (teacherUid) => {
     if (card) card.classList.toggle('open');
 };
 
-// Live Input Validation Listeners
-function setupValidation() {
-    teacherNameInput?.addEventListener('input', () => {
-        const isValid = teacherNameInput.value.trim().length >= 3;
-        teacherNameInput.classList.toggle('input-error', !isValid && teacherNameInput.value.length > 0);
-        teacherNameHint.textContent = isValid ? 'Name looks good.' : 'Name must be at least 3 characters.';
-        teacherNameHint.className = `field-hint ${isValid ? 'valid' : 'error'}`;
-    });
-
-    adminStudentNameInput?.addEventListener('input', () => {
-        const isValid = adminStudentNameInput.value.trim().length >= 3;
-        adminStudentNameInput.classList.toggle('input-error', !isValid && adminStudentNameInput.value.length > 0);
-        adminStudentNameHint.textContent = isValid ? 'Name looks good.' : 'Name must be at least 3 characters.';
-        adminStudentNameHint.className = `field-hint ${isValid ? 'valid' : 'error'}`;
-    });
-
-    adminStudentPinInput?.addEventListener('input', () => {
-        const isValid = /^\d{4,}$/.test(adminStudentPinInput.value.trim());
-        adminStudentPinInput.classList.toggle('input-error', !isValid && adminStudentPinInput.value.length > 0);
-        adminStudentPinHint.textContent = isValid ? 'PIN looks good.' : 'PIN must be at least 4 digits.';
-        adminStudentPinHint.className = `field-hint ${isValid ? 'valid' : 'error'}`;
-    });
-}
-setupValidation();
-
-// Teacher Modal
+// Open Add Teacher Modal
 btnOpenAddTeacher?.addEventListener('click', () => {
     teacherModeInput.value = 'add';
     modalTeacherTitle.innerText = 'Add New Teacher';
@@ -223,28 +206,55 @@ btnOpenAddTeacher?.addEventListener('click', () => {
     teacherEmailInput.value = '';
     teacherPasswordInput.value = '';
     teacherEmailInput.disabled = false;
+    if (teacherEmailHint) {
+        teacherEmailHint.textContent = 'Enter a valid email address.';
+        teacherEmailHint.className = 'field-hint';
+    }
     teacherPasswordGroup.style.display = 'block';
     teacherPasswordInput.required = true;
     teacherPasswordInput.placeholder = '••••••••';
     modalTeacher.classList.remove('hidden');
+    lockBodyScroll();
 });
 
+// Open Edit Teacher Modal
 window.adminOpenEditTeacher = (teacherUid, name, email, pin = '') => {
     teacherModeInput.value = 'edit';
     editingTeacherUidInput.value = teacherUid;
     modalTeacherTitle.innerText = 'Edit Teacher Info';
     teacherNameInput.value = name;
+
+    // Email is the fixed Auth login credential — cannot be changed after creation
     teacherEmailInput.value = email;
-    teacherEmailInput.disabled = false;
-    teacherPasswordGroup.style.display = 'block';
-    teacherPasswordInput.value = pin;
+    teacherEmailInput.disabled = true;
+    if (teacherEmailHint) {
+        teacherEmailHint.textContent = 'Login email is fixed and cannot be changed after creation.';
+        teacherEmailHint.className = 'field-hint';
+    }
+
+    // PIN/password is also fixed after creation — hide entirely in edit mode
+    teacherPasswordGroup.style.display = 'none';
     teacherPasswordInput.required = false;
-    teacherPasswordInput.placeholder = 'Leave blank to keep current password/PIN';
+    teacherPasswordInput.value = '';
+
     modalTeacher.classList.remove('hidden');
+    lockBodyScroll();
 };
 
-btnCloseTeacherModal?.addEventListener('click', () => modalTeacher.classList.add('hidden'));
+function closeTeacherModal() {
+    if (modalTeacher) modalTeacher.classList.add('hidden');
+    if (formTeacher) formTeacher.reset();
+    unlockBodyScroll();
+}
 
+btnCloseTeacherModal?.addEventListener('click', closeTeacherModal);
+if (modalTeacher) {
+    modalTeacher.addEventListener('click', (e) => {
+        if (e.target === modalTeacher) closeTeacherModal();
+    });
+}
+
+// Form Submission for Add / Edit Teacher
 formTeacher?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const mode = teacherModeInput.value;
@@ -279,29 +289,35 @@ formTeacher?.addEventListener('submit', async (e) => {
             const newTeacherUid = userCred.user.uid;
             await secondarySignOut(secondaryAuth);
 
-            await set(ref(database, `teachers/${newTeacherUid}/info`), { name, email, pin: password });
+            await set(ref(database, `teachers/${newTeacherUid}/info`), { 
+                name, 
+                email, 
+                authEmail: email, // Preserves creation Auth email
+                pin: password 
+            });
             showToast('Teacher created successfully!', 'success');
         } else {
+            // EDIT MODE: Name is the only editable field.
+            // Email and PIN are the Auth login credentials, fixed at creation —
+            // they cannot be changed here without a Cloud Function to update
+            // the actual Firebase Auth account, so we don't touch them.
             const uid = editingTeacherUidInput.value;
-            const updateData = { name, email };
-            if (password) updateData.pin = password;
-            await update(ref(database, `teachers/${uid}/info`), updateData);
+            await update(ref(database, `teachers/${uid}/info`), { name });
             showToast('Teacher updated successfully!', 'success');
         }
 
-        modalTeacher.classList.add('hidden');
-        formTeacher.reset();
+        closeTeacherModal();
         loadAllTeachersAndStudents();
     } catch (err) {
         console.error(err);
-        showToast(err.code === 'auth/email-already-in-use' ? 'Email already in use.' : 'Could not save teacher.', 'error');
+        showToast(err.code === 'auth/email-already-in-use' ? 'Email is already registered.' : 'Could not save teacher.', 'error');
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerText = 'Save Teacher';
     }
 });
 
-// Student Modal
+// Student Modal Open Handlers
 window.adminOpenAddStudent = (teacherUid, teacherName) => {
     studentModeInput.value = 'add';
     targetTeacherUidInput.value = teacherUid;
@@ -310,7 +326,13 @@ window.adminOpenAddStudent = (teacherUid, teacherName) => {
     adminStudentIdInput.value = '';
     adminStudentPinInput.value = '';
     adminStudentIdInput.disabled = false;
+    adminStudentPinInput.required = true;
+    const pinLabel = document.getElementById('admin-student-pin-label');
+    if (pinLabel) pinLabel.style.removeProperty('display');
+    adminStudentPinInput.style.display = '';
+    if (adminStudentPinHint) adminStudentPinHint.style.display = '';
     modalAdminStudent.classList.remove('hidden');
+    lockBodyScroll();
 };
 
 window.adminOpenEditStudent = (teacherUid, studentId, studentName, studentPin) => {
@@ -320,12 +342,32 @@ window.adminOpenEditStudent = (teacherUid, studentId, studentName, studentPin) =
     adminStudentModalTitle.innerText = `Edit ${studentName}`;
     adminStudentNameInput.value = studentName;
     adminStudentIdInput.value = studentId;
-    adminStudentPinInput.value = studentPin;
     adminStudentIdInput.disabled = true;
+
+    // PIN is the Auth login credential, fixed at creation — hide the field in edit mode
+    adminStudentPinInput.value = '';
+    adminStudentPinInput.required = false;
+    const pinLabel = document.getElementById('admin-student-pin-label');
+    if (pinLabel) pinLabel.style.setProperty('display', 'none', 'important');
+    adminStudentPinInput.style.display = 'none';
+    if (adminStudentPinHint) adminStudentPinHint.style.display = 'none';
+
     modalAdminStudent.classList.remove('hidden');
+    lockBodyScroll();
 };
 
-btnCloseAdminStudentModal?.addEventListener('click', () => modalAdminStudent.classList.add('hidden'));
+function closeAdminStudentModal() {
+    if (modalAdminStudent) modalAdminStudent.classList.add('hidden');
+    if (formAdminStudent) formAdminStudent.reset();
+    unlockBodyScroll();
+}
+
+btnCloseAdminStudentModal?.addEventListener('click', closeAdminStudentModal);
+if (modalAdminStudent) {
+    modalAdminStudent.addEventListener('click', (e) => {
+        if (e.target === modalAdminStudent) closeAdminStudentModal();
+    });
+}
 
 formAdminStudent?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -339,7 +381,7 @@ formAdminStudent?.addEventListener('submit', async (e) => {
         showToast('Name must be at least 3 characters.', 'error');
         return;
     }
-    if (!/^\d{4,}$/.test(pin)) {
+    if (mode === 'add' && !/^\d{4,}$/.test(pin)) {
         showToast('PIN must be at least 4 digits.', 'error');
         return;
     }
@@ -359,12 +401,14 @@ formAdminStudent?.addEventListener('submit', async (e) => {
             await set(ref(database, `teachers/${teacherUid}/students/${studentId}`), { name, pin });
             showToast('Student created successfully!', 'success');
         } else {
-            await update(ref(database, `teachers/${teacherUid}/students/${studentId}`), { name, pin });
+            // EDIT MODE: Name is the only editable field.
+            // PIN is the Auth login credential, fixed at creation —
+            // changing it here would break login (see teacher edit fix).
+            await update(ref(database, `teachers/${teacherUid}/students/${studentId}`), { name });
             showToast('Student updated successfully!', 'success');
         }
 
-        modalAdminStudent.classList.add('hidden');
-        formAdminStudent.reset();
+        closeAdminStudentModal();
         loadAllTeachersAndStudents();
     } catch (err) {
         console.error(err);
@@ -375,7 +419,7 @@ formAdminStudent?.addEventListener('submit', async (e) => {
     }
 });
 
-// Delete Confirm Modal
+// Delete Confirm Modal Handlers
 window.adminConfirmDeleteTeacher = (teacherUid, teacherName) => {
     deleteModalTitle.innerText = 'Delete Teacher?';
     deleteModalText.innerText = `Are you sure you want to delete ${teacherName}? All students under this teacher will be removed.`;
@@ -384,6 +428,7 @@ window.adminConfirmDeleteTeacher = (teacherUid, teacherName) => {
         showToast(`Teacher ${teacherName} removed.`, 'success');
     };
     modalDeleteConfirm.classList.remove('hidden');
+    lockBodyScroll();
 };
 
 window.adminConfirmDeleteStudent = (teacherUid, studentId, studentName) => {
@@ -394,9 +439,21 @@ window.adminConfirmDeleteStudent = (teacherUid, studentId, studentName) => {
         showToast(`Student ${studentName} removed.`, 'success');
     };
     modalDeleteConfirm.classList.remove('hidden');
+    lockBodyScroll();
 };
 
-btnCancelDelete?.addEventListener('click', () => modalDeleteConfirm.classList.add('hidden'));
+function closeDeleteConfirmModal() {
+    if (modalDeleteConfirm) modalDeleteConfirm.classList.add('hidden');
+    pendingDeleteAction = null;
+    unlockBodyScroll();
+}
+
+btnCancelDelete?.addEventListener('click', closeDeleteConfirmModal);
+if (modalDeleteConfirm) {
+    modalDeleteConfirm.addEventListener('click', (e) => {
+        if (e.target === modalDeleteConfirm) closeDeleteConfirmModal();
+    });
+}
 
 btnConfirmDelete?.addEventListener('click', async () => {
     if (!pendingDeleteAction) return;
@@ -405,14 +462,13 @@ btnConfirmDelete?.addEventListener('click', async () => {
 
     try {
         await pendingDeleteAction();
-        modalDeleteConfirm.classList.add('hidden');
+        closeDeleteConfirmModal();
         loadAllTeachersAndStudents();
     } catch (err) {
         showToast('Delete operation failed.', 'error');
     } finally {
         btnConfirmDelete.disabled = false;
         btnConfirmDelete.innerText = 'Delete';
-        pendingDeleteAction = null;
     }
 });
 

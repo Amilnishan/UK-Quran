@@ -8,7 +8,6 @@ let pendingDeleteId = null;
 let searchTerm = '';
 const todayStr = new Date().toISOString().split('T')[0];
 
-// Pre-cached Quran Page Options (0-604) for 100x Faster Card Rendering
 const PRECACHED_OPTIONS_TEMPLATE = Array.from({ length: 605 }, (_, i) => `<option value="${i}">${i}</option>`).join('');
 
 function buildNumberSelectOptions(selectedValue = 0) {
@@ -16,7 +15,7 @@ function buildNumberSelectOptions(selectedValue = 0) {
     return PRECACHED_OPTIONS_TEMPLATE.replace(`value="${val}"`, `value="${val}" selected`);
 }
 
-// --- DOM Refs ---
+// DOM Refs
 const studentListContainer = document.getElementById('student-list');
 const studentSearchInput = document.getElementById('student-search');
 const totalStudentsEl = document.getElementById('total-students');
@@ -80,13 +79,17 @@ const deleteStudentNameEl = document.getElementById('delete-student-name');
 const btnCancelDelete = document.getElementById('btn-cancel-delete');
 const btnConfirmDelete = document.getElementById('btn-confirm-delete');
 
-// 1. Setup Header Date
+// Setup Header Date
 const currentDateEl = document.getElementById('current-date');
 if (currentDateEl) {
     currentDateEl.innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-// 2. Auth State Observer
+// Lock / Unlock Page Scroll Guaranteed
+function lockBodyScroll() { document.body.classList.add('modal-open'); }
+function unlockBodyScroll() { document.body.classList.remove('modal-open'); }
+
+// Auth Observer
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentTeacherUid = user.uid;
@@ -97,7 +100,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 3. Load Data from Firebase Realtime DB
+// Load DB
 function loadDataFromDB() {
     if (!currentTeacherUid) return;
 
@@ -143,7 +146,7 @@ function loadDataFromDB() {
         renderStudents();
         hideLoadingIndicators();
     }).catch((err) => {
-        console.error("Error loading student data:", err);
+        console.error(err);
         showToast("Error loading student data", "error");
         hideLoadingIndicators();
     });
@@ -162,7 +165,6 @@ function hideLoadingIndicators() {
     }
 }
 
-// Toast Helper
 function showToast(message, type = 'success') {
     if (!toastContainer) return;
     const toast = document.createElement('div');
@@ -180,42 +182,19 @@ function toAuthPassword(pin) {
     return String(pin).padEnd(6, '0');
 }
 
-const userIconSVG = `
-<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="white"/>
-</svg>`;
-
-const trashIconSVG = `
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-    <path d="M10 11v6"></path><path d="M14 11v6"></path>
-    <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
-</svg>`;
+const userIconSVG = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="white"/></svg>`;
+const trashIconSVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></svg>`;
 
 function getFilteredStudents() {
     const term = searchTerm.trim().toLowerCase();
     if (!term) return students;
-    return students.filter((student) => student.name.toLowerCase().includes(term));
+    return students.filter((s) => s.name.toLowerCase().includes(term));
 }
 
 function formatProgressDateLabel(dateKey) {
     const [year, month, day] = dateKey.split('-').map(Number);
     const dateObj = new Date(year, month - 1, day);
     return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function lockBodyScroll() { document.body.classList.add('modal-open'); }
-function unlockBodyScroll() {
-    if (!document.querySelector('.modal-overlay:not(.hidden)')) {
-        document.body.classList.remove('modal-open');
-    }
-}
-
-function pushModalState() {
-    if (!history.state || !history.state.modalOpen) {
-        history.pushState({ modalOpen: true }, '');
-    }
 }
 
 // Render Student Cards
@@ -262,13 +241,13 @@ function renderStudents() {
                 <div class="progress-row">
                     <div class="progress-item">
                         <span>New Pages</span>
-                        <select class="page-select" data-action="new-pages" data-student-id="${student.id}" aria-label="New pages for ${student.name}">
+                        <select class="page-select" data-action="new-pages" data-student-id="${student.id}">
                             ${buildNumberSelectOptions(student.newPages || 0)}
                         </select>
                     </div>
                     <div class="progress-item">
                         <span>Revision Pages</span>
-                        <select class="page-select" data-action="rev-pages" data-student-id="${student.id}" aria-label="Revision pages for ${student.name}">
+                        <select class="page-select" data-action="rev-pages" data-student-id="${student.id}">
                             ${buildNumberSelectOptions(student.rev || 0)}
                         </select>
                     </div>
@@ -291,25 +270,25 @@ function renderStudents() {
     studentListContainer.appendChild(fragment);
 
     if (totalStudentsEl) totalStudentsEl.innerText = students.length;
-    if (presentStudentsEl) presentStudentsEl.innerText = students.filter((student) => student.isPresent).length;
+    if (presentStudentsEl) presentStudentsEl.innerText = students.filter((s) => s.isPresent).length;
 }
 
-// Search Listener
+// Search
 if (studentSearchInput) {
-    studentSearchInput.addEventListener('input', (event) => {
-        searchTerm = event.target.value;
+    studentSearchInput.addEventListener('input', (e) => {
+        searchTerm = e.target.value;
         renderStudents();
     });
 }
 
-// Event Delegation for Student Cards
+// Card Event Delegation
 studentListContainer.addEventListener('click', (e) => {
     const actionTarget = e.target.closest('[data-action]');
     if (!actionTarget) return;
 
     const action = actionTarget.dataset.action;
     const studentId = actionTarget.dataset.studentId;
-    const student = students.find((item) => item.id === studentId);
+    const student = students.find((s) => s.id === studentId);
 
     if (!student) return;
 
@@ -320,7 +299,6 @@ studentListContainer.addEventListener('click', (e) => {
         student.isPresent = false;
         renderStudents();
     } else if (action === 'toggle-card') {
-        // Prevent card toggle if clicking P/A toggle or Delete button
         if (e.target.closest('.sc-actions')) return;
         student.expanded = !student.expanded;
         renderStudents();
@@ -334,14 +312,14 @@ studentListContainer.addEventListener('click', (e) => {
 studentListContainer.addEventListener('change', (e) => {
     const selectEl = e.target.closest('[data-action="new-pages"]');
     if (selectEl) {
-        const student = students.find((item) => item.id === selectEl.dataset.studentId);
+        const student = students.find((s) => s.id === selectEl.dataset.studentId);
         if (student) student.newPages = Math.max(0, Math.min(604, Number(selectEl.value) || 0));
         return;
     }
 
     const revSelectEl = e.target.closest('[data-action="rev-pages"]');
     if (revSelectEl) {
-        const student = students.find((item) => item.id === revSelectEl.dataset.studentId);
+        const student = students.find((s) => s.id === revSelectEl.dataset.studentId);
         if (student) student.rev = Math.max(0, Math.min(604, Number(revSelectEl.value) || 0));
     }
 });
@@ -349,31 +327,38 @@ studentListContainer.addEventListener('change', (e) => {
 studentListContainer.addEventListener('input', (e) => {
     const input = e.target.closest('[data-action="heardby"]');
     if (input) {
-        const student = students.find((item) => item.id === input.dataset.studentId);
+        const student = students.find((s) => s.id === input.dataset.studentId);
         if (student) student.revHeardBy = input.value;
         return;
     }
 
     const remarkInput = e.target.closest('[data-action="remark"]');
     if (remarkInput) {
-        const student = students.find((item) => item.id === remarkInput.dataset.studentId);
+        const student = students.find((s) => s.id === remarkInput.dataset.studentId);
         if (student) student.remarks = remarkInput.value;
     }
 });
 
-// --- Monthly Progress Modal ---
+// --- Monthly Progress Modal Logic ---
 function openStudentProgressModal(studentId) {
-    const student = students.find((item) => item.id === studentId);
+    const student = students.find((s) => s.id === studentId);
     if (!student || !studentProgressModal) return;
+
     currentProgressStudentId = studentId;
     progressModalTitle.innerText = `Monthly Progress - ${student.name}`;
+    
     const today = new Date();
     if (progressFilterMonth) progressFilterMonth.value = String(today.getMonth() + 1).padStart(2, '0');
     if (progressFilterYear) progressFilterYear.value = String(today.getFullYear());
-    
+
+    isProgressEditMode = false;
+    if (btnToggleProgressEdit) {
+        btnToggleProgressEdit.innerText = 'Edit';
+        btnToggleProgressEdit.classList.remove('active-p');
+    }
+
     studentProgressModal.classList.remove('hidden');
     lockBodyScroll();
-    pushModalState();
     loadStudentProgressReport(studentId);
 }
 
@@ -390,15 +375,21 @@ function closeStudentProgressModal() {
     unlockBodyScroll();
 }
 
+// Load Monthly Report Data & Filter
 function loadStudentProgressReport(studentId) {
     if (!studentProgressModal || !progressModalTableBody || !progressFilterMonth || !progressFilterYear) return;
+    
     const month = progressFilterMonth.value;
     const year = progressFilterYear.value;
     const prefix = `${year}-${month}`;
+
+    // WIPE TABLE IMMEDIATELY BEFORE FETCHING
     progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">Loading monthly data...</td></tr>';
 
     get(ref(database, `teachers/${currentTeacherUid}/logs`)).then((snap) => {
+        progressModalTableBody.innerHTML = ''; // Clear loading text
         const rows = [];
+
         if (snap.exists()) {
             currentProgressLogSnapshot = snap.val();
             Object.keys(currentProgressLogSnapshot)
@@ -423,18 +414,19 @@ function loadStudentProgressReport(studentId) {
         }
 
         if (rows.length === 0) {
-            progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">No data found for this month.</td></tr>';
+            progressModalTableBody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#888;">No history found for this month.</td></tr>';
             return;
         }
 
-        progressModalTableBody.innerHTML = '';
         rows.forEach((row) => {
             const [yearStr, monthStr, dayStr] = row.date.split('-');
             const dateObj = new Date(Number(yearStr), Number(monthStr) - 1, Number(dayStr));
             const formattedDate = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+            
             const editButtonMarkup = isProgressEditMode
-                ? `<button type="button" class="icon-btn" data-action="edit-progress-row" data-date="${row.date}" title="Edit ${formattedDate}" style="padding:4px 7px; font-size:11px; background:#eef2ff; color:#1d4ed8;">✎</button>`
+                ? `<button type="button" class="icon-btn" data-action="edit-progress-row" data-date="${row.date}" title="Edit ${formattedDate}" style="padding:3px 8px; font-size:11px; background:#e0f2fe; color:#0369a1; border-radius:6px; border:none; cursor:pointer;">✎</button>`
                 : '';
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td class="sticky-col" style="font-size:11px;">
@@ -443,8 +435,8 @@ function loadStudentProgressReport(studentId) {
                         <span>${formattedDate}</span>
                     </div>
                 </td>
-                <td>${row.newPages || ''}</td>
-                <td>${row.rev || ''}</td>
+                <td>${row.newPages > 0 ? row.newPages : ''}</td>
+                <td>${row.rev > 0 ? row.rev : ''}</td>
                 <td style="color:#137333; font-weight:bold;">${row.present}</td>
                 <td style="color:#b71c1c; font-weight:bold; background:#ffebee;">${row.absent}</td>
                 <td style="font-size:11px;">${row.remarks}</td>
@@ -458,9 +450,109 @@ function loadStudentProgressReport(studentId) {
     });
 }
 
+// Month & Year Filter Change Listeners
+if (progressFilterMonth) {
+    progressFilterMonth.addEventListener('change', () => {
+        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
+    });
+}
+
+if (progressFilterYear) {
+    progressFilterYear.addEventListener('change', () => {
+        if (currentProgressStudentId) loadStudentProgressReport(currentProgressStudentId);
+    });
+}
+
+// Close Monthly Modal Handler
 if (btnCloseProgressModal) {
-    btnCloseProgressModal.addEventListener('click', () => {
-        closeStudentProgressModal();
+    btnCloseProgressModal.addEventListener('click', closeStudentProgressModal);
+}
+
+if (studentProgressModal) {
+    studentProgressModal.addEventListener('click', (e) => {
+        if (e.target === studentProgressModal) closeStudentProgressModal();
+    });
+}
+
+// Edit Mode Toggle
+if (btnToggleProgressEdit) {
+    btnToggleProgressEdit.addEventListener('click', () => {
+        isProgressEditMode = !isProgressEditMode;
+        btnToggleProgressEdit.innerText = isProgressEditMode ? 'Done' : 'Edit';
+        btnToggleProgressEdit.classList.toggle('active-p', isProgressEditMode);
+        
+        if (currentProgressStudentId) {
+            loadStudentProgressReport(currentProgressStudentId);
+        }
+    });
+}
+
+// Row Edit Click Listener
+if (progressModalTableBody) {
+    progressModalTableBody.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit-progress-row"]');
+        if (!editBtn) return;
+        openProgressEditModal(editBtn.dataset.date);
+    });
+}
+
+function openProgressEditModal(dateKey) {
+    if (!currentProgressStudentId || !progressDateEditModal) return;
+
+    const entry = currentProgressLogSnapshot[dateKey]?.[currentProgressStudentId] || {};
+    currentProgressEditDateKey = dateKey;
+    isProgressEditPresent = entry.isPresent === true;
+
+    const student = students.find((s) => s.id === currentProgressStudentId);
+    const studentName = student ? student.name : 'Student';
+
+    if (progressEditDateLabel) progressEditDateLabel.innerText = formatProgressDateLabel(dateKey);
+    if (progressEditModalTitle) progressEditModalTitle.innerText = `Edit Log - ${studentName}`;
+    if (progressEditNew) progressEditNew.innerHTML = buildNumberSelectOptions(entry.newPages || 0);
+    if (progressEditRev) progressEditRev.innerHTML = buildNumberSelectOptions(entry.rev || 0);
+    if (progressEditRemarks) progressEditRemarks.value = entry.remarks || '';
+    if (progressEditHeardBy) progressEditHeardBy.value = entry.revHeardBy || '';
+    
+    updateProgressEditAttendanceUI();
+    progressDateEditModal.classList.remove('hidden');
+}
+
+function updateProgressEditAttendanceUI() {
+    if (progressEditPresentBtn) progressEditPresentBtn.classList.toggle('active-p', isProgressEditPresent);
+    if (progressEditAbsentBtn) progressEditAbsentBtn.classList.toggle('active-a', !isProgressEditPresent);
+}
+
+function closeProgressEditModal() {
+    if (progressDateEditModal) progressDateEditModal.classList.add('hidden');
+    currentProgressEditDateKey = null;
+}
+
+if (progressEditPresentBtn) progressEditPresentBtn.addEventListener('click', () => { isProgressEditPresent = true; updateProgressEditAttendanceUI(); });
+if (progressEditAbsentBtn) progressEditAbsentBtn.addEventListener('click', () => { isProgressEditPresent = false; updateProgressEditAttendanceUI(); });
+if (btnCancelProgressEdit) btnCancelProgressEdit.addEventListener('click', closeProgressEditModal);
+if (btnCloseProgressEditModal) btnCloseProgressEditModal.addEventListener('click', closeProgressEditModal);
+
+if (btnSaveProgressEdit) {
+    btnSaveProgressEdit.addEventListener('click', () => {
+        if (!currentProgressStudentId || !currentProgressEditDateKey || !currentTeacherUid) return;
+
+        const payload = {
+            name: students.find((s) => s.id === currentProgressStudentId)?.name || '',
+            isPresent: isProgressEditPresent,
+            newPages: Number(progressEditNew.value) || 0,
+            rev: Number(progressEditRev.value) || 0,
+            remarks: progressEditRemarks.value.trim(),
+            revHeardBy: progressEditHeardBy.value.trim()
+        };
+
+        const logRef = ref(database, `teachers/${currentTeacherUid}/logs/${currentProgressEditDateKey}/${currentProgressStudentId}`);
+        update(logRef, payload).then(() => {
+            showToast('Progress updated successfully.', 'success');
+            closeProgressEditModal();
+            loadStudentProgressReport(currentProgressStudentId);
+        }).catch(() => {
+            showToast('Failed to update progress.', 'error');
+        });
     });
 }
 
@@ -471,12 +563,10 @@ if (btnMenu && teacherMenuBackdrop && teacherSideMenu) {
     const closeTeacherMenu = () => {
         teacherSideMenu.classList.remove('open');
         teacherMenuBackdrop.classList.remove('open');
-        teacherSideMenu.setAttribute('aria-hidden', 'true');
     };
     const openTeacherMenu = () => {
         teacherSideMenu.classList.add('open');
         teacherMenuBackdrop.classList.add('open');
-        teacherSideMenu.setAttribute('aria-hidden', 'false');
     };
     btnMenu.addEventListener('click', (e) => { e.stopPropagation(); openTeacherMenu(); });
     btnMenuClose?.addEventListener('click', closeTeacherMenu);
@@ -493,17 +583,10 @@ function resetAddForm() {
     if (addStudentForm) addStudentForm.reset();
     if (newStudentNameInput) newStudentNameInput.classList.remove('input-error');
     if (newStudentPinInput) newStudentPinInput.classList.remove('input-error');
-    if (newStudentNameHint) {
-        newStudentNameHint.textContent = 'Name must be at least 3 characters.';
-        newStudentNameHint.className = 'field-hint';
-    }
-    if (newStudentPinHint) {
-        newStudentPinHint.textContent = 'PIN must be at least 4 digits.';
-        newStudentPinHint.className = 'field-hint';
-    }
+    if (newStudentNameHint) { newStudentNameHint.textContent = 'Name must be at least 3 characters.'; newStudentNameHint.className = 'field-hint'; }
+    if (newStudentPinHint) { newStudentPinHint.textContent = 'PIN must be at least 4 digits.'; newStudentPinHint.className = 'field-hint'; }
 }
 
-// Live Validation Listeners for Teacher Modal
 if (newStudentNameInput) {
     newStudentNameInput.addEventListener('input', () => {
         const val = newStudentNameInput.value.trim();
@@ -533,7 +616,6 @@ function openAddStudentModal() {
     resetAddForm();
     addStudentModal.classList.remove('hidden');
     lockBodyScroll();
-    pushModalState();
 }
 
 function closeAddStudentModal() {
@@ -598,15 +680,14 @@ if (addStudentForm) {
     });
 }
 
-// --- Delete Student ---
+// Delete Student
 function openDeleteModal(studentId) {
-    const student = students.find((item) => item.id === studentId);
+    const student = students.find((s) => s.id === studentId);
     if (!student || !deleteStudentModal) return;
     pendingDeleteId = student.id;
     if (deleteStudentNameEl) deleteStudentNameEl.innerText = student.name;
     deleteStudentModal.classList.remove('hidden');
     lockBodyScroll();
-    pushModalState();
 }
 
 function closeDeleteModal() {
@@ -661,7 +742,7 @@ if (btnViewReports) {
     });
 }
 
-// --- Save Daily Report ---
+// Save Daily Report
 if (btnSaveReport) {
     btnSaveReport.addEventListener('click', () => {
         if (!currentTeacherUid) return;
