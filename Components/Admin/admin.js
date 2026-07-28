@@ -141,9 +141,6 @@ async function loadAllTeachersAndStudents() {
                                 <p>ID: ${sId} | PIN: ${st.pin}</p>
                             </div>
                             <div class="admin-actions">
-                                <button class="icon-btn-edit" title="Edit Student" onclick="event.stopPropagation(); window.adminOpenEditStudent('${teacherUid}', '${sId}', '${st.name}', '${st.pin}')">
-                                    ${editIconSVG}
-                                </button>
                                 <button class="icon-btn-delete" title="Delete Student" onclick="event.stopPropagation(); window.adminConfirmDeleteStudent('${teacherUid}', '${sId}', '${st.name}')">
                                     ${trashIconSVG}
                                 </button>
@@ -167,10 +164,6 @@ async function loadAllTeachersAndStudents() {
 
                 <div class="teacher-actions-bar">
                     <button type="button" class="btn-sm-primary" onclick="event.stopPropagation(); window.adminOpenAddStudent('${teacherUid}', '${teacherName}')">+ Add Student</button>
-                    ${!isMainAdmin ? `
-                    <button type="button" class="icon-btn-edit" title="Edit Teacher Info" onclick="event.stopPropagation(); window.adminOpenEditTeacher('${teacherUid}', '${teacherName}', '${teacherEmail}', '${teacherPin}')">
-                        ${editIconSVG}
-                    </button>` : ''}
                     ${!isMainAdmin ? `
                     <button type="button" class="icon-btn-delete" title="Delete Teacher" onclick="event.stopPropagation(); window.adminConfirmDeleteTeacher('${teacherUid}', '${teacherName}')">
                         ${trashIconSVG}
@@ -218,7 +211,7 @@ btnOpenAddTeacher?.addEventListener('click', () => {
 });
 
 // Open Edit Teacher Modal
-window.adminOpenEditTeacher = (teacherUid, name, email, pin = '') => {
+/* window.adminOpenEditTeacher = (teacherUid, name, email, pin = '') => {
     teacherModeInput.value = 'edit';
     editingTeacherUidInput.value = teacherUid;
     modalTeacherTitle.innerText = 'Edit Teacher Info';
@@ -239,7 +232,7 @@ window.adminOpenEditTeacher = (teacherUid, name, email, pin = '') => {
 
     modalTeacher.classList.remove('hidden');
     lockBodyScroll();
-};
+}; */
 
 function closeTeacherModal() {
     if (modalTeacher) modalTeacher.classList.add('hidden');
@@ -335,7 +328,7 @@ window.adminOpenAddStudent = (teacherUid, teacherName) => {
     lockBodyScroll();
 };
 
-window.adminOpenEditStudent = (teacherUid, studentId, studentName, studentPin) => {
+/* window.adminOpenEditStudent = (teacherUid, studentId, studentName, studentPin) => {
     studentModeInput.value = 'edit';
     targetTeacherUidInput.value = teacherUid;
     editingStudentIdInput.value = studentId;
@@ -354,7 +347,7 @@ window.adminOpenEditStudent = (teacherUid, studentId, studentName, studentPin) =
 
     modalAdminStudent.classList.remove('hidden');
     lockBodyScroll();
-};
+}; */
 
 function closeAdminStudentModal() {
     if (modalAdminStudent) modalAdminStudent.classList.add('hidden');
