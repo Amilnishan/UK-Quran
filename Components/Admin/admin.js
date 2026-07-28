@@ -124,7 +124,7 @@ async function loadAllTeachersAndStudents() {
 
             const card = document.createElement('div');
             const isMainAdmin = teacherUid === auth.currentUser.uid;
-            card.className = `teacher-card-admin ${isMainAdmin ? 'open' : ''}`;
+            card.className = 'teacher-card-admin';
             card.id = `teacher-card-${teacherUid}`;
 
             let studentsHTML = '';
