@@ -95,6 +95,7 @@ onAuthStateChanged(auth, (user) => {
         currentTeacherUid = user.uid;
         showLoadingIndicators();
         loadDataFromDB();
+        autoBackfillMissedDay();
     } else {
         window.location.href = '../../index.html';
     }
@@ -150,6 +151,38 @@ function loadDataFromDB() {
         showToast("Error loading student data", "error");
         hideLoadingIndicators();
     });
+}
+
+async function autoBackfillMissedDay() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const studentsSnap = await get(ref(database, `teachers/${currentTeacherUid}/students`));
+    if (!studentsSnap.exists()) return;
+
+    const yesterdayLogSnap = await get(ref(database, `teachers/${currentTeacherUid}/logs/${yesterdayStr}`));
+    const existingLog = yesterdayLogSnap.exists() ? yesterdayLogSnap.val() : {};
+
+    const updates = {};
+    studentsSnap.forEach((child) => {
+        // Only fill in students who have NO entry at all for that day —
+        // anyone who already submitted (themselves or via the teacher) is
+        // left completely untouched.
+        if (!existingLog[child.key]) {
+            updates[`teachers/${currentTeacherUid}/logs/${yesterdayStr}/${child.key}`] = {
+                name: child.val().name,
+                isPresent: false,
+                newPages: 0,
+                rev: 0,
+                remarks: ""
+            };
+        }
+    });
+
+    if (Object.keys(updates).length > 0) {
+        await update(ref(database), updates);
+    }
 }
 
 function showLoadingIndicators() {
