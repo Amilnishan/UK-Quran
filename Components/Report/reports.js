@@ -22,6 +22,9 @@ function containsArabicText(text) {
 const btnBack = document.getElementById('btn-back');
 const filterMonth = document.getElementById('filter-month');
 const filterYear = document.getElementById('filter-year');
+const today = new Date();
+filterMonth.value = String(today.getMonth() + 1).padStart(2, '0');
+filterYear.value = String(today.getFullYear());
 const tableBody = document.getElementById('report-table-body');
 const tableTitle = document.getElementById('table-title');
 const btnDownload = document.getElementById('btn-download-pdf');
@@ -383,7 +386,7 @@ function downloadPdfReport() {
         const doc = new jsPDFLib({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
         // Heading
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('NotoNaskhArabic-Regular');
         doc.setFontSize(18);
         doc.setTextColor(216, 130, 18);
         doc.text(`Monthly Report - ${monthName} ${year}`, 14, 16);
@@ -417,8 +420,6 @@ function downloadPdfReport() {
         const rows = latestReportRows.length > 0 ? latestReportRows : getRowsForPdf();
         const body = rows.map(r => [r.name, r.newPages, r.rev, r.present, r.absent, r.remark || '-']);
 
-
-
         doc.autoTable({
             head,
             body,
@@ -430,6 +431,15 @@ function downloadPdfReport() {
             didParseCell: (data) => {
                 if (data.section === 'body' && data.column.index === 3) data.cell.styles.textColor = [22, 163, 74];
                 if (data.section === 'body' && data.column.index === 4) data.cell.styles.textColor = [220, 38, 38];
+
+                // Name & Remarks columns — switch font for Arabic text
+                if (data.section === 'body' && (data.column.index === 0 || data.column.index === 5)) {
+                    const text = String(data.cell.raw || '');
+                    const hasArabic = /[\u0600-\u06FF]/.test(text);
+                    if (hasArabic) {
+                        data.cell.styles.font = 'NotoNaskhArabic-Regular';
+                    }
+                }
             }
         });
 
