@@ -1193,7 +1193,18 @@ body.modal-open { overflow: hidden; }
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 14px;
+    padding: 9px;
+    background: #f8f9fb;
+    border: 1px solid #e3e7ed;
+    border-radius: 14px;
+    margin-top: 12px;
+}
+.donation-upi-row1 {
+    
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px;
     background: #f8f9fb;
     border: 1px solid #e3e7ed;
     border-radius: 14px;
