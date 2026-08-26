@@ -63,6 +63,17 @@
             box-sizing: border-box;
             width: 100%;
         }
+        .fathiha {
+            height: 100px;
+            background-image: url(../../images/Banner/banner-2-reverse.webp), url(images/Banner/banner-2-reverse.webp);
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            width: 100%;
+        }        
 
         .audio-list {
             display: none;
@@ -149,6 +160,180 @@
             font-size: 14px;
             color: #444;
         }
+
+        #surah-card .video-list {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        #surah-card.open .video-list {
+            display: grid;
+        }
+
+        .video-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .video-card-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .thumb-wrap {
+            position: relative;
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #edf2f7;
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .play-overlay {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.72);            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
+        }
+
+        .play-overlay:hover {
+            background: rgb(0, 0, 0);
+        }
+
+        .play-overlay svg {
+            width: 36px;
+            height: 36px;
+            fill: #ffffff;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+        }
+
+        .video-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+        }
+
+        .video-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+            box-sizing: border-box;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .video-modal-overlay.open {
+            display: flex;
+        }
+
+        .video-modal-card {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .video-modal-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+        }
+
+        .video-modal-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .video-modal-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #1e293b;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            text-decoration: none;
+        }
+
+        .video-modal-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .video-modal-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+
+        .video-modal-btn.close-btn {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .video-player-wrapper {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000000;
+        }
+
+        .video-player-wrapper video {
+            width: 100%;
+            height: auto;
+            max-height: 75vh;
+            display: block;
+            border-radius: 12px;
+        }
+
         .menu-btn { font-size: 22px; line-height: 1; width: 42px; height: 42px; border-radius: 50%; border: none; background: transparent; color: #111; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .menu-btn:hover { background: rgba(0, 0, 0, 0.05); }
         .menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.24); opacity: 0; visibility: hidden; transition: opacity 0.28s ease; z-index: 1050; }
@@ -193,6 +378,19 @@
                 <button type="button" id="btn-menu-logout">LOGOUT</button>
             </div>
         </aside>
+      
+        <div class="student-action-card" id="surah-card">
+            <div class="fathiha">
+                <h3 style="margin-left: 10px; margin-top: 20px;margin-bottom: 18px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    Qur'an 
+                </h3>
+                <p style="margin-left: 12px; margin-right: 22px; font-size: 14px;">
+                    JUZ 1
+                </p>
+            </div>
+            <div class="video-list" id="surah-video-list"></div>
+        </div>
         <div class="student-action-card" id="juz30-card">
             <div class="qiraat">
                 <h3 style="margin-left: 10px; margin-top: 20px;margin-bottom: 18px;">
@@ -212,6 +410,23 @@
             </div>
                 <!-- Audio cards will be dynamically added here -->
             </div>
+        </div>         
+    </div>
+
+    <div id="video-modal" class="video-modal-overlay">
+        <div class="video-modal-card">
+            <div class="video-modal-header">
+                <div class="video-modal-actions">
+                    <a id="video-modal-download" class="video-modal-btn" href="#" download title="Download Video">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                    </a>
+                    <button id="video-modal-fullscreen" class="video-modal-btn" type="button" title="Fullscreen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="m21 3-7 7"></path><path d="M9 21H3v-6"></path><path d="m3 21 7-7"></path></svg>
+                    </button>
+                    <button id="video-modal-close" class="video-modal-btn close-btn" type="button" title="Close">✕</button>
+                </div>
+            </div>
+            <div class="video-player-wrapper" id="video-player-wrapper"></div>
         </div>
     </div>
     <script>
@@ -398,6 +613,120 @@
                 window.location.href = '../Student/student.html';
             });
         }
+
+        const surahVideoFiles = [
+            {
+                fileName: 'Surah al-fathiha.mp4',
+                title: 'Surah al-Fatiha',
+                thumb: '../../images/quran/Surah al-fathiha.webp'
+            }
+        ];
+
+        const surahCard = document.getElementById('surah-card');
+        const surahVideoList = document.getElementById('surah-video-list');
+        const surahHeader = surahCard?.querySelector('h3');
+
+        surahHeader?.addEventListener('click', () => {
+            surahCard.classList.toggle('open');
+        });
+        const surahVideoModal = document.getElementById('video-modal');
+        const surahVideoWrapper = document.getElementById('video-player-wrapper');
+        const surahVideoDownload = document.getElementById('video-modal-download');
+        const surahVideoFullscreen = document.getElementById('video-modal-fullscreen');
+        const surahVideoClose = document.getElementById('video-modal-close');
+
+        function getSurahVideoUrl(fileName) {
+            return '../../videos/Surah al-fathiha/' + encodeURIComponent(fileName);
+        }
+
+        function openSurahModal(fileName) {
+            surahVideoWrapper.innerHTML = '';
+
+            const video = document.createElement('video');
+            video.controls = true;
+            video.autoplay = true;
+            video.playsInline = true;
+            video.src = getSurahVideoUrl(fileName);
+            surahVideoWrapper.appendChild(video);
+
+            if (surahVideoDownload) {
+                surahVideoDownload.href = getSurahVideoUrl(fileName);
+                surahVideoDownload.download = fileName;
+            }
+
+            surahVideoModal.classList.add('open');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeSurahModal() {
+            const video = surahVideoWrapper.querySelector('video');
+            if (video) {
+                try { video.pause(); } catch (e) {}
+                surahVideoWrapper.innerHTML = '';
+            }
+            surahVideoModal.classList.remove('open');
+            document.body.classList.remove('modal-open');
+        }
+
+        surahVideoFiles.forEach((item) => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+
+            const row = document.createElement('div');
+            row.className = 'video-card-row';
+
+            const thumbWrap = document.createElement('div');
+            thumbWrap.className = 'thumb-wrap';
+
+            const thumb = document.createElement('img');
+            thumb.className = 'video-thumb';
+            thumb.src = item.thumb;
+            thumb.alt = item.title;
+            thumb.onerror = () => {
+                thumb.onerror = null;
+                thumb.src = '../../images/arabic-letters/PART- 2.webp';
+            };
+
+            const playButton = document.createElement('button');
+            playButton.className = 'play-overlay';
+            playButton.type = 'button';
+            playButton.setAttribute('aria-label', 'Play video');
+            playButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5L8 5.5z"/></svg>';
+
+            thumbWrap.appendChild(thumb);
+            thumbWrap.appendChild(playButton);
+
+            const title = document.createElement('div');
+            title.className = 'video-title';
+            title.textContent = item.title;
+
+            playButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openSurahModal(item.fileName);
+            });
+
+            card.addEventListener('click', () => openSurahModal(item.fileName));
+
+            row.appendChild(thumbWrap);
+            row.appendChild(title);
+            card.appendChild(row);
+            surahVideoList.appendChild(card);
+        });
+
+        surahVideoClose?.addEventListener('click', closeSurahModal);
+        surahVideoModal?.addEventListener('click', (e) => {
+            if (e.target === surahVideoModal) closeSurahModal();
+        });
+
+        surahVideoFullscreen?.addEventListener('click', () => {
+            const video = surahVideoWrapper.querySelector('video');
+            if (!video) return;
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            }
+        });
 
         // --- DYNAMIC GUEST MENU CHECK ---
 const isGuest = sessionStorage.getItem('isGuest') === 'true';

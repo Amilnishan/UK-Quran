@@ -1,4 +1,4 @@
-const donationUpi = 'abutaubha123-3@okaxis';
+const donationUpi = 'abutaubha123-3@okhdfcbank'; // UPI ID for donations
 
 // UI Elements
 const toastContainer = document.getElementById('toast-container');
