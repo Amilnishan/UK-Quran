@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Arabic Letters — Without Harakat</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    .menu-btn { font-size: 22px; line-height: 1; width: 42px; height: 42px; border-radius: 50%; border: none; background: transparent; color: #111; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .menu-btn:hover { background: rgba(0, 0, 0, 0.05); }
+    .menu-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.24); opacity: 0; visibility: hidden; transition: opacity 0.28s ease; z-index: 1050; }
+    .menu-backdrop.open { opacity: 1; visibility: visible; }
+    .side-menu { position: fixed; top: 0; right: -100%; width: 60vw; max-width: 340px; height: 100vh; background: #fff; box-shadow: -18px 0 45px rgba(0,0,0,0.12); z-index: 1100; transition: right 0.28s ease; display: flex; flex-direction: column; padding: 32px 32px 28px; }
+    .side-menu.open { right: 0; }
+    .side-menu .menu-close-btn { margin-left: auto; border: none; background: transparent; font-size: 28px; line-height: 1; color: #333; cursor: pointer; }
+    .side-menu .menu-title { margin: 0; font-size: 22px; letter-spacing: 0.18em; text-transform: uppercase; color: #888; font-weight: 700; }
+    .side-menu .menu-list { margin-top: 48px; display: flex; flex-direction: column; gap: 28px; }
+    .side-menu .menu-list button { border: none; background: transparent; text-align: left; color: #111; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; padding: 0; cursor: pointer; }
+    .side-menu .menu-list button + button { padding-top: 28px; border-top: 1px solid rgba(0,0,0,0.08); }
+    .side-menu .menu-list button:hover { color: #0f4ad6; }
+
+    /* Hero banner (matches the blue geometric banner style used elsewhere).
+       Acts as the accordion header — click it to reveal the letter list,
+       same pattern as the Juz 30 / Thajweed lesson cards. */
+    .la-hero {
+        margin: 20px 20px 0;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        min-height: 130px;
+        background: linear-gradient(120deg, #0a1a5c 0%, #12309e 55%, #2451d6 100%);
+        display: flex;
+        align-items: center;
+        padding: 24px 28px;
+        box-shadow: 0 10px 25px rgba(10, 26, 92, 0.18);
+        cursor: pointer;
+        user-select: none;
+    }
+    .la-hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 78% 30%, rgba(255,255,255,0.18), transparent 40%),
+            radial-gradient(circle at 92% 75%, rgba(255,255,255,0.14), transparent 45%);
+        pointer-events: none;
+    }
+    .la-hero-icon {
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.16);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        margin-right: 16px;
+    }
+    .la-hero-text { position: relative; z-index: 1; flex: 1; }
+    .la-hero-text h2 { margin: 0 0 4px; color: #fff; font-size: 22px; font-weight: 700; }
+    .la-hero-text p { margin: 0; color: #cdd8ff; font-size: 13px; }
+    .la-hero-arrow {
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+        color: rgba(255,255,255,0.85);
+        transition: transform 0.25s ease;
+    }
+    .la-hero.open .la-hero-arrow { transform: rotate(180deg); }
+
+    /* Letter list — collapsed by default, revealed when the hero is tapped */
+    .letter-list {
+        display: none;
+        padding: 18px 20px 20px;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .la-hero.open + .letter-list {
+        display: flex;
+    }
+    .letter-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 12px 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        text-align: left;
+        width: 100%;
+        font-family: inherit;
+    }
+    .letter-row:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .letter-row:active { transform: translateY(0); }
+    .letter-glyph {
+        flex-shrink: 0;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: #eef2ff;
+        color: #12309e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Noto Naskh Arabic', serif;
+        font-size: 26px;
+        font-weight: 600;
+    }
+    .letter-info { flex: 1; min-width: 0; }
+    .letter-info h4 { margin: 0; font-size: 15px; color: #1f2937; font-weight: 700; }
+    .letter-info p { margin: 2px 0 0; font-size: 12px; color: #8a8a8a; }
+    .letter-chevron { color: #b8bfd6; flex-shrink: 0; }
+
+    @media (max-width: 480px) {
+        .la-hero { margin: 16px; padding: 20px 22px; min-height: 110px; }
+        .letter-list { padding: 14px 16px 16px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <header class="dash-header">
+        <button class="icon-btn" id="btn-back" title="Go Back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8E785C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <h2 style="margin:0; font-size:18px; color: #5C4B37;">LEARN ARABIC</h2>
+        <button class="menu-btn" id="btn-menu" aria-label="Open menu">&#9776;</button>
+    </header>
+
+    <div id="la-menu-backdrop" class="menu-backdrop"></div>
+    <aside id="la-side-menu" class="side-menu" aria-hidden="true">
+        <button type="button" class="menu-close-btn" id="btn-menu-close">&times;</button>
+        <p class="menu-title">UK QURAN</p>
+        <div class="menu-list">
+            <button type="button" id="btn-menu-home">HOME</button>
+            <button type="button" id="btn-menu-thajweed">THAJWEED</button>
+            <button type="button" id="btn-menu-qiraat">QIRA'AT</button>
+            <button type="button" id="btn-menu-learn-arabic">LEARN ARABIC</button>
+            <button type="button" id="btn-menu-certificates">CERTIFICATES</button>
+            <button type="button" id="btn-menu-logout">LOGOUT</button>
+        </div>
+    </aside>
+
+    <div class="la-hero" id="la-hero">
+        <div class="la-hero-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+        </div>
+        <div class="la-hero-text">
+            <h2>Arabic Letters</h2>
+            <p>Without Harakat</p>
+        </div>
+        <svg class="la-hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+    </div>
+
+    <div class="letter-list" id="letter-list">
+        <!-- JS injects letter rows here -->
+    </div>
+
+</div>
+
+<script>
+    // Same 28-letter set used by the tracer (kept in the same visual order).
+    // Only name + glyph needed here — the tracer owns the actual stroke data.
+    const LETTERS = [
+        { char: "أ", enName: "Alif",  arName: "ألف" },
+        { char: "ب", enName: "Ba",    arName: "باء" },
+        { char: "ت", enName: "Ta",    arName: "تاء" },
+        { char: "ث", enName: "Tha",   arName: "ثاء" },
+        { char: "ج", enName: "Jeem",  arName: "جيم" },
+        { char: "ح", enName: "Haa",   arName: "حاء" },
+        { char: "خ", enName: "Khaa",  arName: "خاء" },
+        { char: "د", enName: "Dal",   arName: "دال" },
+        { char: "ذ", enName: "Thal",  arName: "ذال" },
+        { char: "ر", enName: "Ra",    arName: "راء" },
+        { char: "ز", enName: "Zay",   arName: "زاي" },
+        { char: "س", enName: "Seen",  arName: "سين" },
+        { char: "ش", enName: "Sheen", arName: "شين" },
+        { char: "ص", enName: "Saad",  arName: "صاد" },
+        { char: "ض", enName: "Dad",   arName: "ضاد" },
+        { char: "ط", enName: "Taa",   arName: "طاء" },
+        { char: "ظ", enName: "Dhaa",  arName: "ظاء" },
+        { char: "ع", enName: "Ain",   arName: "عين" },
+        { char: "غ", enName: "Ghain", arName: "غين" },
+        { char: "ف", enName: "Fa",    arName: "فاء" },
+        { char: "ق", enName: "Qaf",   arName: "قاف" },
+        { char: "ك", enName: "Kaf",   arName: "كاف" },
+        { char: "ل", enName: "Lam",   arName: "لام" },
+        { char: "م", enName: "Meem",  arName: "ميم" },
+        { char: "ن", enName: "Nun",   arName: "نون" },
+        { char: "هـ", enName: "Ha",   arName: "هاء" },
+        { char: "و", enName: "Waw",   arName: "واو" },
+        { char: "ي", enName: "Ya",    arName: "ياء" }
+    ];
+
+    const letterList = document.getElementById('letter-list');
+
+    LETTERS.forEach((letter, index) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'letter-row';
+        row.innerHTML = `
+            <div class="letter-glyph">${letter.char}</div>
+            <div class="letter-info">
+                <h4>${letter.enName}</h4>
+                <p>Learn to recognize and write</p>
+            </div>
+            <svg class="letter-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        `;
+        row.addEventListener('click', () => {
+            window.location.href = `tracing.html?letter=${index}`;
+        });
+        letterList.appendChild(row);
+    });
+
+    // Accordion: tap the hero banner to reveal/hide the letter list,
+    // same interaction as the Juz 30 / Thajweed lesson cards.
+    const laHero = document.getElementById('la-hero');
+    laHero.addEventListener('click', () => {
+        laHero.classList.toggle('open');
+    });
+
+    const isGuest = sessionStorage.getItem('isGuest') === 'true';
+
+    // Back — return to whichever page the student came from (student
+    // dashboard, guest dashboard, Qira'at menu, etc.) rather than a fixed
+    // destination, since Learn Arabic can now be entered from several places.
+    document.getElementById('btn-back').addEventListener('click', () => {
+        if (document.referrer && document.referrer.includes(window.location.host)) {
+            history.back();
+        } else {
+            // No usable browser history (e.g. opened in a new tab) —
+            // fall back to the dashboard as a safe default.
+            window.location.href = isGuest ? '../Guest/guest.html' : '../Student/student.html';
+        }
+    });
+
+    const btnMenu = document.getElementById('btn-menu');
+    const laMenuBackdrop = document.getElementById('la-menu-backdrop');
+    const laSideMenu = document.getElementById('la-side-menu');
+    const btnMenuClose = document.getElementById('btn-menu-close');
+    const btnMenuHome = document.getElementById('btn-menu-home');
+    const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
+    const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
+    const btnMenuLearnArabic = document.getElementById('btn-menu-learn-arabic');
+    const btnMenuCertificates = document.getElementById('btn-menu-certificates');
+    const btnMenuLogout = document.getElementById('btn-menu-logout');
+
+    if (isGuest) {
+        if (btnMenuCertificates) btnMenuCertificates.style.display = 'none';
+        if (btnMenuLogout) btnMenuLogout.textContent = 'EXIT GUEST MODE';
+    }
+
+    const openMenu = () => {
+        laSideMenu.classList.add('open');
+        laMenuBackdrop.classList.add('open');
+        laSideMenu.setAttribute('aria-hidden', 'false');
+    };
+    const closeMenu = () => {
+        laSideMenu.classList.remove('open');
+        laMenuBackdrop.classList.remove('open');
+        laSideMenu.setAttribute('aria-hidden', 'true');
+    };
+
+    btnMenu?.addEventListener('click', (e) => { e.stopPropagation(); openMenu(); });
+    btnMenuClose?.addEventListener('click', closeMenu);
+    laMenuBackdrop?.addEventListener('click', closeMenu);
+
+    btnMenuHome?.addEventListener('click', () => {
+        closeMenu();
+        window.location.href = isGuest ? '../Guest/guest.html' : '../Student/student.html';
+    });
+    btnMenuThajweed?.addEventListener('click', () => {
+        closeMenu();
+        window.location.href = '../Thajweed/thajweed.html';
+    });
+    btnMenuQiraat?.addEventListener('click', () => {
+        closeMenu();
+        window.location.href = '../Qira\'at/qiraat.html';
+    });
+    btnMenuLearnArabic?.addEventListener('click', () => {
+        closeMenu();
+        window.location.href = 'learn-arabic-without-harakat.html';
+    });
+    btnMenuCertificates?.addEventListener('click', () => {
+        closeMenu();
+        window.location.href = '../Certificates/certificates.html';
+    });
+    btnMenuLogout?.addEventListener('click', () => {
+        closeMenu();
+        if (isGuest) sessionStorage.removeItem('isGuest');
+        window.location.href = '../../index.html';
+    });
+</script>
+</body>
+</html>

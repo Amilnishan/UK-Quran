@@ -356,24 +356,31 @@
 </head>
 <body>
     <div class="app-container">
-        <header class="dash-header">
+                <header class="dash-header">
+            <button class="icon-btn" id="btn-back" title="Go Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8E785C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
             <div class="user-info">
                 <div>
                     <h2 style="margin:0;">QIRA'AT</h2>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="menu-btn" id="btn-menu" type="button" aria-label="Open menu">☰</button>
+                <button class="menu-btn" id="btn-menu" type="button" aria-label="Open menu">&#9776;</button>
             </div>
         </header>
         <div id="qiraat-menu-backdrop" class="menu-backdrop"></div>
         <aside id="qiraat-side-menu" class="side-menu" aria-hidden="true">
             <button type="button" class="menu-close-btn" id="btn-menu-close">×</button>
             <p class="menu-title">UK QURAN</p>
-            <div class="menu-list">
+                        <div class="menu-list">
                 <button type="button" id="btn-menu-home">HOME</button>
                 <button type="button" id="btn-menu-thajweed">THAJWEED</button>
                 <button type="button" id="btn-menu-qiraat">QIRA'AT</button>
+                <button type="button" id="btn-menu-learn-arabic">LEARN ARABIC</button>
                 <button type="button" id="btn-menu-certificates">CERTIFICATES</button>
                 <button type="button" id="btn-menu-logout">LOGOUT</button>
             </div>
@@ -610,7 +617,11 @@
         const btnBack = document.getElementById('btn-back');
         if (btnBack) {
             btnBack.addEventListener('click', () => {
-                window.location.href = '../Student/student.html';
+                if (document.referrer && document.referrer.includes(window.location.host)) {
+                    history.back();
+                } else {
+                    window.location.href = isGuest ? '../Guest/guest.html' : '../Student/student.html';
+                }
             });
         }
 
@@ -784,6 +795,11 @@ btnMenuThajweed?.addEventListener('click', () => {
 btnMenuQiraat?.addEventListener('click', () => {
     closeMenu();
     window.location.href = 'qiraat.html';
+});
+
+document.getElementById('btn-menu-learn-arabic')?.addEventListener('click', () => {
+    closeMenu();
+    window.location.href = '../Learn-Arabic/learn-arabic-without-harakat.html';
 });
 
 btnMenuCertificates?.addEventListener('click', () => {

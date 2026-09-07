@@ -35,6 +35,7 @@ const btnMenuClose = document.getElementById('btn-menu-close');
 const btnMenuHome = document.getElementById('btn-menu-home');
 const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
 const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
+const btnMenuLearnArabic = document.getElementById('btn-menu-learn-arabic');
 const btnMenuCertificates = document.getElementById('btn-menu-certificates');
 const btnMenuLogout = document.getElementById('btn-menu-logout');
 
@@ -273,6 +274,13 @@ if (btnOpenQiraat) {
     });
 }
 
+const btnOpenLearnArabic = document.getElementById('btn-open-learn-arabic');
+if (btnOpenLearnArabic) {
+    btnOpenLearnArabic.addEventListener('click', () => {
+        window.location.href = '../Learn-Arabic/learn-arabic-without-harakat.html';
+    });
+}
+
 if (btnCloseDonate) {
     btnCloseDonate.addEventListener('click', () => {
         if (donateModal) {
@@ -439,6 +447,13 @@ if (btnMenuQiraat) {
         studentSideMenu.classList.remove('open');
         studentMenuBackdrop.classList.remove('open');
         window.location.href = '../Qira\'at/qiraat.html';
+    });
+}
+if (btnMenuLearnArabic) {
+    btnMenuLearnArabic.addEventListener('click', () => {
+        studentSideMenu.classList.remove('open');
+        studentMenuBackdrop.classList.remove('open');
+        window.location.href = '../Learn-Arabic/learn-arabic-without-harakat.html';
     });
 }
 if (btnMenuLogout) {

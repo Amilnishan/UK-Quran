@@ -1,0 +1,1359 @@
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>تعلّم الحروف — Arabic Letter Tracer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#003399;
+    --blue-dark:#002266;
+    --paper:#f4f6fb;
+    --card:#ffffff;
+    --ink:#1a1a2e;
+    --muted:#7a80a0;
+    --guide:#c7cde0;
+    --good:#1fa15b;
+    --bad:#d13b3b;
+    --gold:#f2b705;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100%;
+    background:linear-gradient(180deg,#e7ebf7 0%,var(--paper) 220px);
+    font-family:"Segoe UI","Tahoma",-apple-system,BlinkMacSystemFont,sans-serif;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:18px 12px 40px;
+    color:var(--ink);
+  }
+  .app{
+    width:100%;
+    max-width:400px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 12px 30px rgba(0,25,90,0.14);
+  }
+  header{
+    background:linear-gradient(160deg,var(--blue) 0%,var(--blue-dark) 100%);
+    color:#fff;
+    padding:16px 14px 20px;
+    text-align:center;
+  }
+  .exit-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .exit-btn{
+    background:rgba(255,255,255,0.12);
+  }
+  .exit-row .idx{
+    font-size:11px;
+    letter-spacing:1px;
+    color:#c9d3f5;
+  }
+  .nav-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .nav-btn{
+    width:38px;height:38px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,0.16);
+    color:#fff;
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:transform .12s ease, background .15s ease;
+    flex-shrink:0;
+  }
+  .nav-btn:active{transform:scale(0.9);background:rgba(255,255,255,0.32);}
+  .letter-meta{flex:1;}
+  .letter-meta .idx{font-size:11px;letter-spacing:1px;color:#c9d3f5;margin-bottom:2px;}
+  .letter-meta .names{font-size:14px;color:#e6ebff;}
+  .letter-meta .names b{color:#fff;font-weight:600;}
+  .big-char{
+    font-size:64px;
+    line-height:1;
+    margin:10px 0 2px;
+    font-weight:400;
+    font-family:"Noto Naskh Arabic", "Segoe UI", serif;
+  }
+  .names, .names b{
+    font-family:"Noto Naskh Arabic", "Segoe UI", sans-serif;
+  }
+  .streak-wrap{
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .streak-dot{
+    width:11px;height:11px;border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    transition:background .2s ease, transform .2s ease;
+  }
+  .streak-dot.filled{background:var(--gold);transform:scale(1.15);}
+  .streak-label{
+    font-size:11px;color:#c9d3f5;margin-top:8px;letter-spacing:.3px;
+  }
+  .mode-badge{
+    display:inline-block;margin-top:8px;
+    padding:4px 12px;border-radius:20px;
+    font-size:11px;font-weight:600;letter-spacing:.4px;
+  }
+  .mode-badge.tracing{background:rgba(255,255,255,0.18);color:#fff;}
+  .mode-badge.blank{background:var(--gold);color:#3a2900;}
+
+  .body-area{padding:16px 16px 18px;}
+  .instruction{
+    text-align:center;
+    font-size:13.5px;
+    color:var(--muted);
+    margin:0 0 12px;
+    min-height:18px;
+  }
+  .canvas-wrap{
+    position:relative;
+    width:100%;
+    border-radius:16px;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,51,153,0.05) 0 1px, transparent 1px 100%);
+    background-color:#fbfcff;
+    border:2px solid #e3e7f5;
+    touch-action:none;
+    overflow:hidden;
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .canvas-wrap.correct{
+    border-color:var(--good);
+    box-shadow:0 0 0 3px rgba(31,161,91,0.12);
+  }
+  .canvas-wrap.wrong{
+    border-color:var(--bad);
+    box-shadow:0 0 0 3px rgba(209,59,59,0.12);
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+  }
+
+  .controls{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+  }
+  .ctrl-btn{
+    flex:1;
+    border:none;
+    border-radius:14px;
+    padding:12px 8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .ctrl-btn:active{transform:scale(0.97);}
+  .ctrl-btn.clear{
+    background:#eef1fb;
+    color:var(--blue);
+  }
+  .ctrl-btn.check{
+    background:var(--blue);
+    color:#fff;
+  }
+  .ctrl-btn.clear:hover, .ctrl-btn.check:hover{filter:brightness(1.05);}
+
+  .footnote{
+    text-align:center;
+    font-size:11px;
+    color:#a7acc4;
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  @media (max-width:360px){
+    .big-char{font-size:54px;}
+    .overlay-signal .glyph{font-size:64px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <header>
+      <div class="exit-row">
+        <button class="nav-btn exit-btn" id="listBtn" aria-label="Back to letter list" title="Back to letter list">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <div class="idx" id="idxLabel" dir="ltr">1 / 28</div>
+      </div>
+      <div class="nav-row" dir="ltr">
+        <button class="nav-btn" id="backBtn" aria-label="Previous letter" title="Previous letter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="letter-meta">
+          <div class="names" id="namesLabel"><b>Alif</b> · ألف</div>
+        </div>
+        <button class="nav-btn" id="nextBtn" aria-label="Next letter" title="Next letter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <div class="big-char" id="bigChar">أ</div>
+      <div class="mode-badge tracing" id="modeBadge">TRACING MODE</div>
+      <div class="streak-wrap" id="streakDots"></div>
+      <div class="streak-label" id="streakLabel" dir="ltr">0 / 5 correct in a row</div>
+    </header>
+
+    <div class="body-area">
+      <p class="instruction" id="instructionText" dir="ltr">Trace over the dotted guide, starting from the blue dot.</p>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="board" width="320" height="240"></canvas>
+      </div>
+      <div class="controls">
+        <button class="ctrl-btn clear" id="clearBtn">Clear</button>
+        <button class="ctrl-btn check" id="checkBtn">Check ✓</button>
+      </div>
+      <p class="footnote">Draw the letter with your finger or mouse. Get 5 correct in a row to unlock Blank Mode — one mistake sends you back to the guided dots.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- geometry helpers ---------- */
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function ptOnSeg(seg,t){
+    if(seg.p1){
+      const x = (1-t)*(1-t)*seg.p0.x + 2*(1-t)*t*seg.p1.x + t*t*seg.p2.x;
+      const y = (1-t)*(1-t)*seg.p0.y + 2*(1-t)*t*seg.p1.y + t*t*seg.p2.y;
+      return {x,y};
+    }
+    return { x: lerp(seg.p0.x, seg.p2.x, t), y: lerp(seg.p0.y, seg.p2.y, t) };
+  }
+  function buildGuide(segments, perSeg){
+    perSeg = perSeg || 7;
+    const pts = [];
+    segments.forEach(seg=>{
+      for(let i=0;i<=perSeg;i++){
+        pts.push(ptOnSeg(seg, i/perSeg));
+      }
+    });
+    return pts;
+  }
+  function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+
+  /* ---------- shared skeleton families ----------
+     Arabic letters cluster into base-shape families that differ only
+     by their dots (ba/ta/tha/nun/ya, jeem/haa/khaa, dal/thal, ra/zay,
+     seen/sheen, saad/dad, taa/dhaa, ain/ghain, fa/qaf). We reuse the
+     base skeleton per family and vary only the diacriticDots, which
+     mirrors how the letters are actually taught. */
+
+const BOWL = [
+  // Right vertical
+  {
+    p0: { x: 245, y: 65 },
+    p1: { x: 245, y: 85 },
+    p2: { x: 245, y: 105 }
+  },
+
+  // Right rounded corner
+  {
+    p0: { x: 245, y: 105 },
+    p1: { x: 245, y: 145 },
+    p2: { x: 205, y: 150 }
+  },
+
+  // Bottom
+  {
+    p0: { x: 205, y: 150 },
+    p1: { x: 160, y: 155 },
+    p2: { x: 115, y: 150 }
+  },
+
+  // Left rounded corner
+  {
+    p0: { x: 115, y: 150 },
+    p1: { x: 75, y: 145 },
+    p2: { x: 75, y: 105 }
+  },
+
+  // Left vertical
+  {
+    p0: { x: 75, y: 105 },
+    p1: { x: 75, y: 85 },
+    p2: { x: 75, y: 65 }
+  }
+];
+const HOOK = [
+  // 1. Top wave header: Starts at the green mark (scaled down, centered)
+  {
+    p0: { x: 125, y: 75 },
+    p1: { x: 165, y: 68 },
+    p2: { x: 215, y: 80 }
+  },
+  // 2. Backtrack corner: Retraces slightly back left to the notch
+  {
+    p0: { x: 215, y: 80 },
+    p1: { x: 200, y: 84 },
+    p2: { x: 185, y: 90 }
+  },
+  // 3. Middle neck diagonal: Sweeps DOWN-LEFT forming the sharp waist
+  {
+    p0: { x: 185, y: 90 },
+    p1: { x: 155, y: 108 },
+    p2: { x: 128, y: 140 }
+  },
+  // 4. Large lower bowl: Compact curve down, around the base, swooping right to the end tip
+  {
+    p0: { x: 128, y: 140 },
+    p1: { x: 105, y: 180 },
+    p2: { x: 140, y: 210 }
+  },
+  {
+    p0: { x: 140, y: 210 },
+    p1: { x: 175, y: 225 },
+    p2: { x: 220, y: 200 }
+  }
+];
+// Arabic Letter Dal (د) defined using quadratic Bézier curve segments
+const DAL = [
+  {
+    p0: { x: 165, y: 75 },
+    p1: { x: 205, y: 110 },
+    p2: { x: 200, y: 165 }
+  },
+  {
+    p0: { x: 200, y: 165 },
+    p1: { x: 165, y: 175 },
+    p2: { x: 135, y: 165 }
+  }
+];
+const RA = [
+  {
+    p0: { x: 190, y: 70 },
+    p1: { x: 215, y: 110 },
+    p2: { x: 200, y: 150 }
+  },
+  {
+    p0: { x: 200, y: 150 },
+    p1: { x: 175, y: 185 },
+    p2: { x: 120, y: 180 }
+  }
+];
+const SEEN = [
+  // First vertical line (rightmost stroke, goes down)
+  {
+    p0: { x: 235, y: 70 },
+    p1: { x: 235, y: 110 },
+    p2: { x: 235, y: 150 }
+  },
+  // First small bottom curve connecting to second tooth
+  {
+    p0: { x: 235, y: 150 },
+    p1: { x: 215, y: 175 },
+    p2: { x: 195, y: 150 }
+  },
+  // Second tooth going up
+  {
+    p0: { x: 195, y: 150 },
+    p1: { x: 195, y: 130 },
+    p2: { x: 195, y: 110 }
+  },
+  // Second small bottom curve connecting to third tooth
+  {
+    p0: { x: 195, y: 150 },
+    p1: { x: 175, y: 175 },
+    p2: { x: 155, y: 150 }
+  },
+  // Third tooth going up
+  {
+    p0: { x: 155, y: 150 },
+    p1: { x: 155, y: 130 },
+    p2: { x: 155, y: 110 }
+  },
+  // Deep tail curve going down and sweeping left
+  {
+    p0: { x: 155, y: 150 },
+    p1: { x: 155, y: 220 },
+    p2: { x: 105, y: 220 }
+  },
+  // Tail end going straight up on the left
+  {
+    p0: { x: 105, y: 220 },
+    p1: { x: 80, y: 220 },
+    p2: { x: 80, y: 145 }
+  }
+];
+const SAAD = [
+  // Loop part: starts baseline left, curves up and right, loops down and closes baseline
+  {
+    p0: { x: 180, y: 150 },
+    p1: { x: 200, y: 80 },
+    p2: { x: 260, y: 110 }
+  },
+  {
+    p0: { x: 260, y: 110 },
+    p1: { x: 270, y: 150 },
+    p2: { x: 180, y: 150 }
+  },
+  // Small tooth after loop going slightly up and down
+  {
+    p0: { x: 180, y: 150 },
+    p1: { x: 160, y: 150 },
+    p2: { x: 155, y: 125 }
+  },
+  // Deep tail bowl going down and sweeping back up on the left
+  {
+    p0: { x: 155, y: 125 },
+    p1: { x: 155, y: 220 },
+    p2: { x: 105, y: 220 }
+  },
+  {
+    p0: { x: 105, y: 220 },
+    p1: { x: 75, y: 220 },
+    p2: { x: 75, y: 145 }
+  }
+];
+const TAA = [
+  // 1. Long vertical stem starting from the very top going down
+  {
+    p0: { x: 160, y: 10 },
+    p1: { x: 160, y: 100 },
+    p2: { x: 160, y: 190 }
+  },
+  // 2. Loop starting from base of stem, arching up and right
+  {
+    p0: { x: 160, y: 190 },
+    p1: { x: 180, y: 90 },
+    p2: { x: 270, y: 130 }
+  },
+  // 3. Baseline sweep from right corner, looping flat all the way to the left tip
+  {
+    p0: { x: 270, y: 130 },
+    p1: { x: 280, y: 190 },
+    p2: { x: 90, y: 190 }
+  }
+];
+const AIN = [
+  // 1. Small top C-shaped loop (opens to the right)
+  {
+    p0: { x: 215, y: 35 },
+    p1: { x: 130, y: 35 },
+    p2: { x: 130, y: 100 }
+  },
+  {
+    p0: { x: 130, y: 100 },
+    p1: { x: 130, y: 125 },
+    p2: { x: 220, y: 105 }
+  },
+  // 2. Large bottom C-shaped bowl (opens to the right)
+  {
+    p0: { x: 220, y: 105 },
+    p1: { x: 110, y: 135 },
+    p2: { x: 110, y: 200 }
+  },
+  {
+    p0: { x: 110, y: 200 },
+    p1: { x: 110, y: 245 },
+    p2: { x: 250, y: 220 }
+  }
+];
+const FA = [
+  // 1. Top head loop (starts inside, curves up, around, and down to meet baseline)
+  {
+    p0: { x: 225, y: 170 },
+    p1: { x: 175, y: 120 },
+    p2: { x: 220, y: 100 }
+  },
+  {
+    p0: { x: 220, y: 100 },
+    p1: { x: 245, y: 120 },
+    p2: { x: 235, y: 155 }
+  },
+  // 2. Wide flat bottom boat (extends left and curves slightly upward at end)
+  {
+    p0: { x: 235, y: 155 },
+    p1: { x: 200, y: 200 },
+    p2: { x: 110, y: 200 }
+  },
+  {
+    p0: { x: 110, y: 200 },
+    p1: { x: 80, y: 200 },
+    p2: { x: 80, y: 155 }
+  },
+
+];
+const KAF_BODY = [
+  // 1. Tall vertical stem starting from the top right
+  {
+    p0: { x: 230, y: 55 },
+    p1: { x: 230, y: 135 },
+    p2: { x: 230, y: 190 }
+  },
+
+  // 2. Wide baseline sweep running right-to-left
+  {
+    p0: { x: 230, y: 190 },
+    p1: { x: 200, y: 220 },
+    p2: { x: 120, y: 220 }
+  },
+
+  // 3. Left tip curving slightly upward
+  {
+    p0: { x: 120, y: 220 },
+    p1: { x: 90, y: 220 },
+    p2: { x: 90, y: 170 }
+  }
+];
+
+const KAF_INNER = [
+  // 4. Inner Mini-Hamza
+  {
+    p0: { x: 180, y: 110 },
+    p1: { x: 150, y: 95 },
+    p2: { x: 145, y: 130 }
+  },
+
+  // 5. Middle notch transition
+  {
+    p0: { x: 145, y: 130 },
+    p1: { x: 150, y: 145 },
+    p2: { x: 175, y: 142 }
+  },
+
+  // 6. Bottom diagonal tail
+  {
+    p0: { x: 175, y: 142 },
+    p1: { x: 155, y: 162 },
+    p2: { x: 135, y: 168 }
+  }
+];
+
+// Keep one combined guide for the visible tracing dots/touch tracking,
+// but preserve the two real Kaf strokes separately for evaluation.
+const KAF = [...KAF_BODY, ...KAF_INNER];
+
+  const LAM = [
+    {p0:{x:195,y:70}, p2:{x:195,y:150}},
+    {p0:{x:195,y:150}, p1:{x:185,y:195}, p2:{x:140,y:180}}
+  ];
+const MEEM = [
+  // 1. Loop arch: Starts at the green mark, moves UP-RIGHT over the top crest, then down to the right side
+  {
+    p0: { x: 155, y: 100 },
+    p1: { x: 150, y: 55 },
+    p2: { x: 175, y: 48 }
+  },
+  {
+    p0: { x: 175, y: 48 },
+    p1: { x: 195, y: 50 },
+    p2: { x: 195, y: 100 }
+  },
+  // 2. Base connector: Sweeps horizontally LEFT back under the head loop
+  {
+    p0: { x: 195, y: 100 },
+    p1: { x: 175, y: 100 },
+    p2: { x: 155, y: 100 }
+  },
+  // 3. Descending tail: Sweeps down-left into the curved vertical tail stroke
+  {
+    p0: { x: 155, y: 100 },
+    p1: { x: 130, y: 115 },
+    p2: { x: 130, y: 140 }
+  },
+  {
+    p0: { x: 130, y: 140 },
+    p1: { x: 135, y: 175 },
+    p2: { x: 150, y: 205 }
+  }
+];
+// Meem — alternate accepted stroke: same blue starting dot (155,100), but
+// instead of looping up-and-over the top, the student sweeps directly
+// RIGHT into the head loop from the right side. Some students are taught
+// this order instead of the up-first loop above. Both are valid Meem
+// strokes, so this second path is checked in addition to MEEM (see
+// MEEM_ALT_PATHS below) — it does not replace or alter MEEM itself, and no
+// other letter references this constant.
+const MEEM_ALT = [
+  // 1. Start at the same blue dot, sweep RIGHT along the base first
+  {
+    p0: { x: 155, y: 100 },
+    p1: { x: 175, y: 100 },
+    p2: { x: 195, y: 100 }
+  },
+  // 2. Curve up and over the top crest of the head loop
+  {
+    p0: { x: 195, y: 100 },
+    p1: { x: 195, y: 50 },
+    p2: { x: 175, y: 48 }
+  },
+  {
+    p0: { x: 175, y: 48 },
+    p1: { x: 150, y: 55 },
+    p2: { x: 155, y: 100 }
+  },
+  // 3. Descending tail: same as MEEM's tail, sweeping down-left
+  {
+    p0: { x: 155, y: 100 },
+    p1: { x: 130, y: 115 },
+    p2: { x: 130, y: 140 }
+  },
+  {
+    p0: { x: 130, y: 140 },
+    p1: { x: 135, y: 175 },
+    p2: { x: 150, y: 205 }
+  }
+];
+const HA = [
+  // 1. Start at top green mark: curve down-right along outer upper slope to bottom-right corner
+  {
+    p0: { x: 165, y: 100 },
+    p1: { x: 205, y: 105 },
+    p2: { x: 220, y: 145 }
+  },
+  // 2. Bottom curve: sweep down-left around base corner back toward center
+  {
+    p0: { x: 220, y: 145 },
+    p1: { x: 205, y: 170 },
+    p2: { x: 165, y: 160 }
+  },
+  // 3. Inner loop: curve up and around the central counter clockwise/leftwards
+  {
+    p0: { x: 165, y: 160 },
+    p1: { x: 145, y: 135 },
+    p2: { x: 160, y: 110 }
+  },
+  {
+    p0: { x: 160, y: 110 },
+    p1: { x: 180, y: 110 },
+    p2: { x: 175, y: 140 }
+  },
+  // 4. Outer tail stroke: cross back out through the base and sweep down-left to the end tip
+  {
+    p0: { x: 175, y: 140 },
+    p1: { x: 155, y: 165 },
+    p2: { x: 120, y: 180 }
+  },
+  {
+    p0: { x: 120, y: 180 },
+    p1: { x: 95, y: 190 },
+    p2: { x: 75, y: 195 }
+  }
+];
+const WAW = [
+  // 1. Start at blue dot, move horizontally LEFT across the bottom of the loop
+  {
+    p0: { x: 215, y: 110 },
+    p1: { x: 180, y: 115 },
+    p2: { x: 145, y: 110 }
+  },
+  // 2. Curve UP and RIGHT over the top arch of the head
+  {
+    p0: { x: 145, y: 110 },
+    p1: { x: 130, y: 40 },
+    p2: { x: 175, y: 35 }
+  },
+  {
+    p0: { x: 175, y: 35 },
+    p1: { x: 215, y: 40 },
+    p2: { x: 215, y: 110 }
+  },
+  // 3. Continue DOWNward along the tail swooping down to the bottom-left tip
+  {
+    p0: { x: 215, y: 110 },
+    p1: { x: 215, y: 175 },
+    p2: { x: 180, y: 200 }
+  },
+  {
+    p0: { x: 180, y: 200 },
+    p1: { x: 145, y: 220 },
+    p2: { x: 100, y: 220 }
+  }
+];
+const YAA = [
+  // 1. Hook top (starts at right hook tip, arches left over the crest)
+  {
+    p0: { x: 235, y: 50 },
+    p1: { x: 245, y: 40 },
+    p2: { x: 200, y: 45 }
+  },
+  // 2. Middle neck (curves down-left into the deep inner notch)
+  {
+    p0: { x: 200, y: 45 },
+    p1: { x: 155, y: 65 },
+    p2: { x: 155, y: 110 }
+  },
+  // 3. Neck sweep (swings sharply back out to the right)
+  {
+    p0: { x: 155, y: 110 },
+    p1: { x: 165, y: 145 },
+    p2: { x: 230, y: 140 }
+  },
+  // 4. Main bottom bowl (loops around the base to the left side)
+  {
+    p0: { x: 230, y: 140 },
+    p1: { x: 220, y: 220 },
+    p2: { x: 115, y: 200 }
+  },
+  // 5. Left upward tail termination
+  {
+    p0: { x: 115, y: 200 },
+    p1: { x: 75, y: 180 },
+    p2: { x: 75, y: 115 }
+  },
+];
+  // Alif is a single straight vertical stroke — start dot at the top,
+  // one clean line straight down to the bottom. No extra marks, no hamza
+  // flourish, no additional guide points around the start dot.
+  const ALIF = [
+    { p0: { x: 160, y: 55 }, p2: { x: 160, y: 180 } }
+  ];
+
+  /* ---------- letters dataset ---------- */
+  const RAW_LETTERS = [
+      { char:"ا", arName:"ألف", enName:"Alif",  shape:ALIF, dots:[] },
+    { char:"ب", arName:"باء", enName:"Ba",    shape:BOWL, dots:[{x:160,y:170}] },
+    { char:"ت", arName:"تاء", enName:"Ta",    shape:BOWL, dots:[{x:145,y:85},{x:175,y:85}] },
+    { char:"ث", arName:"ثاء", enName:"Tha",   shape:BOWL, dots:[{x:145,y:85},{x:160,y:70},{x:175,y:85}] },
+    { char:"ج", arName:"جيم", enName:"Jeem",  shape:HOOK, dots:[{x:163,y:159}] },
+    { char:"ح", arName:"حاء", enName:"Haa",   shape:HOOK, dots:[] },
+    { char:"خ", arName:"خاء", enName:"Khaa",  shape:HOOK, dots:[{x:167,y:40}] },
+    { char:"د", arName:"دال", enName:"Dal",   shape:DAL,  dots:[] },
+    { char:"ذ", arName:"ذال", enName:"Thal",  shape:DAL,  dots:[{x:160,y:50}] },
+    { char:"ر", arName:"راء", enName:"Ra",    shape:RA,   dots:[] },
+    { char:"ز", arName:"زاي", enName:"Zay",   shape:RA,   dots:[{x:182,y:48}] },
+    { char:"س", arName:"سين", enName:"Seen",  shape:SEEN, dots:[] },
+    { char:"ش", arName:"شين", enName:"Sheen", shape:SEEN, dots:[{x:175,y:70},{x:190,y:55},{x:205,y:70}]  },
+    { char:"ص", arName:"صاد", enName:"Saad",  shape:SAAD, dots:[] },
+    { char:"ض", arName:"ضاد", enName:"Dad",   shape:SAAD, dots:[{x:214,y:72}] },
+    { char:"ط", arName:"طاء", enName:"Taa",   shape:TAA,  dots:[] },
+    { char:"ظ", arName:"ظاء", enName:"Dhaa",  shape:TAA,  dots:[{x:215,y:73}] },
+    { char:"ع", arName:"عين", enName:"Ain",   shape:AIN,  dots:[] },
+    { char:"غ", arName:"غين", enName:"Ghain", shape:AIN,  dots:[{x:194,y:10}] },
+    { char:"ف", arName:"فاء", enName:"Fa",    shape:FA,   dots:[{x:205,y:70}] },
+    { char:"ق", arName:"قاف", enName:"Qaf",   shape:FA,   dots:[{x:195,y:70},{x:218,y:70}] },
+    { char:"ك", arName:"كاف", enName:"Kaf", shape:KAF, dots:[], subShapes:[KAF_BODY, KAF_INNER] },
+    { char:"ل", arName:"لام", enName:"Lam",   shape:LAM,  dots:[] },
+    { char:"م", arName:"ميم", enName:"Meem",  shape:MEEM, dots:[] },
+    { char:"ن", arName:"نون", enName:"Nun",   shape:BOWL, dots:[{x:160,y:85}] },
+    { char:"هـ", arName:"هاء", enName:"Ha",    shape:HA,   dots:[] },
+    { char:"و", arName:"واو", enName:"Waw",   shape:WAW,  dots:[] },
+    { char:"ي", arName:"ياء", enName:"Ya",    shape:YAA, dots:[{x:145,y:225},{x:175,y:225}] }
+  ];
+
+    const MEEM_ALT_GUIDE = buildGuide(MEEM_ALT, 7);
+
+    const LETTERS = RAW_LETTERS.map(l=>({
+    char:l.char, arName:l.arName, enName:l.enName,
+    guideDots: buildGuide(l.shape, 7),
+    diacriticDots: l.dots.slice(),
+    altGuideDots: l.shape === MEEM ? MEEM_ALT_GUIDE : null,
+    subGuideDots: l.subShapes ? l.subShapes.map(s=>buildGuide(s, 7)) : null
+  }));
+
+  /* ---------- state ---------- */
+  const TOUCH_RADIUS = 18;
+  const STRAY_THRESHOLD = 26;
+  const STREAK_TARGET = 5;
+  const DIACRITIC_TOUCH_RADIUS = 38; // dots are marks near the letter, not exact waypoints on the stroke path
+  const RESAMPLE_POINTS = 40;
+  const AVG_DEVIATION_LIMIT = 14;    // average px difference between drawn shape and guide shape
+  const MAX_DEVIATION_LIMIT = 22;    // worst single-point px difference allowed anywhere along the path
+
+  let currentIndex = 0;
+  let continuousCorrect = 0;
+  let mode = "tracing"; // "tracing" | "blank"
+  let touchedGuide = [];
+  let touchedDiacritic = [];
+  let strokePoints = [];
+  let isDrawing = false;
+  let evalTimer = null;
+  let locked = false; // true while a signal is showing
+  let guideTouchOrder = []; // records the index order in which guide dots were first touched
+
+  /* ---------- dom refs ---------- */
+  const canvas = document.getElementById("board");
+  const ctx = canvas.getContext("2d");
+  const canvasWrap = document.getElementById("canvasWrap");
+  const bigChar = document.getElementById("bigChar");
+  const namesLabel = document.getElementById("namesLabel");
+  const idxLabel = document.getElementById("idxLabel");
+  const modeBadge = document.getElementById("modeBadge");
+  const streakDotsWrap = document.getElementById("streakDots");
+  const streakLabel = document.getElementById("streakLabel");
+  const instructionText = document.getElementById("instructionText");
+  const backBtn = document.getElementById("backBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const listBtn = document.getElementById("listBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const checkBtn = document.getElementById("checkBtn");
+
+  listBtn.addEventListener("click", ()=>{
+    window.location.href = "learn-arabic-without-harakat.html";
+  });
+
+  for(let i=0;i<STREAK_TARGET;i++){
+    const d = document.createElement("div");
+    d.className = "streak-dot";
+    streakDotsWrap.appendChild(d);
+  }
+  const streakDotEls = Array.from(streakDotsWrap.children);
+
+  /* ---------- rendering ---------- */
+  function clearCanvas(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  function drawGuides(){
+    const letter = LETTERS[currentIndex];
+    if(mode !== "tracing") return;
+
+    // dotted structural guide
+    letter.guideDots.forEach((p,i)=>{
+      const done = touchedGuide[i];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, i===0 ? 7 : 4.5, 0, Math.PI*2);
+      ctx.fillStyle = i===0 ? "#1a56ff" : (done ? "#2fbf71" : "#c7cde0");
+      ctx.fill();
+    });
+
+    // direction arrows every few points
+    for(let i=0;i<letter.guideDots.length-1;i+=5){
+      const a = letter.guideDots[i];
+      const b = letter.guideDots[Math.min(i+1, letter.guideDots.length-1)];
+      const ang = Math.atan2(b.y-a.y, b.x-a.x);
+      const midx=(a.x+b.x)/2, midy=(a.y+b.y)/2;
+      ctx.save();
+      ctx.translate(midx, midy);
+      ctx.rotate(ang);
+      ctx.beginPath();
+      ctx.moveTo(6,0); ctx.lineTo(-4,-4); ctx.lineTo(-4,4); ctx.closePath();
+      ctx.fillStyle = "rgba(0,51,153,0.35)";
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // diacritic dots (dots of the letter itself)
+    letter.diacriticDots.forEach((p,i)=>{
+      const done = touchedDiacritic[i];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5.5, 0, Math.PI*2);
+      ctx.fillStyle = done ? "#2fbf71" : "#7c86b8";
+      ctx.fill();
+    });
+  }
+
+  function drawUserStrokes(strokes){
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.fillStyle = "#1a1a2e";
+    ctx.lineWidth = 6;
+    strokes.forEach(stroke=>{
+      if(stroke.length === 1){
+        // A tap/click with no drag — draw a dot so it's still visible.
+        ctx.beginPath();
+        ctx.arc(stroke[0].x, stroke[0].y, 3, 0, Math.PI*2);
+        ctx.fill();
+        return;
+      }
+      if(stroke.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(stroke[0].x, stroke[0].y);
+      for(let i=1;i<stroke.length;i++){ ctx.lineTo(stroke[i].x, stroke[i].y); }
+      ctx.stroke();
+    });
+  }
+
+  let allStrokes = [];
+  let currentStroke = [];
+
+  function redraw(){
+    clearCanvas();
+    drawGuides();
+    drawUserStrokes(allStrokes.concat(currentStroke.length ? [currentStroke] : []));
+  }
+
+  /* ---------- letter load / UI sync ---------- */
+  function loadLetter(index, resetStreak){
+    currentIndex = (index + LETTERS.length) % LETTERS.length;
+    if(resetStreak){
+      continuousCorrect = 0;
+      mode = "tracing";
+    }
+    resetAttempt();
+    const l = LETTERS[currentIndex];
+    bigChar.textContent = l.char;
+    namesLabel.innerHTML = "<b>"+l.enName+"</b> · "+l.arName;
+    idxLabel.textContent = (currentIndex+1)+" / "+LETTERS.length;
+    updateModeUI();
+    updateStreakUI();
+    redraw();
+  }
+
+  function resetAttempt(){
+    const l = LETTERS[currentIndex];
+    touchedGuide = new Array(l.guideDots.length).fill(false);
+    touchedDiacritic = new Array(l.diacriticDots.length).fill(false);
+    allStrokes = [];
+    currentStroke = [];
+    strokePoints = [];
+    guideTouchOrder = [];
+    diacriticStrokeViolation = false;
+    clearTimeout(evalTimer);
+  }
+
+  function updateModeUI(){
+    if(mode === "blank"){
+      modeBadge.textContent = "BLANK MODE";
+      modeBadge.className = "mode-badge blank";
+      instructionText.textContent = "No guides this time — draw " + LETTERS[currentIndex].enName + " from memory!";
+    } else {
+      modeBadge.textContent = "TRACING MODE";
+      modeBadge.className = "mode-badge tracing";
+      instructionText.textContent = "Trace over the dotted guide, starting from the blue dot.";
+    }
+  }
+
+  function updateStreakUI(){
+    streakDotEls.forEach((d,i)=>{
+      d.classList.toggle("filled", i < continuousCorrect);
+    });
+    streakLabel.textContent = Math.min(continuousCorrect,STREAK_TARGET) + " / " + STREAK_TARGET + " correct in a row";
+  }
+
+  /* ---------- coordinate mapping ---------- */
+  function toCanvasCoords(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return { x:(clientX-rect.left)*scaleX, y:(clientY-rect.top)*scaleY };
+  }
+
+  /* ---------- touch-all-dots tracking ---------- */
+  function registerPoint(p){
+    strokePoints.push(p);
+    const l = LETTERS[currentIndex];
+    l.guideDots.forEach((g,i)=>{
+      if(!touchedGuide[i] && dist(p,g) <= TOUCH_RADIUS){
+        touchedGuide[i] = true;
+        guideTouchOrder.push(i);
+      }
+    });
+    l.diacriticDots.forEach((g,i)=>{
+      if(!touchedDiacritic[i] && dist(p,g) <= TOUCH_RADIUS) touchedDiacritic[i] = true;
+    });
+  }
+
+  // Checks that guide dots were touched in roughly increasing index order
+  // (guideDots are authored in correct Arabic writing order: right-to-left,
+  // top-to-bottom). Drawing backwards touches them in decreasing order and
+  // should fail. We allow a small amount of local disorder (adjacent dots
+  // touched slightly out of sequence due to natural hand wobble) but reject
+  // strokes that are clearly reversed overall.
+  function isCorrectDirection(order){
+    if(order.length < 2) return true; // nothing meaningful to check
+
+    // Adjacent-pair check (cheap, catches most cases)
+    let forward = 0, backward = 0;
+    for(let i=1;i<order.length;i++){
+      if(order[i] > order[i-1]) forward++;
+      else if(order[i] < order[i-1]) backward++;
+    }
+
+    // Global correlation check: compares the touch sequence against the
+    // ideal 0,1,2,3...N order using Spearman-style rank correlation. This
+    // catches looping shapes (like Meem) where a reversed stroke can still
+    // produce a majority of "forward" adjacent pairs locally, because the
+    // loop doubles back near itself — the global check looks at overall
+    // trend across the WHOLE sequence instead of just neighboring steps.
+    const n = order.length;
+    const idealRanks = order.map((_, i) => i);
+    let sumDiffSq = 0;
+    for(let i=0;i<n;i++){
+      const diff = order[i] - idealRanks[i];
+      sumDiffSq += diff * diff;
+    }
+    const maxDiffSq = n * n; // rough normalizer
+    const spearmanLike = 1 - (6 * sumDiffSq) / (n * (n*n - 1) || 1);
+
+    // Require both a local forward majority AND a positive overall trend
+    return (forward >= backward) && (spearmanLike > 0);
+  }
+
+  function nearestGuideDist(p){
+    const l = LETTERS[currentIndex];
+    let best = Infinity;
+    l.guideDots.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+    l.diacriticDots.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+    return best;
+  }
+
+  // Same idea as nearestGuideDist, but against a specific alternate guide
+  // path (used only for Meem's second valid stroke) instead of the
+  // letter's default guideDots.
+  function nearestAltGuideDist(p, altGuideDots, diacriticDots){
+    let best = Infinity;
+    altGuideDots.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+    diacriticDots.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+    return best;
+  }
+
+  // Kaf is intentionally represented by TWO physical pen strokes:
+  // 1) the outer body and 2) the inner flourish.
+  // The old evaluator compared the longest stroke against the COMBINED
+  // six-segment guide, which is impossible for a normal two-stroke drawing:
+  // the outer stroke cannot also contain the disconnected inner flourish.
+  function separateStrokeMatches(stroke, guide){
+    if(!stroke || stroke.length < 2 || !guide || guide.length < 2) return false;
+    const d = pathDeviation(stroke, guide);
+    return d.avg <= AVG_DEVIATION_LIMIT && d.max <= MAX_DEVIATION_LIMIT;
+  }
+
+  function strokeIsNearGuide(stroke, guide){
+    return stroke.some(p=>{
+      let best = Infinity;
+      guide.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+      return best <= STRAY_THRESHOLD;
+    });
+  }
+
+  function strokeDirectionOk(stroke, guide){
+    if(!stroke || stroke.length < 2) return false;
+    // For a secondary stroke we only need to make sure the stroke starts
+    // close to the guide's beginning and ends close to its end. This avoids
+    // forcing the global guideTouchOrder to mix two physically separate
+    // paths into one artificial sequence.
+    const startOk = dist(stroke[0], guide[0]) <= TOUCH_RADIUS * 2;
+    const endOk = dist(stroke[stroke.length - 1], guide[guide.length - 1]) <= TOUCH_RADIUS * 2;
+    return startOk && endOk;
+  }
+
+  function strokeLength(points){
+    let len = 0;
+    for(let i=1;i<points.length;i++){ len += dist(points[i-1], points[i]); }
+    return len;
+  }
+
+  // Resample a polyline to N evenly-spaced points along its length, so
+  // shapes drawn at different speeds/densities can be compared point-for-point.
+  function resamplePath(points, n){
+    if(points.length === 0) return [];
+    if(points.length === 1) return new Array(n).fill(points[0]);
+    const total = strokeLength(points);
+    if(total === 0) return new Array(n).fill(points[0]);
+    const step = total / (n - 1);
+    const result = [points[0]];
+    let accumulated = 0;
+    let i = 1;
+    let prev = points[0];
+    while(result.length < n && i < points.length){
+      const segLen = dist(prev, points[i]);
+      if(accumulated + segLen >= step){
+        const remain = step - accumulated;
+        const t = segLen === 0 ? 0 : remain / segLen;
+        const newPt = { x: prev.x + (points[i].x - prev.x) * t, y: prev.y + (points[i].y - prev.y) * t };
+        result.push(newPt);
+        prev = newPt;
+        accumulated = 0;
+      } else {
+        accumulated += segLen;
+        prev = points[i];
+        i++;
+      }
+    }
+    while(result.length < n) result.push(points[points.length - 1]);
+    return result;
+  }
+
+  function boundingBoxOf(points){
+    const xs = points.map(p=>p.x), ys = points.map(p=>p.y);
+    return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+  }
+
+  function normalizeToBox(points, targetBox){
+    const box = boundingBoxOf(points);
+    // MIN_SPAN prevents a near-straight line (e.g. Alif's vertical stroke,
+    // or a hand-drawn stroke with only slight wobble on one axis) from
+    // having its width/height clamped down to a tiny value like 1px. That
+    // tiny denominator previously blew up/shrank the scale factor and
+    // wrecked the comparison for any letter shaped like a single straight
+    // line. Using a larger floor keeps the scale sane for thin shapes
+    // while still scaling normally for wide/tall shapes as before.
+    const MIN_SPAN = 40;
+    const w = Math.max(box.maxX - box.minX, MIN_SPAN);
+    const h = Math.max(box.maxY - box.minY, MIN_SPAN);
+    const targetW = Math.max(targetBox.maxX - targetBox.minX, MIN_SPAN);
+    const targetH = Math.max(targetBox.maxY - targetBox.minY, MIN_SPAN);
+    const scale = Math.min(targetW / w, targetH / h);
+    const cx = (box.minX + box.maxX) / 2, cy = (box.minY + box.maxY) / 2;
+    const targetCx = (targetBox.minX + targetBox.maxX) / 2, targetCy = (targetBox.minY + targetBox.maxY) / 2;
+    return points.map(p => ({
+      x: targetCx + (p.x - cx) * scale,
+      y: targetCy + (p.y - cy) * scale
+    }));
+  }
+
+  // Compares a drawn stroke against the letter's guide path: resamples both
+  // to the same number of evenly-spaced points, normalizes the drawn stroke
+  // onto the guide's size/position, then measures how far each point sits
+  // from its counterpart. Checked both start-to-end and end-to-start since
+  // either drawing direction is acceptable. Returns {avg, max} deviation in
+  // canvas pixels — small numbers mean the shapes closely match.
+  function pathDeviation(userPoints, guidePoints){
+    const guideBox = boundingBoxOf(guidePoints);
+    const normalizedUser = normalizeToBox(userPoints, guideBox);
+    const rsUser = resamplePath(normalizedUser, RESAMPLE_POINTS);
+    const rsGuide = resamplePath(guidePoints, RESAMPLE_POINTS);
+
+    let sumFwd = 0, maxFwd = 0, sumRev = 0, maxRev = 0;
+    for(let i=0;i<RESAMPLE_POINTS;i++){
+      const dFwd = dist(rsUser[i], rsGuide[i]);
+      sumFwd += dFwd; if(dFwd > maxFwd) maxFwd = dFwd;
+      const dRev = dist(rsUser[i], rsGuide[RESAMPLE_POINTS-1-i]);
+      sumRev += dRev; if(dRev > maxRev) maxRev = dRev;
+    }
+    const avgFwd = sumFwd / RESAMPLE_POINTS, avgRev = sumRev / RESAMPLE_POINTS;
+    return avgFwd <= avgRev ? { avg: avgFwd, max: maxFwd } : { avg: avgRev, max: maxRev };
+  }
+
+  /* ---------- pointer handling ---------- */
+  function pointerDown(e){
+    if(locked) return;
+    isDrawing = true;
+    clearTimeout(evalTimer);
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+    currentStroke = [pos];
+    registerPoint(pos);
+    redraw();
+    e.preventDefault();
+  }
+  function pointerMove(e){
+    if(!isDrawing || locked) return;
+    const pos = toCanvasCoords(e.clientX, e.clientY);
+    currentStroke.push(pos);
+    registerPoint(pos);
+    redraw();
+    e.preventDefault();
+  }
+  function pointerUp(e){
+    if(!isDrawing) return;
+    isDrawing = false;
+    if(currentStroke.length >= 1){
+      allStrokes.push(currentStroke);
+      checkDiacriticSeparation(currentStroke);
+    }
+    currentStroke = [];
+    redraw();
+    evalTimer = setTimeout(evaluateAttempt, 1900);
+  }
+
+  // Multiple diacritic dots (e.g. Tha's 3 dots, Ya's 2 dots) must be drawn as
+  // SEPARATE dabs, not one continuous line dragged through all of them.
+  // If a single stroke touches 2+ diacritic dots, un-mark all but the first
+  // one it touched, so the student is forced to lift and dab each separately.
+  let diacriticStrokeViolation = false;
+  function checkDiacriticSeparation(stroke){
+    const l = LETTERS[currentIndex];
+    if(l.diacriticDots.length < 2) return; // nothing to separate
+
+    const touchedInThisStroke = [];
+    stroke.forEach(p=>{
+      l.diacriticDots.forEach((g,i)=>{
+        if(dist(p,g) <= TOUCH_RADIUS && !touchedInThisStroke.includes(i)){
+          touchedInThisStroke.push(i);
+        }
+      });
+    });
+
+    if(touchedInThisStroke.length >= 2){
+      diacriticStrokeViolation = true;
+    }
+  }
+
+  canvas.addEventListener("pointerdown", pointerDown);
+  canvas.addEventListener("pointermove", pointerMove);
+  window.addEventListener("pointerup", pointerUp);
+  canvas.addEventListener("pointercancel", pointerUp);
+
+  /* ---------- evaluation ---------- */
+  function evaluateAttempt(){
+    if(locked) return;
+    if(strokePoints.length === 0) return; // nothing drawn, don't judge
+
+    const l = LETTERS[currentIndex];
+
+    // A student may draw the letter body and a diacritic dot as two
+    // separate pen-strokes (e.g. the bowl, then a quick dab for Ba's dot).
+    // Treat the longest stroke as "the letter" for shape comparison, and
+    // check diacritic dots loosely against every point from every stroke —
+    // a dot is a nearby mark, not an exact waypoint on the main path.
+    const strokesForEval = allStrokes.concat(currentStroke.length ? [currentStroke] : []);
+    let mainStroke = strokesForEval[0] || strokePoints;
+    let mainStrokeLen = strokeLength(mainStroke);
+    strokesForEval.forEach(s => {
+      const len = strokeLength(s);
+      if(len > mainStrokeLen){ mainStroke = s; mainStrokeLen = len; }
+    });
+    if(mainStroke.length < 2) mainStroke = strokePoints;
+
+    const allPointsFlat = strokesForEval.flat();
+
+    // --- Main letter shape: does it match the guide path's shape? ---
+  let shapeOk = true;
+  let strayed = false;
+  let correctDirection = true;
+
+  if(l.subGuideDots){
+    // Special case: Kaf has two disconnected physical strokes.
+    // The longest stroke must match the outer body; another stroke must
+    // independently match the inner flourish.
+    const [bodyGuide, innerGuide] = l.subGuideDots;
+
+    const body = pathDeviation(mainStroke, bodyGuide);
+    const bodyShapeOk = body.avg <= AVG_DEVIATION_LIMIT && body.max <= MAX_DEVIATION_LIMIT;
+
+    const bodyStrayed = mode === "tracing"
+      ? mainStroke.some(p => {
+          let best = Infinity;
+          bodyGuide.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+          innerGuide.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+          l.diacriticDots.forEach(g=>{ const d=dist(p,g); if(d<best) best=d; });
+          return best > STRAY_THRESHOLD;
+        })
+      : false;
+
+    // The existing global order check still verifies that the student began
+    // with the blue-dot body and then moved forward through the visible guide.
+    const bodyDirection = mode === "tracing" ? isCorrectDirection(guideTouchOrder) : true;
+
+    const secondaryStrokes = strokesForEval.filter(s => s !== mainStroke && s.length >= 2);
+    let innerMatch = false;
+
+    for(const s of secondaryStrokes){
+      const d = pathDeviation(s, innerGuide);
+      const shapeMatch = d.avg <= AVG_DEVIATION_LIMIT && d.max <= MAX_DEVIATION_LIMIT;
+      const nearMatch = mode !== "tracing" || strokeIsNearGuide(s, innerGuide);
+      const directionMatch = mode !== "tracing" || strokeDirectionOk(s, innerGuide);
+      if(shapeMatch && nearMatch && directionMatch){
+        innerMatch = true;
+        break;
+      }
+    }
+
+    // Prevent a single long stroke from "pretending" to cover both shapes.
+    // Kaf therefore requires an actual second pen stroke for the flourish.
+    shapeOk = bodyShapeOk && innerMatch;
+    strayed = bodyStrayed;
+    correctDirection = bodyDirection;
+  } else if(l.guideDots.length > 1){
+    const primary = pathDeviation(mainStroke, l.guideDots);
+    const primaryShapeOk = primary.avg <= AVG_DEVIATION_LIMIT && primary.max <= MAX_DEVIATION_LIMIT;
+    const primaryStrayed = mode === "tracing" ? strokePoints.some(p => nearestGuideDist(p) > STRAY_THRESHOLD) : false;
+    const primaryDirection = mode === "tracing" ? isCorrectDirection(guideTouchOrder) : true;
+    const primaryOk = primaryShapeOk && !primaryStrayed && primaryDirection;
+
+    if(primaryOk || !l.altGuideDots){
+      shapeOk = primaryShapeOk;
+      strayed = primaryStrayed;
+      correctDirection = primaryDirection;
+    } else {
+      // Primary path failed and this letter (Meem) has an alternate valid
+      // path — check the stroke against that path instead.
+      const alt = pathDeviation(mainStroke, l.altGuideDots);
+      shapeOk = alt.avg <= AVG_DEVIATION_LIMIT && alt.max <= MAX_DEVIATION_LIMIT;
+      strayed = mode === "tracing"
+        ? strokePoints.some(p => nearestAltGuideDist(p, l.altGuideDots, l.diacriticDots) > STRAY_THRESHOLD)
+        : false;
+      // Direction order was recorded against the primary guide dots, which
+      // don't correspond to the alt path's indices, so direction isn't
+      // meaningfully checkable against the alt path — the shape+stray
+      // check above is what confirms the student actually traced it.
+      correctDirection = true;
+    }
+  }
+
+  // --- Diacritic dots: touched anywhere nearby, in any stroke ---
+  const allDiacriticTouched = l.diacriticDots.every(g =>
+    allPointsFlat.some(p => dist(p, g) <= DIACRITIC_TOUCH_RADIUS)
+  );
+
+const correct =
+  shapeOk &&
+  allDiacriticTouched &&
+  !strayed &&
+  correctDirection &&
+  !diacriticStrokeViolation;
+  showSignal(correct);
+  }
+
+  function showSignal(correct){
+    locked = true;
+    canvasWrap.classList.remove("correct", "wrong");
+    canvasWrap.classList.add(correct ? "correct" : "wrong");
+
+    if(correct){
+      continuousCorrect = Math.min(continuousCorrect + 1, STREAK_TARGET);
+    }
+    mode = continuousCorrect >= STREAK_TARGET ? "blank" : "tracing";
+    updateStreakUI();
+
+    setTimeout(()=>{
+      canvasWrap.classList.remove("correct", "wrong");
+      locked = false;
+      resetAttempt();
+      updateModeUI();
+      redraw();
+    }, 3000);
+  }
+
+  /* ---------- controls ---------- */
+  backBtn.addEventListener("click", ()=> loadLetter(currentIndex - 1, true));
+  nextBtn.addEventListener("click", ()=> loadLetter(currentIndex + 1, true));
+  clearBtn.addEventListener("click", ()=>{
+    if(locked) return;
+    clearTimeout(evalTimer);
+    resetAttempt();
+    redraw();
+  });
+  checkBtn.addEventListener("click", ()=>{
+    if(locked) return;
+    clearTimeout(evalTimer);
+    evaluateAttempt();
+  });
+
+  /* ---------- init ---------- */
+  function getRequestedLetterIndex(){
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("letter");
+    const n = parseInt(raw, 10);
+    if(Number.isInteger(n) && n >= 0 && n < LETTERS.length) return n;
+    return 0;
+  }
+  loadLetter(getRequestedLetterIndex(), true);
+
+})();
+</script>
+</body>
+</html>

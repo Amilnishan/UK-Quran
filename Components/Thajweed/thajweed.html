@@ -252,14 +252,20 @@
 <body>
     <div class="app-container">
         <!-- Dashboard Header -->
-        <header class="dash-header">
+                <header class="dash-header">
+            <button class="icon-btn" id="btn-back" title="Go Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8E785C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
             <div class="user-info">
                 <div>
-                    <h2 style="margin:0;">THAJWEED CLASS</h2>
+                    <h2 style="margin:0;">THAJWEED</h2>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="menu-btn" id="btn-menu" type="button" aria-label="Open menu">☰</button>
+                <button class="menu-btn" id="btn-menu" type="button" aria-label="Open menu">&#9776;</button>
             </div>
         </header>
 
@@ -272,6 +278,7 @@
                 <button type="button" id="btn-menu-home">HOME</button>
                 <button type="button" id="btn-menu-thajweed">THAJWEED</button>
                 <button type="button" id="btn-menu-qiraat">QIRA'AT</button>
+                <button type="button" id="btn-menu-learn-arabic">LEARN ARABIC</button>
                 <button type="button" id="btn-menu-certificates">CERTIFICATES</button>
                 <button type="button" id="btn-menu-logout">LOGOUT</button>
             </div>
@@ -457,6 +464,17 @@
             if (btnMenuLogout) btnMenuLogout.textContent = 'EXIT GUEST MODE';
         }
 
+        const btnBack = document.getElementById('btn-back');
+        if (btnBack) {
+            btnBack.addEventListener('click', () => {
+                if (document.referrer && document.referrer.includes(window.location.host)) {
+                    history.back();
+                } else {
+                    window.location.href = isGuest ? '../Guest/guest.html' : '../Student/student.html';
+                }
+            });
+        }
+
         const btnMenu = document.getElementById('btn-menu');
         const thajweedMenuBackdrop = document.getElementById('thajweed-menu-backdrop');
         const thajweedSideMenu = document.getElementById('thajweed-side-menu');
@@ -490,6 +508,11 @@
         document.getElementById('btn-menu-qiraat')?.addEventListener('click', () => {
             closeMenu();
             window.location.href = '../Qira\'at/qiraat.html';
+        });
+
+        document.getElementById('btn-menu-learn-arabic')?.addEventListener('click', () => {
+            closeMenu();
+            window.location.href = '../Learn-Arabic/learn-arabic-without-harakat.html';
         });
 
         btnMenuCertificates?.addEventListener('click', () => {

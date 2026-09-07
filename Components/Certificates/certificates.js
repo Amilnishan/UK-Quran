@@ -15,6 +15,7 @@ const btnMenuClose = document.getElementById('btn-menu-close');
 const btnMenuHome = document.getElementById('btn-menu-home');
 const btnMenuThajweed = document.getElementById('btn-menu-thajweed');
 const btnMenuQiraat = document.getElementById('btn-menu-qiraat');
+const btnMenuLearnArabic = document.getElementById('btn-menu-learn-arabic');
 const btnMenuCertificates = document.getElementById('btn-menu-certificates');
 const btnMenuLogout = document.getElementById('btn-menu-logout');
 
@@ -38,6 +39,7 @@ menuBackdrop?.addEventListener('click', closeMenu);
 btnMenuHome?.addEventListener('click', () => { closeMenu(); window.location.href = '../Student/student.html'; });
 btnMenuThajweed?.addEventListener('click', () => { closeMenu(); window.location.href = '../Thajweed/thajweed.html'; });
 btnMenuQiraat?.addEventListener('click', () => { closeMenu(); window.location.href = '../Qira\'at/qiraat.html'; });
+btnMenuLearnArabic?.addEventListener('click', () => { closeMenu(); window.location.href = '../Learn-Arabic/learn-arabic-without-harakat.html'; });
 btnMenuCertificates?.addEventListener('click', closeMenu); // already here
 btnMenuLogout?.addEventListener('click', () => { closeMenu(); signOut(auth).then(() => window.location.href = '../../index.html'); });
 
