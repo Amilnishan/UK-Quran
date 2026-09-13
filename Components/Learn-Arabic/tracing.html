@@ -1407,10 +1407,49 @@ const AIN = [
 
   const LETTER_AUDIO_CACHE = {};
 
-  const errorAudio =
-    new Audio("../../audios/error.mp3");
+  let audioContext;
 
-  errorAudio.preload = "auto";
+  function tone(
+    frequency,
+    start,
+    duration,
+    type = "sine",
+    volume = .1
+  ){
+    audioContext ||= new (
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+
+    const oscillator =
+      audioContext.createOscillator();
+    const gain =
+      audioContext.createGain();
+    const startTime =
+      audioContext.currentTime + start;
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(
+      volume,
+      startTime + .01
+    );
+    gain.gain.linearRampToValueAtTime(
+      0,
+      startTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
+  }
+
+  function playFail(){
+    tone(320, 0, .16, "sawtooth", .12);
+    tone(190, .1, .24, "sawtooth", .12);
+  }
 
 
   function preloadAudio(){
@@ -1453,22 +1492,6 @@ const AIN = [
     audio.play().catch(err=>{
       console.log(
         "Letter audio could not play:",
-        err
-      );
-    });
-
-  }
-
-
-  function playErrorAudio(){
-
-    errorAudio.pause();
-
-    errorAudio.currentTime = 0;
-
-    errorAudio.play().catch(err=>{
-      console.log(
-        "Error audio could not play:",
         err
       );
     });
@@ -3430,7 +3453,7 @@ const AIN = [
 
     }else{
 
-      playErrorAudio();
+      playFail();
 
     }
 
