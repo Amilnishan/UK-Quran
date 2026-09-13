@@ -1000,7 +1000,7 @@
      ROUND SETTINGS
   ========================================================= */
 
-  var ROUND_SIZES = [9,18,27,36];
+  var ROUND_SIZES = [7,14,21,28];
 
   var SOUNDS_PER_ROUND = 9;
 
@@ -1793,7 +1793,7 @@
 
   function computeColumns(){
 
-    return 9;
+    return 7;
 
   }
 
@@ -2049,10 +2049,6 @@
             t.vy * dt;
 
 
-          var h =
-            t.el.offsetHeight || 80;
-
-
           var newTop =
             t.baseTop +
             t.fallOffset;
@@ -2064,10 +2060,6 @@
 
             t.grounded =
               true;
-
-
-            t.el.style.top =
-              newTop + "px";
 
 
             t.el.style.visibility =
@@ -2085,22 +2077,15 @@
 
           }
 
-          else{
-
-            t.el.style.top =
-              newTop + "px";
-
-          }
-
         }
 
 
         t.el.style.transform =
-          "translate(" +
+          "translate3d(" +
           swayX.toFixed(1) +
           "px," +
-          swayY.toFixed(1) +
-          "px) rotate(" +
+          (swayY + t.fallOffset).toFixed(1) +
+          "px,0) rotate(" +
           rot.toFixed(1) +
           "deg)";
 
