@@ -117,6 +117,31 @@
     .letter-info p { margin: 2px 0 0; font-size: 12px; color: #8a8a8a; }
     .letter-chevron { color: #b8bfd6; flex-shrink: 0; }
 
+    .exam-button {
+        align-self: stretch;
+        border: 1px solid #0f2a86;
+        border-radius: 16px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, #12309e 0%, #2d63d8 100%);
+        color: #ffffff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(18, 48, 158, 0.24);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .exam-button:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 12px 24px rgba(18, 48, 158, 0.3); }
+    .exam-button:active { transform: translateY(0); }
+    .exam-play { display: inline-flex; align-items: center; gap: 8px; color: #ffffff; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; }
+    .exam-play svg { width: 20px; height: 20px; }
+
     @media (max-width: 480px) {
         .la-hero { margin: 16px; padding: 20px 22px; min-height: 110px; }
         .letter-list { padding: 14px 16px 16px; }
@@ -156,6 +181,7 @@
         <div class="la-hero-sub">
 
         <div class="la-hero-text">
+            <p style="margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;">LEVEL 1</p>
             <p style="font-size: 15px; font-weight: 600;">Arabic Letters</p>
         </div>
         <svg class="la-hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -225,6 +251,23 @@
         });
         letterList.appendChild(row);
     });
+
+    const examButton = document.createElement('button');
+    examButton.type = 'button';
+    examButton.className = 'exam-button';
+    examButton.innerHTML = `
+        <span>LEVEL 1 EXAM</span>
+        <span class="exam-play" aria-hidden="true">
+            <span>PLAY</span>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"></path>
+            </svg>
+        </span>
+    `;
+    examButton.addEventListener('click', () => {
+        window.location.href = 'game.html';
+    });
+    letterList.appendChild(examButton);
 
     // Accordion: tap the hero banner to reveal/hide the letter list,
     // same interaction as the Juz 30 / Thajweed lesson cards.
