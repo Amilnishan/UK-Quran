@@ -781,14 +781,25 @@ input:focus {
     }
 }
 
-.btn-square { display: inline-flex; align-items: center; justify-content: start; min-height: 120px; border-radius: 20px; border: 1px solid #e5e7eb; background: #ffffff; color: #1f2937; font-weight: 700; cursor: pointer; font-size: 15px; text-align: center; padding: 0 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.2s ease, background-color 0.2s ease; width: 100%; }
-.btn-square:hover { transform: translateY(-2px); background: #f8fafc; }
+.btn-squareq { 
+    width: 100%; display: flex; align-items: center; justify-content: start; min-height: 120px; 
+    border-radius: 20px; border: 1px solid #fff; 
+    background-image: url(images/Banner/banner-2-reverse.webp); background-size: cover; background-position: center; 
+    color: black; font-weight: 700; cursor: pointer; font-size: 15px; padding: 0 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); 
+}
+.btn-squarew { 
+    width: 100%; display: flex; align-items: center; justify-content: start; min-height: 120px; 
+    border-radius: 20px; border: 1px solid #fff; 
+    background-image: url(images/Banner/banner-2-reverse.webp); background-size: cover; background-position: center; 
+    color: black; font-weight: 700; cursor: pointer; font-size: 15px; padding: 0 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); 
+}
+
 
 /* --- RELATIVE BANNER PATH FIXES FOR SUBFOLDERS --- */
 .btn-square1 { 
     width: 100%; display: flex; align-items: center; justify-content: end; min-height: 120px; 
     border-radius: 20px; border: 1px solid #fff; 
-    background-image: url(images/Banner/banner-2.webp); background-size: cover; background-position: center; 
+    background-image: url(images/Banner/banner-3.webp); background-size: cover; background-position: center; 
     color: black; font-weight: 700; cursor: pointer; font-size: 15px; padding: 0 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); 
 }
 
@@ -810,7 +821,9 @@ input:focus {
 }
 
 /* Fallback image paths for nested component files */
-.app-container .btn-square1 { background-image: url(../../images/Banner/banner-2.webp); }
+.app-container .btn-squareq { background-image: url(../../images/Banner/banner-2-reverse.webp); }
+.app-container .btn-squarew { background-image: url(../../images/Banner/banner-2-reverse.webp); }
+.app-container .btn-square1 { background-image: url(../../images/Banner/banner-3.webp); }
 .app-container .btn-square3 { background-image: url(../../images/Banner/banner-3.webp); }
 .app-container .lesson-1 { background-image: url(../../images/Banner/lesson-1-banner.webp); }
 .app-container .qiraat { background-image: url(../../images/Banner/banner-3-reverse.webp); }

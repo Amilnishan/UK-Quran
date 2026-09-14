@@ -1,0 +1,3118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>حروفي | Huroofi — Arabic Letters Game</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-0:#FBFAF6;
+    --bg-1:#F3F7FB;
+    --ink:#2A2B31;
+    --ink-soft:#6B6D78;
+    --blue:#2F8FE0;
+    --blue-deep:#1E6FC2;
+    --green:#1FA35C;
+    --red:#E9455A;
+    --heart:#FF4D6D;
+    --heart-empty:#E7E3DA;
+    --card:#ffffff;
+
+    --palette-1:#E63950;
+    --palette-2:#2F6FED;
+    --palette-3:#1FA35C;
+    --palette-4:#7B4FE0;
+    --palette-5:#F2A705;
+    --palette-6:#17A6A6;
+    --palette-7:#EC4899;
+    --palette-8:#F0791F;
+    --palette-9:#5B3FD1;
+    --palette-10:#E0447A;
+  }
+
+  *{
+    box-sizing:border-box;
+  }
+
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background-image:url("../../images/Background/game.webp");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    font-family:'Baloo 2','Baloo Bhaijaan 2',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #app{
+    position:relative;
+    width:100vw;
+    height:100dvh;
+    overflow:hidden;
+  }
+
+  /* ---------- background ---------- */
+
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(60px);
+    opacity:.35;
+    pointer-events:none;
+  }
+
+  .blob-a{
+    width:38vmax;
+    height:38vmax;
+    top:-14vmax;
+    left:-10vmax;
+    background:radial-gradient(circle,#DCEBFB,transparent 70%);
+  }
+
+  .blob-b{
+    width:32vmax;
+    height:32vmax;
+    bottom:-12vmax;
+    right:-8vmax;
+    background:radial-gradient(circle,#FCE7EE,transparent 70%);
+  }
+
+  .blob-c{
+    width:26vmax;
+    height:26vmax;
+    bottom:20vh;
+    left:-6vmax;
+    background:radial-gradient(circle,#FFF4DA,transparent 70%);
+  }
+
+  /* ---------- board / letters ---------- */
+
+  #board{
+    position:absolute;
+    inset:0;
+  }
+
+  .letter-tile{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-family:'Baloo Bhaijaan 2',sans-serif;
+    font-weight:600;
+    font-size:35px;
+
+    color:var(--tile-color,var(--blue));
+    background:color-mix(
+      in srgb,
+      var(--tile-color,var(--blue)) 16%,
+      white
+    );
+
+    border-radius:20px;
+    border:2px solid rgba(255,255,255,.95);
+    box-shadow:
+      0 0 8px rgba(255,255,255,.9),
+      0 0 18px rgba(255,255,255,.45);
+    line-height:1;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+
+    padding:.35em .4em;
+
+    transform:translate(0,0) rotate(0deg);
+
+    text-shadow:
+      0 5px 0 rgba(0,0,0,.10),
+      0 9px 14px rgba(0,0,0,.10);
+
+    will-change:transform,top,left;
+    animation:tileGlow 2.4s ease-in-out infinite;
+  }
+
+  @keyframes tileGlow{
+    0%,100%{
+      box-shadow:
+        0 0 8px rgba(255,255,255,.9),
+        0 0 18px rgba(255,255,255,.45);
+    }
+
+    50%{
+      box-shadow:
+        0 0 12px rgba(255,255,255,1),
+        0 0 26px rgba(255,255,255,.7);
+    }
+  }
+
+  .letter-tile::before{
+    content:attr(data-ch);
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:inherit;
+
+    filter:blur(11px);
+    opacity:.32;
+
+    transform:translate(-5px,7px) scale(1.06);
+
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  .letter-tile:focus-visible{
+    outline:3px solid var(--blue-deep);
+    outline-offset:4px;
+    border-radius:14px;
+  }
+
+  .letter-tile.repositioning{
+    transition:
+      left .85s cubic-bezier(.34,1.4,.4,1),
+      top .85s cubic-bezier(.34,1.4,.4,1);
+  }
+
+  .letter-tile.correct-pop{
+    animation:pop .7s ease;
+  }
+
+  .letter-tile.wrong-shake{
+    animation:shake .5s ease;
+  }
+
+  .letter-tile.dim{
+    opacity:.28;
+  }
+
+  @keyframes pop{
+    0%{
+      transform:scale(1);
+    }
+
+    35%{
+      transform:scale(1.5) rotate(-6deg);
+      filter:brightness(1.25);
+    }
+
+    65%{
+      transform:scale(.92) rotate(4deg);
+    }
+
+    100%{
+      transform:scale(1);
+      opacity:0;
+    }
+  }
+
+  @keyframes shake{
+    0%,100%{
+      transform:translateX(0) rotate(0);
+    }
+
+    20%{
+      transform:translateX(-10px) rotate(-6deg);
+    }
+
+    40%{
+      transform:translateX(10px) rotate(6deg);
+    }
+
+    60%{
+      transform:translateX(-7px) rotate(-4deg);
+    }
+
+    80%{
+      transform:translateX(7px) rotate(4deg);
+    }
+  }
+
+  @media (max-width:600px){
+
+    .letter-tile{
+      font-size:26px;
+      padding:.22em .28em;
+      border-radius:12px;
+
+      text-shadow:
+        0 2px 0 rgba(0,0,0,.10),
+        0 4px 6px rgba(0,0,0,.10);
+    }
+  }
+
+  /* ---------- start screen ---------- */
+
+  #start-screen{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+
+    padding-top:9vh;
+
+    text-align:center;
+    pointer-events:none;
+  }
+
+  #start-screen h1{
+    margin:0;
+
+    font-family:'Baloo Bhaijaan 2',sans-serif;
+    font-weight:800;
+
+    font-size:clamp(2rem,6vw,3.2rem);
+
+    color:var(--ink);
+    letter-spacing:.5px;
+  }
+
+  #start-screen h1 span{
+    display:block;
+
+    font-family:'Baloo 2',sans-serif;
+    font-size:.4em;
+    font-weight:600;
+
+    color:var(--ink-soft);
+
+    margin-top:.35em;
+    letter-spacing:.2px;
+  }
+
+  #start-screen p.tip{
+    margin:.9em auto 0;
+
+    max-width:26em;
+
+    font-size:clamp(.95rem,2.4vw,1.1rem);
+
+    color:var(--ink-soft);
+    font-weight:600;
+    line-height:1.5;
+
+    padding:0 1.2em;
+  }
+
+  /* ---------- play button ---------- */
+
+  #play-wrap{
+    position:absolute;
+
+    bottom:6vh;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+    align-items:center;
+
+    gap:18px;
+
+    z-index:5;
+  }
+
+  .spark{
+    width:16px;
+    height:4px;
+
+    border-radius:2px;
+
+    background:var(--blue);
+    opacity:.55;
+  }
+
+  .spark.s2{
+    width:10px;
+  }
+
+  #play-btn{
+    position:relative;
+
+    width:88px;
+    height:88px;
+
+    border-radius:50%;
+    border:none;
+
+    cursor:pointer;
+
+    background:
+      radial-gradient(
+        circle at 35% 30%,
+        #5FB0F5,
+        var(--blue) 55%,
+        var(--blue-deep) 100%
+      );
+
+    box-shadow:
+      0 10px 24px rgba(47,143,224,.45),
+      inset 0 -6px 10px rgba(0,0,0,.15),
+      inset 0 4px 8px rgba(255,255,255,.35);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #play-btn::after{
+    content:"";
+
+    position:absolute;
+    inset:-10px;
+
+    border-radius:50%;
+
+    border:3px solid var(--blue);
+
+    opacity:.35;
+
+    animation:ring 2.2s ease-out infinite;
+  }
+
+  @keyframes ring{
+    0%{
+      transform:scale(.85);
+      opacity:.5;
+    }
+
+    100%{
+      transform:scale(1.35);
+      opacity:0;
+    }
+  }
+
+  #play-btn svg{
+    width:32px;
+    height:32px;
+
+    margin-left:4px;
+
+    filter:drop-shadow(
+      0 2px 2px rgba(0,0,0,.2)
+    );
+  }
+
+  /* ---------- HUD ---------- */
+
+  #hud{
+    position:absolute;
+
+    top:0;
+    left:0;
+    right:0;
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:flex-start;
+
+    padding:
+      max(16px,env(safe-area-inset-top))
+      20px
+      0;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:opacity .4s ease;
+
+    z-index:6;
+  }
+
+  #hud.visible{
+    opacity:1;
+  }
+
+  #lives{
+    display:flex;
+    gap:6px;
+  }
+
+  .heart{
+    width:30px;
+    height:30px;
+
+    transition:transform .3s ease;
+  }
+
+  .heart.lost{
+    animation:heartLost .5s ease forwards;
+  }
+
+  @keyframes heartLost{
+
+    0%{
+      transform:scale(1);
+    }
+
+    40%{
+      transform:scale(1.4);
+    }
+
+    100%{
+      transform:scale(.85);
+      opacity:.35;
+    }
+  }
+
+  #score-pill{
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    background:var(--card);
+
+    padding:7px 14px 7px 10px;
+
+    border-radius:999px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+
+    font-family:'Baloo 2',sans-serif;
+
+    font-weight:700;
+
+    font-size:1.05rem;
+
+    color:var(--ink);
+  }
+
+  #score-pill svg{
+    width:20px;
+    height:20px;
+  }
+
+  /* ---------- speaker / prompt ---------- */
+
+  #prompt-wrap{
+    position:absolute;
+
+    top:9vh;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:8px;
+
+    z-index:6;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:opacity .4s ease;
+  }
+
+  #prompt-wrap.visible{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  #speaker-btn{
+    width:64px;
+    height:64px;
+
+    border-radius:50%;
+    border:none;
+
+    cursor:pointer;
+
+    background:
+      radial-gradient(
+        circle at 35% 30%,
+        #5FB0F5,
+        var(--blue) 55%,
+        var(--blue-deep) 100%
+      );
+
+    box-shadow:
+      0 8px 18px rgba(47,143,224,.4),
+      inset 0 -5px 8px rgba(0,0,0,.15),
+      inset 0 3px 6px rgba(255,255,255,.4);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #speaker-btn svg{
+    width:28px;
+    height:28px;
+  }
+
+  #speaker-btn.speaking{
+    animation:pulse .6s ease infinite;
+  }
+
+  @keyframes pulse{
+
+    0%,100%{
+      transform:scale(1);
+    }
+
+    50%{
+      transform:scale(1.08);
+    }
+  }
+
+  #prompt-label{
+    font-size:.85rem;
+
+    font-weight:600;
+
+    color:var(--ink-soft);
+
+    background:var(--card);
+
+    padding:4px 12px;
+
+    border-radius:999px;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+  }
+
+  /* ---------- feedback ---------- */
+
+  #feedback{
+    position:absolute;
+
+    top:24vh;
+    left:50%;
+
+    transform:
+      translateX(-50%)
+      translateY(-10px)
+      scale(.9);
+
+    padding:10px 26px;
+
+    border-radius:999px;
+
+    font-family:'Baloo Bhaijaan 2',sans-serif;
+
+    font-weight:700;
+
+    font-size:clamp(1.1rem,3vw,1.5rem);
+
+    color:#fff;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:
+      opacity .25s ease,
+      transform .25s ease;
+
+    z-index:7;
+
+    white-space:nowrap;
+  }
+
+  #feedback.show{
+    opacity:1;
+
+    transform:
+      translateX(-50%)
+      translateY(0)
+      scale(1);
+  }
+
+  #feedback.good{
+    background:
+      linear-gradient(
+        135deg,
+        #2FC97D,
+        var(--green)
+      );
+  }
+
+  #feedback.bad{
+    background:
+      linear-gradient(
+        135deg,
+        #F0616F,
+        var(--red)
+      );
+  }
+
+  /* ---------- game over ---------- */
+
+  #gameover-screen{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    background:rgba(251,250,246,.92);
+
+    backdrop-filter:blur(6px);
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:opacity .4s ease;
+
+    z-index:9;
+
+    padding:0 24px;
+  }
+
+  #gameover-screen.visible{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  #gameover-screen h2{
+    font-family:'Baloo Bhaijaan 2',sans-serif;
+
+    font-weight:800;
+
+    font-size:clamp(1.8rem,6vw,2.6rem);
+
+    color:var(--ink);
+
+    margin:0 0 .2em;
+  }
+
+  #gameover-screen .final-score{
+    font-family:'Baloo 2',sans-serif;
+
+    font-weight:700;
+
+    font-size:1.2rem;
+
+    color:var(--blue-deep);
+
+    margin:0 0 1.4em;
+  }
+
+  #gameover-screen .final-score b{
+    font-size:1.6em;
+  }
+
+  #gameover-screen .final-grade{
+    margin:-.8em 0 1.4em;
+    color:var(--green);
+    font-family:'Baloo Bhaijaan 2',sans-serif;
+    font-size:1.5rem;
+    font-weight:800;
+  }
+
+  #replay-btn{
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    cursor:pointer;
+
+    background:
+      linear-gradient(
+        135deg,
+        #5FB0F5,
+        var(--blue-deep)
+      );
+
+    color:#fff;
+
+    font-family:'Baloo 2',sans-serif;
+
+    font-weight:700;
+
+    font-size:1.15rem;
+
+    padding:14px 30px;
+
+    border-radius:999px;
+
+    box-shadow:
+      0 10px 22px rgba(47,143,224,.4);
+  }
+
+  #replay-btn svg{
+    width:22px;
+    height:22px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+
+    #play-btn::after{
+      animation:none;
+    }
+
+    .letter-tile.repositioning{
+      transition:none;
+    }
+  }
+
+  .sr-only{
+    position:absolute;
+
+    width:1px;
+    height:1px;
+
+    padding:0;
+    margin:-1px;
+
+    overflow:hidden;
+
+    clip:rect(0,0,0,0);
+
+    white-space:nowrap;
+
+    border:0;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <div class="blob blob-a"></div>
+  <div class="blob blob-b"></div>
+  <div class="blob blob-c"></div>
+
+  <!-- HUD -->
+
+  <div id="hud">
+
+    <div id="lives" aria-live="polite"></div>
+
+    <div id="score-pill">
+
+      <svg viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7L12 17.8 5.8 21.2 7 14.2 2 9.3l7.1-.7L12 2z"
+          fill="#F2A705"
+        />
+      </svg>
+
+      <span id="score-val">0</span>
+
+    </div>
+
+  </div>
+
+  <!-- PROMPT -->
+
+  <div id="prompt-wrap">
+
+    <div id="prompt-label" aria-live="polite"></div>
+
+    <button
+      id="speaker-btn"
+      aria-label="Play the letter sound again"
+    >
+
+      <svg viewBox="0 0 24 24" fill="none">
+
+        <path
+          d="M4 9v6h4l5 4V5L8 9H4z"
+          fill="#fff"
+        />
+
+        <path
+          d="M16.5 8.5a5 5 0 0 1 0 7"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M19 6a9 9 0 0 1 0 12"
+          stroke="#fff"
+          stroke-width="2"
+          stroke-linecap="round"
+          opacity=".7"
+        />
+
+      </svg>
+
+    </button>
+
+  </div>
+
+  <!-- FEEDBACK -->
+
+  <div id="feedback" role="status"></div>
+
+  <!-- BOARD -->
+
+  <div id="board"></div>
+
+  <!-- START -->
+
+  <div id="start-screen"></div>
+
+  <!-- PLAY -->
+
+  <div id="play-wrap">
+
+    <div class="spark s2"></div>
+
+    <button
+      id="play-btn"
+      aria-label="Play"
+      style="color:#fff;"
+    >
+      start
+    </button>
+
+    <div class="spark s2"></div>
+
+  </div>
+
+  <!-- GAME OVER -->
+
+  <div id="gameover-screen">
+
+    <h2 id="gameover-title">
+      انتهت اللعبة
+    </h2>
+
+    <p class="final-score">
+      Score:
+      <b id="final-score-val">0</b>
+      / <b id="max-score-val">360</b>
+    </p>
+
+    <p class="final-grade" id="final-grade">Excellent</p>
+
+    <button id="replay-btn">
+
+      <svg viewBox="0 0 24 24" fill="none">
+
+        <path
+          d="M4 12a8 8 0 1 1 2.6 5.9"
+          stroke="#fff"
+          stroke-width="2.2"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M4 17v-5h5"
+          stroke="#fff"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+
+      </svg>
+
+      إعادة اللعب
+
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+(function(){
+
+  "use strict";
+
+
+  /* =========================================================
+     LETTER DATA
+  ========================================================= */
+
+  var LETTERS = [
+
+    {ch:"ا", name:"ألف"},
+    {ch:"ب", name:"باء"},
+    {ch:"ت", name:"تاء"},
+    {ch:"ث", name:"ثاء"},
+    {ch:"ج", name:"جيم"},
+    {ch:"ح", name:"حاء"},
+
+    {ch:"خ", name:"خاء"},
+    {ch:"د", name:"دال"},
+    {ch:"ذ", name:"ذال"},
+    {ch:"ر", name:"راء"},
+    {ch:"ز", name:"زاي"},
+    {ch:"س", name:"سين"},
+
+    {ch:"ش", name:"شين"},
+    {ch:"ص", name:"صاد"},
+    {ch:"ض", name:"ضاد"},
+    {ch:"ط", name:"طاء"},
+    {ch:"ظ", name:"ظاء"},
+    {ch:"ع", name:"عين"},
+
+    {ch:"غ", name:"غين"},
+    {ch:"ف", name:"فاء"},
+    {ch:"ق", name:"قاف"},
+    {ch:"ك", name:"كاف"},
+    {ch:"ل", name:"لام"},
+    {ch:"م", name:"ميم"},
+
+    {ch:"ن", name:"نون"},
+    {ch:"ه", name:"هاء"},
+    {ch:"و", name:"واو"},
+    {ch:"ي", name:"ياء"}
+
+  ];
+
+
+  /* =========================================================
+     ROUND SETTINGS
+  ========================================================= */
+
+  var ROUND_SIZES = [7,14,21,28];
+
+  var SOUNDS_PER_ROUND = 9;
+
+  var POINTS_PER_LETTER = 10;
+
+  var MAX_SCORE =
+    ROUND_SIZES.length *
+    SOUNDS_PER_ROUND *
+    POINTS_PER_LETTER;
+
+  var currentRoundIndex = 0;
+
+  var activeRoundLetters = [];
+
+
+  /* =========================================================
+     PREVENT SAME ROUND REPEATING
+  ========================================================= */
+
+  var lastRoundSet = [];
+
+
+  /* =========================================================
+     COLORS
+  ========================================================= */
+
+  var PALETTE = [
+
+    "--palette-1",
+    "--palette-2",
+    "--palette-3",
+    "--palette-4",
+    "--palette-5",
+    "--palette-6",
+    "--palette-7",
+    "--palette-8",
+    "--palette-9",
+    "--palette-10"
+
+  ];
+
+
+  var reduceMotion =
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+
+  /* =========================================================
+     DOM
+  ========================================================= */
+
+  var board =
+    document.getElementById("board");
+
+  var startScreen =
+    document.getElementById("start-screen");
+
+  var playWrap =
+    document.getElementById("play-wrap");
+
+  var playBtn =
+    document.getElementById("play-btn");
+
+  var hud =
+    document.getElementById("hud");
+
+  var livesEl =
+    document.getElementById("lives");
+
+  var scoreVal =
+    document.getElementById("score-val");
+
+  var promptWrap =
+    document.getElementById("prompt-wrap");
+
+  var speakerBtn =
+    document.getElementById("speaker-btn");
+
+  var promptLabel =
+    document.getElementById("prompt-label");
+
+  var feedback =
+    document.getElementById("feedback");
+
+  var gameoverScreen =
+    document.getElementById("gameover-screen");
+
+  var gameoverTitle =
+    document.getElementById("gameover-title");
+
+  var finalScoreVal =
+    document.getElementById("final-score-val");
+
+  var maxScoreVal =
+    document.getElementById("max-score-val");
+
+  var finalGrade =
+    document.getElementById("final-grade");
+
+  var replayBtn =
+    document.getElementById("replay-btn");
+
+
+  /* =========================================================
+     AUDIO
+  ========================================================= */
+
+  var audioCtx = null;
+
+
+  function ensureAudio(){
+
+    if(!audioCtx){
+
+      try{
+
+        audioCtx =
+          new (
+            window.AudioContext ||
+            window.webkitAudioContext
+          )();
+
+      }catch(e){}
+
+    }
+
+    else if(audioCtx.state === "suspended"){
+
+      audioCtx.resume();
+
+    }
+
+  }
+
+
+  function tone(
+    freq,
+    start,
+    dur,
+    type,
+    gain
+  ){
+
+    if(!audioCtx) return;
+
+    var osc =
+      audioCtx.createOscillator();
+
+    var g =
+      audioCtx.createGain();
+
+    osc.type =
+      type || "sine";
+
+    osc.frequency.value =
+      freq;
+
+    g.gain.value = 0;
+
+    osc.connect(g);
+
+    g.connect(
+      audioCtx.destination
+    );
+
+    var t0 =
+      audioCtx.currentTime + start;
+
+    g.gain.setValueAtTime(
+      0,
+      t0
+    );
+
+    g.gain.linearRampToValueAtTime(
+      gain || 0.18,
+      t0 + 0.02
+    );
+
+    g.gain.exponentialRampToValueAtTime(
+      0.001,
+      t0 + dur
+    );
+
+    osc.start(t0);
+
+    osc.stop(
+      t0 + dur + 0.02
+    );
+
+  }
+
+
+  function playSuccess(){
+
+    tone(
+      587,
+      0,
+      .14,
+      "sine",
+      .2
+    );
+
+    tone(
+      880,
+      .11,
+      .22,
+      "sine",
+      .2
+    );
+
+  }
+
+
+  function playFail(){
+
+    tone(
+      320,
+      0,
+      .16,
+      "sawtooth",
+      .12
+    );
+
+    tone(
+      190,
+      .1,
+      .24,
+      "sawtooth",
+      .12
+    );
+
+  }
+
+
+  /* =========================================================
+     LETTER AUDIO
+  ========================================================= */
+
+  function speak(letter){
+
+    if(
+      !letter ||
+      !letter.ch
+    ) return;
+
+
+    var index =
+      LETTERS.findIndex(
+        function(item){
+
+          return item.ch === letter.ch;
+
+        }
+      );
+
+
+    if(index < 0) return;
+
+
+    var audioNumber =
+      (index % 28) + 1;
+
+
+    var audio =
+      new Audio(
+        "../../audios/arabic-letters/" +
+        String(audioNumber).padStart(2,"0") +
+        ".mp3"
+      );
+
+
+    audio.preload = "auto";
+
+
+    audio.onplay =
+      function(){
+
+        speakerBtn.classList.add(
+          "speaking"
+        );
+
+      };
+
+
+    audio.onended =
+    audio.onerror =
+      function(){
+
+        speakerBtn.classList.remove(
+          "speaking"
+        );
+
+      };
+
+
+    audio.play().catch(
+      function(){
+
+        speakerBtn.classList.remove(
+          "speaking"
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     GAME STATE
+  ========================================================= */
+
+  var STATE = {
+
+    START:"start",
+    SHUFFLE:"shuffle",
+    FALLING:"falling",
+    FEEDBACK:"feedback",
+    GAMEOVER:"gameover"
+
+  };
+
+
+  var MAX_LIVES = 5;
+
+  var state =
+    STATE.START;
+
+  var lives =
+    MAX_LIVES;
+
+  var score = 0;
+
+  var target = null;
+
+  var targetQueue = [];
+
+  var shownLetters = {};
+
+  var lastShownLetter = null;
+
+  var tiles = [];
+
+  var lastTs = 0;
+
+  var boardW = 0;
+
+  var boardH = 0;
+
+
+  /* =========================================================
+     RANDOM ROUND LETTER GENERATOR
+  ========================================================= */
+
+  function getRandomRoundLetters(roundIndex){
+
+    var count =
+      ROUND_SIZES[roundIndex] ||
+      ROUND_SIZES[
+        ROUND_SIZES.length - 1
+      ];
+
+
+    /*
+      Create a fresh copy of all
+      28 Arabic letters.
+    */
+
+    var pool =
+      LETTERS.slice();
+
+
+    /*
+      Fisher-Yates shuffle
+    */
+
+    for(
+      var i = pool.length - 1;
+      i > 0;
+      i--
+    ){
+
+      var j =
+        Math.floor(
+          Math.random() * (i + 1)
+        );
+
+      var temp =
+        pool[i];
+
+      pool[i] =
+        pool[j];
+
+      pool[j] =
+        temp;
+
+    }
+
+
+    var selected = [];
+
+
+    while(
+      selected.length < count
+    ){
+
+      for(
+        var letterIndex = 0;
+        letterIndex < pool.length && selected.length < count;
+        letterIndex++
+      ){
+
+        selected.push(
+          pool[letterIndex]
+        );
+
+      }
+
+    }
+
+
+    /*
+      Check whether this new set
+      is EXACTLY the same as the
+      previous set.
+    */
+
+    function isSameSet(){
+
+      if(
+        selected.length !==
+        lastRoundSet.length
+      ){
+
+        return false;
+
+      }
+
+
+      return selected.every(
+        function(letter){
+
+          return lastRoundSet.some(
+            function(previous){
+
+              return previous.ch ===
+                letter.ch;
+
+            }
+          );
+
+        }
+      );
+
+    }
+
+
+    /*
+      If same 9 letters appear,
+      reshuffle until a different
+      combination is produced.
+    */
+
+    var attempts = 0;
+
+    while(
+      isSameSet() &&
+      attempts < 20
+    ){
+
+      for(
+        var k = pool.length - 1;
+        k > 0;
+        k--
+      ){
+
+        var r =
+          Math.floor(
+            Math.random() * (k + 1)
+          );
+
+        var temp2 =
+          pool[k];
+
+        pool[k] =
+          pool[r];
+
+        pool[r] =
+          temp2;
+
+      }
+
+
+      selected = [];
+
+
+      while(
+        selected.length < count
+      ){
+
+        for(
+          var reshuffledIndex = 0;
+          reshuffledIndex < pool.length && selected.length < count;
+          reshuffledIndex++
+        ){
+
+          selected.push(
+            pool[reshuffledIndex]
+          );
+
+        }
+
+      }
+
+
+      attempts++;
+
+    }
+
+
+    /*
+      Remember the latest set.
+    */
+
+    lastRoundSet =
+      selected.slice();
+
+
+    return selected;
+
+  }
+
+
+  function getRoundTargets(roundLetters){
+
+    var targets =
+      roundLetters.slice();
+
+
+    for(
+      var i = targets.length - 1;
+      i > 0;
+      i--
+    ){
+
+      var j =
+        Math.floor(
+          Math.random() * (i + 1)
+        );
+
+      var temp =
+        targets[i];
+
+      targets[i] =
+        targets[j];
+
+      targets[j] =
+        temp;
+
+    }
+
+
+    return targets.slice(
+      0,
+      SOUNDS_PER_ROUND
+    );
+
+  }
+
+
+  /* =========================================================
+     BUILD LETTER TILES
+  ========================================================= */
+
+  function buildTiles(letterSet){
+
+    var set =
+      letterSet || LETTERS;
+
+
+    board.innerHTML = "";
+
+    tiles =
+      set.map(
+        function(L,i){
+
+          var el =
+            document.createElement("div");
+
+
+          el.className =
+            "letter-tile";
+
+
+          el.textContent =
+            L.ch;
+
+
+          el.setAttribute(
+            "data-ch",
+            L.ch
+          );
+
+
+          el.setAttribute(
+            "role",
+            "button"
+          );
+
+
+          el.setAttribute(
+            "tabindex",
+            "0"
+          );
+
+
+          el.setAttribute(
+            "aria-label",
+            L.name
+          );
+
+
+          el.style.setProperty(
+            "--tile-color",
+            "var(" +
+            PALETTE[
+              i % PALETTE.length
+            ] +
+            ")"
+          );
+
+
+          board.appendChild(el);
+
+
+          var t = {
+
+            ch:L.ch,
+
+            name:L.name,
+
+            el:el,
+
+            baseLeft:0,
+
+            baseTop:0,
+
+            fallOffset:0,
+
+            vy:0,
+
+            grounded:false,
+
+            timeAcc:
+              Math.random() * 10,
+
+            speedX:
+              0.5 +
+              Math.random() * 0.4,
+
+            speedY:
+              0.4 +
+              Math.random() * 0.4,
+
+            ampX:
+              reduceMotion
+                ? 4
+                : 10 +
+                  Math.random() * 10,
+
+            ampY:
+              reduceMotion
+                ? 3
+                : 6 +
+                  Math.random() * 8,
+
+            phaseX:
+              Math.random() * 6.28,
+
+            phaseY:
+              Math.random() * 6.28,
+
+            rotSpeed:
+              0.3 +
+              Math.random() * 0.3,
+
+            rotAmp:
+              reduceMotion
+                ? 2
+                : 5 +
+                  Math.random() * 5,
+
+            phaseR:
+              Math.random() * 6.28
+
+          };
+
+
+          el.addEventListener(
+            "click",
+            function(){
+
+              onTileTap(t);
+
+            }
+          );
+
+
+          el.addEventListener(
+            "keydown",
+            function(ev){
+
+              if(
+                ev.key === "Enter" ||
+                ev.key === " "
+              ){
+
+                ev.preventDefault();
+
+                onTileTap(t);
+
+              }
+
+            }
+          );
+
+
+          return t;
+
+        }
+      );
+
+  }
+
+
+  /* =========================================================
+     BOARD MEASUREMENT
+  ========================================================= */
+
+  function measureBoard(){
+
+    var r =
+      board.getBoundingClientRect();
+
+    boardW =
+      r.width;
+
+    boardH =
+      r.height;
+
+  }
+
+
+  /* =========================================================
+     SHUFFLE TILE POSITIONS
+  ========================================================= */
+
+  function shuffleTiles(){
+
+    for(
+      var i = tiles.length - 1;
+      i > 0;
+      i--
+    ){
+
+      var j =
+        Math.floor(
+          Math.random() * (i + 1)
+        );
+
+      var item =
+        tiles[i];
+
+      tiles[i] =
+        tiles[j];
+
+      tiles[j] =
+        item;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     COLUMN CALCULATION
+  ========================================================= */
+
+  function computeColumns(){
+
+    return 7;
+
+  }
+
+
+  /* =========================================================
+     TILE LAYOUT
+  ========================================================= */
+
+  function layoutTiles(withTransition){
+
+    measureBoard();
+
+    shuffleTiles();
+
+
+    var cols =
+      computeColumns();
+
+
+    var rows =
+      Math.ceil(
+        tiles.length / cols
+      );
+
+
+    var topPad =
+      boardH * 0.16;
+
+
+    var bottomPad =
+      boardH * 0.22;
+
+
+    var usableH =
+      boardH -
+      topPad -
+      bottomPad;
+
+
+    var cellW =
+      boardW / cols;
+
+
+    var gap = 4;
+
+
+    var tileH =
+      tiles.reduce(
+        function(maxHeight,t){
+
+          return Math.max(
+            maxHeight,
+            t.el.offsetHeight || 80
+          );
+
+        },
+        0
+      );
+
+
+    var cellH =
+      Math.max(
+        usableH / rows,
+        tileH + gap
+      );
+
+
+    tiles.forEach(
+      function(t,i){
+
+        if(withTransition){
+
+          t.el.classList.add(
+            "repositioning"
+          );
+
+        }
+
+
+        var col =
+          i % cols;
+
+
+        var row =
+          Math.floor(i / cols);
+
+
+        var w =
+          t.el.offsetWidth || 80;
+
+
+        var h =
+          t.el.offsetHeight || 80;
+
+
+        var cx =
+          col * cellW +
+          cellW / 2;
+
+
+        var cy =
+          topPad +
+          row * cellH +
+          cellH / 2;
+
+
+        var left =
+          Math.max(
+            4,
+            Math.min(
+              boardW - w - 4,
+              cx - w / 2
+            )
+          );
+
+
+        var top =
+          Math.max(
+            4,
+            cy - h / 2
+          );
+
+
+        t.baseLeft =
+          left;
+
+
+        t.baseTop =
+          top;
+
+
+        t.fallOffset =
+          0;
+
+
+        t.grounded =
+          false;
+
+
+        t.el.style.left =
+          left + "px";
+
+
+        t.el.style.top =
+          top + "px";
+
+
+        t.el.style.visibility =
+          "visible";
+
+
+        t.el.style.opacity =
+          "1";
+
+
+        t.el.style.transform =
+          "translate(0,0) rotate(0deg)";
+
+
+        t.el.classList.remove(
+          "dim",
+          "correct-pop",
+          "wrong-shake"
+        );
+
+      }
+    );
+
+
+    if(withTransition){
+
+      setTimeout(
+        function(){
+
+          tiles.forEach(
+            function(t){
+
+              t.el.classList.remove(
+                "repositioning"
+              );
+
+            }
+          );
+
+        },
+        900
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     ANIMATION LOOP
+  ========================================================= */
+
+  function loop(ts){
+
+    var dt =
+      lastTs
+        ? Math.min(
+            (ts - lastTs) / 1000,
+            0.05
+          )
+        : 0;
+
+
+    lastTs =
+      ts;
+
+
+    tiles.forEach(
+      function(t){
+
+        t.timeAcc += dt;
+
+
+        var swayX =
+          Math.sin(
+            t.timeAcc *
+            t.speedX +
+            t.phaseX
+          ) *
+          t.ampX;
+
+
+        var swayY =
+          Math.cos(
+            t.timeAcc *
+            t.speedY +
+            t.phaseY
+          ) *
+          t.ampY *
+          0.5;
+
+
+        var rot =
+          Math.sin(
+            t.timeAcc *
+            t.rotSpeed +
+            t.phaseR
+          ) *
+          t.rotAmp;
+
+
+        if(
+          state === STATE.FALLING &&
+          !t.grounded
+        ){
+
+          t.fallOffset +=
+            t.vy * dt;
+
+
+          var newTop =
+            t.baseTop +
+            t.fallOffset;
+
+
+          if(
+            newTop >= boardH
+          ){
+
+            t.grounded =
+              true;
+
+
+            t.el.style.visibility =
+              "hidden";
+
+
+            if(
+              target &&
+              t.ch === target.ch
+            ){
+
+              handleMissed(t);
+
+            }
+
+          }
+
+        }
+
+
+        t.el.style.transform =
+          "translate3d(" +
+          swayX.toFixed(1) +
+          "px," +
+          (swayY + t.fallOffset).toFixed(1) +
+          "px,0) rotate(" +
+          rot.toFixed(1) +
+          "deg)";
+
+      }
+    );
+
+
+    requestAnimationFrame(loop);
+
+  }
+
+
+  /* =========================================================
+     LIVES
+  ========================================================= */
+
+  function renderLives(){
+
+    livesEl.innerHTML = "";
+
+
+    for(
+      var i = 0;
+      i < MAX_LIVES;
+      i++
+    ){
+
+      var filled =
+        i < lives;
+
+
+      var svg =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "svg"
+        );
+
+
+      svg.setAttribute(
+        "viewBox",
+        "0 0 24 24"
+      );
+
+
+      svg.setAttribute(
+        "class",
+        "heart"
+      );
+
+
+      svg.innerHTML =
+
+        '<path ' +
+
+        'd="M12 21s-7.2-4.6-9.7-9C.5 8.6 2 5 5.4 5c2 0 3.4 1.2 4.6 2.7C11.2 6.2 12.6 5 14.6 5 18 5 19.5 8.6 21.7 12c-2.5 4.4-9.7 9-9.7 9z" ' +
+
+        'fill="' +
+        (
+          filled
+            ? "url(#g)"
+            : "none"
+        ) +
+        '" ' +
+
+        'stroke="' +
+        (
+          filled
+            ? "none"
+            : "#D8D3C8"
+        ) +
+        '" ' +
+
+        'stroke-width="1.6"/>' +
+
+        '<defs>' +
+
+        '<linearGradient ' +
+        'id="g" ' +
+        'x1="0" ' +
+        'y1="0" ' +
+        'x2="0" ' +
+        'y2="1">' +
+
+        '<stop ' +
+        'offset="0" ' +
+        'stop-color="#FF7A93"/>' +
+
+        '<stop ' +
+        'offset="1" ' +
+        'stop-color="#FF4D6D"/>' +
+
+        '</linearGradient>' +
+
+        '</defs>';
+
+
+      livesEl.appendChild(svg);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SCORE
+  ========================================================= */
+
+  function updateScore(){
+
+    scoreVal.textContent =
+      score;
+
+  }
+
+
+  function getGrade(scoreValue){
+
+    var percentage =
+      scoreValue / MAX_SCORE;
+
+
+    if(percentage >= .8){
+      return "Excellent";
+    }
+
+
+    if(percentage >= .5){
+      return "Good";
+    }
+
+
+    return "Try Again";
+
+  }
+
+
+  function updateFinalResult(){
+
+    finalScoreVal.textContent = score;
+    maxScoreVal.textContent = MAX_SCORE;
+    finalGrade.textContent = getGrade(score);
+
+  }
+
+
+  /* =========================================================
+     FEEDBACK
+  ========================================================= */
+
+  function showFeedback(
+    text,
+    good
+  ){
+
+    feedback.textContent =
+      text;
+
+
+    feedback.className =
+      "show " +
+      (
+        good
+          ? "good"
+          : "bad"
+      );
+
+
+    clearTimeout(
+      showFeedback._t
+    );
+
+
+    showFeedback._t =
+      setTimeout(
+        function(){
+
+          feedback.className =
+            "";
+
+        },
+        850
+      );
+
+  }
+
+
+  /* =========================================================
+     START GAME
+  ========================================================= */
+
+  function startGame(){
+
+    ensureAudio();
+
+
+    lives =
+      MAX_LIVES;
+
+
+    score =
+      0;
+
+
+    currentRoundIndex =
+      0;
+
+
+    shownLetters =
+      {};
+
+
+    lastShownLetter =
+      null;
+
+
+    /*
+      IMPORTANT:
+      Clear previous round memory
+      when starting a completely
+      new game.
+    */
+
+    lastRoundSet =
+      [];
+
+
+    /*
+      Generate the first
+      random 9-letter set.
+    */
+
+    activeRoundLetters =
+      getRandomRoundLetters(
+        currentRoundIndex
+      );
+
+
+    targetQueue =
+      getRoundTargets(activeRoundLetters);
+
+
+    renderLives();
+
+    updateScore();
+
+
+    startScreen.style.display =
+      "none";
+
+
+    playWrap.style.display =
+      "none";
+
+
+    hud.classList.add(
+      "visible"
+    );
+
+
+    gameoverTitle.textContent =
+      "انتهت اللعبة";
+
+
+    gameoverScreen.classList.remove(
+      "visible"
+    );
+
+
+    buildTiles(
+      activeRoundLetters
+    );
+
+
+    state =
+      STATE.SHUFFLE;
+
+
+    layoutTiles(true);
+
+
+    setTimeout(
+      startRound,
+      2000
+    );
+
+  }
+
+
+  /* =========================================================
+     ADVANCE TO NEXT ROUND
+  ========================================================= */
+
+  function advanceRound(){
+
+    if(
+      currentRoundIndex >=
+      ROUND_SIZES.length - 1
+    ){
+
+      winGame();
+
+      return;
+
+    }
+
+
+    currentRoundIndex += 1;
+
+
+    /*
+      Generate a completely
+      NEW random set.
+    */
+
+    activeRoundLetters =
+      getRandomRoundLetters(
+        currentRoundIndex
+      );
+
+
+    targetQueue =
+      getRoundTargets(activeRoundLetters);
+
+
+    state =
+      STATE.SHUFFLE;
+
+
+    promptWrap.classList.remove(
+      "visible"
+    );
+
+
+    /*
+      Rebuild the board with
+      the new random letters.
+    */
+
+    buildTiles(
+      activeRoundLetters
+    );
+
+
+    /*
+      Randomize their positions.
+    */
+
+    layoutTiles(true);
+
+
+    setTimeout(
+      startRound,
+      2000
+    );
+
+  }
+
+
+  /* =========================================================
+     NEXT CHALLENGE
+  ========================================================= */
+
+  function nextRound(){
+
+    state =
+      STATE.SHUFFLE;
+
+
+    promptWrap.classList.remove(
+      "visible"
+    );
+
+
+    activeRoundLetters =
+      getRandomRoundLetters(
+        currentRoundIndex
+      );
+
+
+    targetQueue.forEach(
+      function(targetLetter, index){
+
+        var hasTarget =
+          activeRoundLetters.some(
+            function(letter){
+              return letter.ch === targetLetter.ch;
+            }
+          );
+
+
+        if(!hasTarget){
+          activeRoundLetters[index] = targetLetter;
+        }
+
+      }
+    );
+
+
+    buildTiles(
+      activeRoundLetters
+    );
+
+
+    layoutTiles(true);
+
+
+    setTimeout(
+      startRound,
+      900
+    );
+
+  }
+
+
+  /* =========================================================
+     START ROUND / TARGET
+  ========================================================= */
+
+  function completeRound(){
+
+    state =
+      STATE.FEEDBACK;
+
+
+    promptWrap.classList.remove(
+      "visible"
+    );
+
+
+    var roundNumber =
+      currentRoundIndex + 1;
+
+
+    showFeedback(
+      roundNumber === 1
+        ? "1st round completed"
+        : roundNumber === 2
+          ? "2nd round completed"
+          : roundNumber === 3
+            ? "3rd round completed"
+            : "4th round completed",
+      true
+    );
+
+
+    setTimeout(
+      function(){
+
+        if(
+          currentRoundIndex >=
+          ROUND_SIZES.length - 1
+        ){
+
+          winGame();
+
+        }else{
+
+          advanceRound();
+
+        }
+
+      },
+      1800
+    );
+
+  }
+
+  function startRound(){
+
+    if(
+      state === STATE.GAMEOVER
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      !targetQueue.length
+    ){
+
+      completeRound();
+
+      return;
+
+    }
+
+
+    var targetIndex =
+      Math.floor(
+        Math.random() * targetQueue.length
+      );
+
+
+    target =
+      targetQueue.splice(
+        targetIndex,
+        1
+      )[0];
+
+
+    shownLetters[
+      target.ch
+    ] = true;
+
+
+    lastShownLetter =
+      target.ch;
+
+
+    promptLabel.textContent =
+      target.ch;
+
+
+    var fallSpeed =
+      34 +
+      Math.random() * 8;
+
+
+    tiles.forEach(
+      function(t){
+
+        t.vy =
+          fallSpeed;
+
+        t.fallOffset =
+          0;
+
+        t.grounded =
+          false;
+
+      }
+    );
+
+
+    state =
+      STATE.FALLING;
+
+
+    promptWrap.classList.add(
+      "visible"
+    );
+
+
+    speak(target);
+
+  }
+
+
+  /* =========================================================
+     TILE TAP
+  ========================================================= */
+
+  function onTileTap(t){
+
+    if(
+      state !== STATE.FALLING
+    ){
+
+      return;
+
+    }
+
+
+    ensureAudio();
+
+
+    if(
+      t.ch === target.ch
+    ){
+
+      state =
+        STATE.FEEDBACK;
+
+
+      score += 10;
+
+
+      updateScore();
+
+
+      playSuccess();
+
+
+      t.el.classList.add(
+        "correct-pop"
+      );
+
+
+      tiles.forEach(
+        function(o){
+
+          if(o !== t){
+
+            o.el.classList.add(
+              "dim"
+            );
+
+          }
+
+        }
+      );
+
+
+      t.el.style.visibility =
+        "visible";
+
+
+      t.el.style.opacity =
+        "1";
+
+
+      showFeedback(
+        "أحسنت! ✨",
+        true
+      );
+
+
+      setTimeout(
+        function(){
+
+          tiles.forEach(
+            function(o){
+
+              if(o !== t){
+
+                o.el.classList.remove(
+                  "dim"
+                );
+
+              }
+
+            }
+          );
+
+
+          t.el.classList.remove(
+            "correct-pop"
+          );
+
+
+          /*
+            IMPORTANT:
+            Always generate a new
+            random set for the next
+            challenge.
+          */
+
+          nextRound();
+
+        },
+        2000
+      );
+
+    }
+
+    else{
+
+      loseLife(t);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     MISSED LETTER
+  ========================================================= */
+
+  function handleMissed(t){
+
+    if(
+      state !== STATE.FALLING
+    ){
+
+      return;
+
+    }
+
+
+    state =
+      STATE.FEEDBACK;
+
+
+    loseLifeCore();
+
+
+    playFail();
+
+
+    speak(target);
+
+
+    showFeedback(
+      "لقد فاتك الحرف!",
+      false
+    );
+
+
+    setTimeout(
+      afterLifeLoss,
+      2000
+    );
+
+  }
+
+
+  /* =========================================================
+     WRONG LETTER
+  ========================================================= */
+
+  function loseLife(tappedTile){
+
+    state =
+      STATE.FEEDBACK;
+
+
+    loseLifeCore();
+
+
+    playFail();
+
+
+    tappedTile.el.classList.add(
+      "wrong-shake"
+    );
+
+
+    showFeedback(
+      "حاول مرة أخرى",
+      false
+    );
+
+
+    setTimeout(
+      afterLifeLoss,
+      2000
+    );
+
+  }
+
+
+  /* =========================================================
+     REMOVE LIFE
+  ========================================================= */
+
+  function loseLifeCore(){
+
+    lives =
+      Math.max(
+        0,
+        lives - 1
+      );
+
+
+    var hearts =
+      livesEl.querySelectorAll(
+        ".heart"
+      );
+
+
+    if(
+      hearts[lives]
+    ){
+
+      hearts[lives].classList.add(
+        "lost"
+      );
+
+    }
+
+
+    renderLivesDelayed();
+
+  }
+
+
+  function renderLivesDelayed(){
+
+    setTimeout(
+      renderLives,
+      480
+    );
+
+  }
+
+
+  /* =========================================================
+     AFTER LIFE LOSS
+  ========================================================= */
+
+  function afterLifeLoss(){
+
+    if(
+      lives <= 0
+    ){
+
+      gameOver();
+
+    }
+
+    else{
+
+      /*
+        Even after a wrong answer
+        or missed letter, create
+        a fresh random set.
+      */
+
+      nextRound();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     GAME OVER
+  ========================================================= */
+
+  function gameOver(){
+
+    state =
+      STATE.GAMEOVER;
+
+
+    promptWrap.classList.remove(
+      "visible"
+    );
+
+
+    gameoverTitle.textContent =
+      "انتهت اللعبة";
+
+
+    updateFinalResult();
+
+
+    setTimeout(
+      function(){
+
+        gameoverScreen.classList.add(
+          "visible"
+        );
+
+      },
+      2000
+    );
+
+  }
+
+
+  /* =========================================================
+     WIN GAME
+  ========================================================= */
+
+  function winGame(){
+
+    state =
+      STATE.GAMEOVER;
+
+
+    promptWrap.classList.remove(
+      "visible"
+    );
+
+
+    gameoverTitle.textContent =
+      "أحسنت! فزت";
+
+
+    updateFinalResult();
+
+
+    setTimeout(
+      function(){
+
+        gameoverScreen.classList.add(
+          "visible"
+        );
+
+      },
+      700
+    );
+
+  }
+
+
+  /* =========================================================
+     RESET
+  ========================================================= */
+
+  function resetToStart(){
+
+    state =
+      STATE.START;
+
+
+    gameoverScreen.classList.remove(
+      "visible"
+    );
+
+
+    hud.classList.remove(
+      "visible"
+    );
+
+
+    startScreen.style.display =
+      "flex";
+
+
+    playWrap.style.display =
+      "flex";
+
+
+    /*
+      Reset previous round memory
+      so a new game starts fresh.
+    */
+
+    lastRoundSet =
+      [];
+
+
+    shownLetters =
+      {};
+
+
+    targetQueue =
+      [];
+
+
+    activeRoundLetters =
+      [];
+
+
+    target =
+      null;
+
+
+    layoutTiles(false);
+
+  }
+
+
+  /* =========================================================
+     EVENTS
+  ========================================================= */
+
+  playBtn.addEventListener(
+    "click",
+    startGame
+  );
+
+
+  replayBtn.addEventListener(
+    "click",
+    resetToStart
+  );
+
+
+  speakerBtn.addEventListener(
+    "click",
+    function(){
+
+      if(
+        target &&
+        (
+          state === STATE.FALLING ||
+          state === STATE.FEEDBACK
+        )
+      ){
+
+        ensureAudio();
+
+        speak(target);
+
+      }
+
+    }
+  );
+
+
+  window.addEventListener(
+    "resize",
+    function(){
+
+      if(
+        state === STATE.START ||
+        state === STATE.GAMEOVER
+      ){
+
+        layoutTiles(false);
+
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     INITIALIZE
+  ========================================================= */
+
+  buildTiles();
+
+
+  requestAnimationFrame(
+    function(ts){
+
+      layoutTiles(false);
+
+      lastTs =
+        ts;
+
+      requestAnimationFrame(
+        loop
+      );
+
+    }
+  );
+
+})();
+
+</script>
+
+</body>
+</html>
