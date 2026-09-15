@@ -248,6 +248,29 @@
         </div>
     </div>
 
+    <!-- Game Result Modal -->
+    <div id="game-result-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 520px; width: 95%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
+                <h3 id="game-result-modal-title" style="margin:0; font-size:18px;">Game Result</h3>
+                <button type="button" class="icon-btn" id="btn-close-game-result" title="Close" style="background: transparent; border: none; color:#8E785C; font-size:18px;">×</button>
+            </div>
+            <div class="table-container" style="margin-bottom:0;">
+                <table class="excel-table" style="min-width:100%; font-size:13px;">
+                    <thead>
+                        <tr>
+                            <th class="th-blue">Level</th>
+                            <th class="th-blue">Points Earned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="game-result-table-body">
+                        <tr><td colspan="2" style="padding:16px; color:#888;">No game results yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
 </div>

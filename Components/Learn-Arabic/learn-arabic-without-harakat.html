@@ -278,18 +278,11 @@
 
     const isGuest = sessionStorage.getItem('isGuest') === 'true';
 
-    // Back — return to whichever page the student came from (student
-    // dashboard, guest dashboard, Qira'at menu, etc.) rather than a fixed
-    // destination, since Learn Arabic can now be entered from several places.
     document.getElementById('btn-back').addEventListener('click', () => {
-        if (document.referrer && document.referrer.includes(window.location.host)) {
-            history.back();
-        } else {
-            // No usable browser history (e.g. opened in a new tab) —
-            // fall back to the dashboard as a safe default.
-            window.location.href = isGuest ? '../Guest/guest.html' : '../Student/student.html';
-        }
-    });
+            window.location.href = isGuest
+                ? '../Guest/guest.html'
+                : '../Student/student.html';
+        });
 
     const btnMenu = document.getElementById('btn-menu');
     const laMenuBackdrop = document.getElementById('la-menu-backdrop');

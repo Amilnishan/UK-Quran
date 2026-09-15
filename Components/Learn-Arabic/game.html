@@ -772,6 +772,19 @@
     height:22px;
   }
 
+  #back-to-learn-btn{
+    margin-top:12px;
+    border:1px solid rgba(30,111,194,.35);
+    background:#fff;
+    color:var(--blue-deep);
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1rem;
+    padding:10px 24px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+
   @media (prefers-reduced-motion: reduce){
 
     #play-btn::after{
@@ -902,52 +915,53 @@
   </div>
 
   <!-- GAME OVER -->
+<div id="gameover-screen">
+  <h2 id="gameover-title">
+    Game Over
+  </h2>
 
-  <div id="gameover-screen">
+  <p class="final-score">
+    Score:
+    <b id="final-score-val">0</b>
+    / <b id="max-score-val">360</b>
+  </p>
 
-    <h2 id="gameover-title">
-      انتهت اللعبة
-    </h2>
+  <p class="final-grade" id="final-grade">Excellent</p>
 
-    <p class="final-score">
-      Score:
-      <b id="final-score-val">0</b>
-      / <b id="max-score-val">360</b>
-    </p>
+  <p id="result-save-status" aria-live="polite" style="margin:0 0 12px; color:var(--ink-soft); font-size:.9rem;"></p>
 
-    <p class="final-grade" id="final-grade">Excellent</p>
+  <button id="replay-btn">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M4 12a8 8 0 1 1 2.6 5.9"
+        stroke="#fff"
+        stroke-width="2.2"
+        stroke-linecap="round"
+      />
+      <path
+        d="M4 17v-5h5"
+        stroke="#fff"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+    Replay Game
+  </button>
 
-    <button id="replay-btn">
-
-      <svg viewBox="0 0 24 24" fill="none">
-
-        <path
-          d="M4 12a8 8 0 1 1 2.6 5.9"
-          stroke="#fff"
-          stroke-width="2.2"
-          stroke-linecap="round"
-        />
-
-        <path
-          d="M4 17v-5h5"
-          stroke="#fff"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-
-      </svg>
-
-      إعادة اللعب
-
-    </button>
-
-  </div>
+  <button id="back-to-learn-btn" type="button">
+    Back to Learn Arabic
+  </button>
+</div>
 
 </div>
 
 
-<script>
+<script type="module">
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { get, ref, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { auth, database } from "../../JavaScript/firebase-config.js";
 
 (function(){
 
@@ -1102,8 +1116,14 @@
   var finalGrade =
     document.getElementById("final-grade");
 
+  var resultSaveStatus =
+    document.getElementById("result-save-status");
+
   var replayBtn =
     document.getElementById("replay-btn");
+
+  var backToLearnBtn =
+    document.getElementById("back-to-learn-btn");
 
 
   /* =========================================================
@@ -1111,6 +1131,161 @@
   ========================================================= */
 
   var audioCtx = null;
+
+  var studentIdentity = {
+    studentId:null,
+    teacherUid:null,
+    ready:false
+  };
+
+  var resolveIdentityReady;
+
+  var identityReadyPromise =
+    new Promise(
+      function(resolve){
+
+        resolveIdentityReady = resolve;
+
+      }
+    );
+
+  async function resolveStudentIdentity(user){
+
+    if(
+      !user ||
+      !user.email ||
+      !user.email.endsWith("@student.ukquran.com")
+    ){
+
+      return;
+
+    }
+
+    var studentId =
+      user.email.split("@")[0].toLowerCase();
+
+    var teachersSnap =
+      await get(ref(database,"teachers"));
+
+    if(teachersSnap.exists()){
+
+      teachersSnap.forEach(
+        function(teacherSnap){
+
+          if(
+            !studentIdentity.teacherUid &&
+            teacherSnap.child("students/" + studentId).exists()
+          ){
+
+            studentIdentity.studentId = studentId;
+            studentIdentity.teacherUid = teacherSnap.key;
+
+          }
+
+        }
+      );
+
+    }
+
+    studentIdentity.ready = true;
+
+  }
+
+  onAuthStateChanged(
+    auth,
+    function(user){
+
+      resolveStudentIdentity(user).catch(
+        function(error){
+
+          console.error("Unable to resolve student identity:",error);
+          studentIdentity.ready = true;
+
+        }
+      ).finally(
+        function(){
+
+          resolveIdentityReady();
+
+        }
+      );
+
+    }
+  );
+
+  async function saveLevel1Result(){
+
+    await identityReadyPromise;
+
+    if(
+      !studentIdentity.ready ||
+      !studentIdentity.teacherUid ||
+      !studentIdentity.studentId
+    ){
+
+      throw new Error("Student identity is not available");
+
+    }
+
+    var resultRef =
+      ref(
+        database,
+        "teachers/" +
+        studentIdentity.teacherUid +
+        "/students/" +
+        studentIdentity.studentId +
+        "/gameResults"
+      );
+
+    await update(
+      resultRef,
+      {
+        level1:score
+      }
+    );
+
+  }
+
+  async function persistCompletedResult(){
+
+    if(resultSaveStatus){
+
+      resultSaveStatus.textContent =
+        "Saving result...";
+
+    }
+
+    try{
+
+      await saveLevel1Result();
+
+      if(resultSaveStatus){
+
+        resultSaveStatus.textContent =
+          "Result saved";
+
+        resultSaveStatus.style.color =
+          "var(--green)";
+
+      }
+
+    }catch(error){
+
+      console.error("Unable to save Level 1 game result:",error);
+
+      if(resultSaveStatus){
+
+        resultSaveStatus.textContent =
+          "Result could not be saved. Please try again.";
+
+        resultSaveStatus.style.color =
+          "var(--red)";
+
+      }
+
+    }
+
+  }
 
 
   function ensureAudio(){
@@ -2907,7 +3082,7 @@
      GAME OVER
   ========================================================= */
 
-  function gameOver(){
+  async function gameOver(){
 
     state =
       STATE.GAMEOVER;
@@ -2923,6 +3098,8 @@
 
 
     updateFinalResult();
+
+    await persistCompletedResult();
 
 
     setTimeout(
@@ -2943,7 +3120,7 @@
      WIN GAME
   ========================================================= */
 
-  function winGame(){
+  async function winGame(){
 
     state =
       STATE.GAMEOVER;
@@ -2959,6 +3136,8 @@
 
 
     updateFinalResult();
+
+    await persistCompletedResult();
 
 
     setTimeout(
@@ -3046,6 +3225,16 @@
   replayBtn.addEventListener(
     "click",
     resetToStart
+  );
+
+  backToLearnBtn.addEventListener(
+    "click",
+    function(){
+
+      window.location.href =
+        "learn-arabic-without-harakat.html";
+
+    }
   );
 
 

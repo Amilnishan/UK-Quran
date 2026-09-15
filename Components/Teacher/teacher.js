@@ -58,6 +58,13 @@ const btnSaveProgressEdit = document.getElementById('btn-save-progress-edit');
 const btnCancelProgressEdit = document.getElementById('btn-cancel-progress-edit');
 const btnCloseProgressEditModal = document.getElementById('btn-close-progress-edit');
 
+// Game Result Modal
+const gameResultModal = document.getElementById('game-result-modal');
+const gameResultModalTitle = document.getElementById('game-result-modal-title');
+const gameResultTableBody = document.getElementById('game-result-table-body');
+const btnCloseGameResult = document.getElementById('btn-close-game-result');
+let currentGameResultStudentId = null;
+
 let currentProgressStudentId = null;
 let currentProgressLogSnapshot = {};
 let currentProgressEditDateKey = null;
@@ -296,6 +303,7 @@ function renderStudents() {
                     <input type="text" id="remark-${student.id}" class="remark-input" placeholder="Remarks..." value="${student.remarks || ''}" data-action="remark" data-student-id="${student.id}">
                 </div>
                 <button type="button" class="btn-outline btn-monthly-progress full-width" data-action="monthly-progress" data-student-id="${student.id}">View Monthly Progress</button>
+                <button type="button" class="btn-monthly-progress btn-game-result full-width" data-action="game-result" data-student-id="${student.id}">Game Result</button>
             </div>
         `;
         fragment.appendChild(card);
@@ -341,6 +349,8 @@ studentListContainer.addEventListener('click', (e) => {
         openDeleteModal(studentId);
     } else if (action === 'monthly-progress') {
         openStudentProgressModal(studentId);
+    } else if (action === 'game-result') {
+        openGameResultModal(studentId);
     }
 });
 
@@ -408,6 +418,76 @@ function closeStudentProgressModal() {
     }
     closeProgressEditModal();
     unlockBodyScroll();
+}
+
+// --- Game Result Modal Logic ---
+function openGameResultModal(studentId) {
+    const student = students.find((s) => s.id === studentId);
+    if (!student || !gameResultModal) return;
+
+    currentGameResultStudentId = studentId;
+    if (gameResultModalTitle) gameResultModalTitle.innerText = `Game Result - ${student.name}`;
+
+    gameResultModal.classList.remove('hidden');
+    lockBodyScroll();
+    loadGameResult(studentId);
+}
+
+function closeGameResultModal() {
+    if (!gameResultModal) return;
+    gameResultModal.classList.add('hidden');
+    currentGameResultStudentId = null;
+    unlockBodyScroll();
+}
+
+// Load Game Results from DB (reads the stored score — never a local/hardcoded value)
+function loadGameResult(studentId) {
+    if (!gameResultTableBody) return;
+
+    gameResultTableBody.innerHTML = '<tr><td colspan="2" style="padding:16px; color:#888;">Loading game results...</td></tr>';
+
+    get(ref(database, `teachers/${currentTeacherUid}/students/${studentId}/gameResults`))
+        .then((snap) => {
+            gameResultTableBody.innerHTML = '';
+            const results = snap.exists() ? snap.val() : {};
+
+            // Ordered level keys so future levels (level2, level3...) appear in order.
+            const levelKeys = Object.keys(results)
+                .filter((key) => /^level\d+$/.test(key))
+                .sort((a, b) => {
+                    const numA = Number(a.replace('level', ''));
+                    const numB = Number(b.replace('level', ''));
+                    return numA - numB;
+                });
+
+            if (levelKeys.length === 0) {
+                gameResultTableBody.innerHTML = '<tr><td colspan="2" style="padding:16px; color:#888;">No game results yet.</td></tr>';
+                return;
+            }
+
+            levelKeys.forEach((levelKey) => {
+                const points = Number(results[levelKey]) || 0;
+                const levelLabel = `Level ${levelKey.replace('level', '')}`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${levelLabel}</td>
+                    <td style="font-weight:700; color:#146c43;">${points}</td>
+                `;
+                gameResultTableBody.appendChild(tr);
+            });
+        })
+        .catch((err) => {
+            console.error(err);
+            gameResultTableBody.innerHTML = '<tr><td colspan="2" style="padding:16px; color:#888;">Unable to load game results.</td></tr>';
+        });
+}
+
+if (btnCloseGameResult) btnCloseGameResult.addEventListener('click', closeGameResultModal);
+
+if (gameResultModal) {
+    gameResultModal.addEventListener('click', (e) => {
+        if (e.target === gameResultModal) closeGameResultModal();
+    });
 }
 
 // Load Monthly Report Data & Filter
