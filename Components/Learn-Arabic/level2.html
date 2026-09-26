@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Arabic Letters with Harakat</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --harakat-ink: #121212;
+        --harakat-muted: #858585;
+        --harakat-blue: #eaf0ff;
+        --harakat-symbol: #252b78;
+    }
+
+    .harakat-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 20px 8px;
+    }
+
+    .harakat-header h1 {
+        margin: 0;
+        color: #5c4b37;
+        font-size: 18px;
+        letter-spacing: 0.02em;
+    }
+
+    .harakat-intro {
+        margin: 18px 20px 14px;
+        color: var(--harakat-muted);
+        font-size: 14px;
+    }
+
+    .harakat-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0 20px 20px;
+    }
+
+    .harakat-card {
+        appearance: none;
+        width: 100%;
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border: 1px solid rgba(225, 229, 239, 0.85);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: #fff;
+        box-shadow: 0 10px 24px rgba(39, 47, 83, 0.12);
+        color: var(--harakat-ink);
+        font-family: 'Outfit', sans-serif;
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .harakat-card:hover,
+    .harakat-card:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(39, 47, 83, 0.16);
+        outline: none;
+    }
+
+    .harakat-symbol {
+        flex: 0 0 52px;
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: var(--harakat-blue);
+        color: var(--harakat-symbol);
+        font-family: 'Noto Naskh Arabic', serif;
+        font-size: 39px;
+        line-height: 1;
+    }
+
+    .harakat-copy {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .harakat-copy h2 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+        font-weight: 700;
+    }
+
+    .harakat-copy p {
+        margin: 2px 0 0;
+        color: var(--harakat-muted);
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .harakat-arrow {
+        flex: 0 0 auto;
+        color: #c0c5d2;
+    }
+
+    @media (max-width: 480px) {
+        .harakat-list {
+            gap: 12px;
+            padding: 0 16px 24px;
+        }
+
+        .harakat-card {
+            min-height: 76px;
+            padding: 12px 14px;
+            gap: 14px;
+        }
+
+        .harakat-symbol {
+            flex-basis: 52px;
+            width: 52px;
+            height: 52px;
+            font-size: 26px;
+        }
+
+        .harakat-copy h2 {
+            font-size: 15px;
+        }
+
+        .harakat-copy p {
+            font-size: 12px;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="app-container">
+    <header class="harakat-header">
+        <button class="icon-btn" id="btn-back" title="Go Back" aria-label="Go back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8E785C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+        </button>
+        <h1>Arabic Letters with Harakat</h1>
+    </header>
+
+    <p class="harakat-intro">Learn to recognize and write</p>
+
+    <main class="harakat-list" aria-label="Harakat lessons">
+        <button class="harakat-card" type="button" data-harakat="fathah">
+            <span class="harakat-symbol" lang="ar" dir="rtl">ـَ</span>
+            <span class="harakat-copy">
+                <h2>Fat-hah</h2>
+                <p>Learn to recognize and write</p>
+            </span>
+            <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+
+        <button class="harakat-card" type="button" data-harakat="kasrah">
+            <span class="harakat-symbol" lang="ar" dir="rtl">ـِ</span>
+            <span class="harakat-copy">
+                <h2>Kas-rah</h2>
+                <p>Learn to recognize and write</p>
+            </span>
+            <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+
+        <button class="harakat-card" type="button" data-harakat="dammah">
+            <span class="harakat-symbol" lang="ar" dir="rtl">ـُ</span>
+            <span class="harakat-copy">
+                <h2>Damm-ah</h2>
+                <p>Learn to recognize and write</p>
+            </span>
+            <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+
+        <button class="harakat-card" type="button" data-harakat="sukoon">
+            <span class="harakat-symbol" lang="ar" dir="rtl">ـْ</span>
+            <span class="harakat-copy">
+                <h2>Su-koon</h2>
+                <p>Learn to recognize and write</p>
+            </span>
+            <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </main>
+</div>
+
+<script>
+    const isGuest = sessionStorage.getItem('isGuest') === 'true';
+
+    document.getElementById('btn-back').addEventListener('click', () => {
+        window.location.href = 'learn-arabic-without-harakat.html';
+    });
+
+    document.querySelectorAll('[data-harakat]').forEach((card) => {
+        card.addEventListener('click', () => {
+            if (card.dataset.harakat === 'fathah') {
+                window.location.href = 'fat-hah.html';
+                return;
+            }
+
+            if (card.dataset.harakat === 'kasrah') {
+                window.location.href = 'kes-rah.html';
+                return;
+            }
+
+            if (card.dataset.harakat === 'dammah') {
+                window.location.href = 'Damm-ah.html';
+                return;
+            }
+
+            if (card.dataset.harakat === 'sukoon') {
+                window.location.href = 'sukoon.html';
+                return;
+            }
+
+            card.setAttribute('aria-pressed', 'true');
+        });
+    });
+</script>
+</body>
+</html>

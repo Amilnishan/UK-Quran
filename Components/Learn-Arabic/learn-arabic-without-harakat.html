@@ -82,22 +82,23 @@
         margin-top: 4px;
     }
     .option-btn {
-        appearance: none;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        text-align: left;
-        border: 1px solid #dbe4ff;
+        align-self: stretch;
+        border: 1px solid #ffffff;
         border-radius: 16px;
         padding: 14px 16px;
-        background: #ffffff;
-        color: #12309e;
+        color: #87a6e7;
+         background: #ffffff;
         font-family: 'Outfit', sans-serif;
         font-size: 16px;
         font-weight: 700;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
         cursor: pointer;
-        box-shadow: 0 8px 18px rgba(18, 48, 158, 0.08);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        box-shadow: 0 8px 18px rgba(18, 48, 158, 0.24);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
     }
     .option-btn:hover {
         transform: translateY(-1px);
@@ -148,10 +149,10 @@
 
     .exam-button {
         align-self: stretch;
-        border: 1px solid #0f2a86;
+        border: 1px solid #b1bde5;
         border-radius: 16px;
         padding: 14px 16px;
-        background: linear-gradient(135deg, #12309e 0%, #2d63d8 100%);
+        background:#87a6e7;
         color: #ffffff;
         font-family: 'Outfit', sans-serif;
         font-size: 16px;
@@ -241,7 +242,7 @@
             <div class="la-hero-sub">
                 <div class="la-hero-text">
                     <p style="margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;">LEVEL 2</p>
-                    <p style="font-size: 15px; font-weight: 600;">Coming soon....</p>
+                    <p style="font-size: 15px; font-weight: 600;">Arabic Letters ( Harakat )</p>
                 </div>
                 <svg class="la-hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="6 9 12 15 18 9"></polyline>
@@ -250,9 +251,9 @@
         </div>
 
         <div class="level-actions" id="level2-actions">
-            <button type="button" class="option-btn" id="learn-arabic-harakat-btn">Coming soon....</button>
+            <button type="button" class="option-btn" id="learn-arabic-harakat-btn">Learn Arabic Letters [ with Harakat ]</button>
             <button type="button" class="exam-button" id="level2-exam-btn">
-                <span>Coming soon....</span>
+                <span>LEVEL 2 EXAM</span>
                 <span class="exam-play" aria-hidden="true">
                     <span>PLAY</span>
                     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -365,7 +366,7 @@
 
     level1ExamBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        window.location.href = 'game.html';
+        window.location.href = 'game-level-1.html';
     });
 
     level2Hero.addEventListener('click', () => {
@@ -378,10 +379,12 @@
 
     learnHarakatBtn.addEventListener('click', (event) => {
         event.stopPropagation();
+        window.location.href = 'level2.html';
     });
 
     level2ExamBtn.addEventListener('click', (event) => {
         event.stopPropagation();
+        window.location.href = 'game-level-2.html';
     });
 
     const isGuest = sessionStorage.getItem('isGuest') === 'true';
