@@ -266,7 +266,8 @@ function renderStudents() {
                     <div class="av">${userIconSVG}</div>
                     <div>
                         <h4>${student.name}</h4>
-                        <p class="student-meta">ID: ${student.id} | PIN: ${student.pin}</p>
+                        <p class="student-meta">ID: ${student.id}</p>
+                        <p class="student-meta">PIN: ${student.pin}</p>
                     </div>
                 </div>
                 <div class="sc-actions">
@@ -426,7 +427,7 @@ function openGameResultModal(studentId) {
     if (!student || !gameResultModal) return;
 
     currentGameResultStudentId = studentId;
-    if (gameResultModalTitle) gameResultModalTitle.innerText = `Game Result - ${student.name}`;
+    if (gameResultModalTitle) gameResultModalTitle.innerText = `${student.name}`;
 
     gameResultModal.classList.remove('hidden');
     lockBodyScroll();
@@ -467,11 +468,12 @@ function loadGameResult(studentId) {
 
             levelKeys.forEach((levelKey) => {
                 const points = Number(results[levelKey]) || 0;
+                const totalPerLevel = 340;
                 const levelLabel = `Level ${levelKey.replace('level', '')}`;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="font-weight:600;">${levelLabel}</td>
-                    <td style="font-weight:700; color:#146c43;">${points}</td>
+                    <td style="font-weight:700; color:#146c43;">${points} / ${totalPerLevel}</td>
                 `;
                 gameResultTableBody.appendChild(tr);
             });

@@ -8,12 +8,12 @@
   "theme_color": "#111827",
   "icons": [
     {
-      "src": "images/Logo/logo.webp",
+      "src": "images/Logo/round-logo.webp",
       "sizes": "192x192",
       "type": "image/webp"
     },
     {
-      "src": "images/Logo/logo.webp",
+      "src": "images/Logo/round-logo.webp",
       "sizes": "512x512",
       "type": "image/webp"
     }

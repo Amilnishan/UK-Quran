@@ -45,7 +45,7 @@
     width:100%;
     height:100%;
     overflow:hidden;
-    background-image:url("../../images/Background/game.webp");
+    background-image:url("../../images/Background/download.webp");
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -94,7 +94,7 @@
     background:radial-gradient(circle,#FFF4DA,transparent 70%);
   }
 
-  /* ---------- board / letters ---------- */
+  /* ---------- board / word audio tiles ---------- */
 
   #board{
     position:absolute;
@@ -109,7 +109,7 @@
 
     font-family:'Baloo Bhaijaan 2',sans-serif;
     font-weight:600;
-    font-size:35px;
+    font-size:clamp(22px,3.5vw,36px);
 
     color:var(--tile-color,var(--blue));
     background:color-mix(
@@ -123,7 +123,10 @@
     box-shadow:
       0 0 8px rgba(255,255,255,.9),
       0 0 18px rgba(255,255,255,.45);
-    line-height:1;
+    line-height:1.15;
+    text-align:center;
+    white-space:normal;
+    overflow-wrap:anywhere;
     cursor:pointer;
     user-select:none;
     -webkit-user-select:none;
@@ -243,7 +246,7 @@
   @media (max-width:600px){
 
     .letter-tile{
-      font-size:26px;
+      font-size:clamp(14px,4vw,24px);
       padding:.22em .28em;
       border-radius:12px;
 
@@ -923,7 +926,7 @@
   <p class="final-score">
     Score:
     <b id="final-score-val">0</b>
-    / <b id="max-score-val">360</b>
+    / <b id="max-score-val">340</b>
   </p>
 
   <p class="final-grade" id="final-grade">Excellent</p>
@@ -968,57 +971,79 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
   "use strict";
 
 
-  /* =========================================================
-     LETTER DATA
-  ========================================================= */
+    /* =========================================================
+      WORD AUDIO DATA
+    ========================================================= */
 
-  var LETTERS = [
-
-    {ch:"ا", name:"ألف"},
-    {ch:"ب", name:"باء"},
-    {ch:"ت", name:"تاء"},
-    {ch:"ث", name:"ثاء"},
-    {ch:"ج", name:"جيم"},
-    {ch:"ح", name:"حاء"},
-
-    {ch:"خ", name:"خاء"},
-    {ch:"د", name:"دال"},
-    {ch:"ذ", name:"ذال"},
-    {ch:"ر", name:"راء"},
-    {ch:"ز", name:"زاي"},
-    {ch:"س", name:"سين"},
-
-    {ch:"ش", name:"شين"},
-    {ch:"ص", name:"صاد"},
-    {ch:"ض", name:"ضاد"},
-    {ch:"ط", name:"طاء"},
-    {ch:"ظ", name:"ظاء"},
-    {ch:"ع", name:"عين"},
-
-    {ch:"غ", name:"غين"},
-    {ch:"ف", name:"فاء"},
-    {ch:"ق", name:"قاف"},
-    {ch:"ك", name:"كاف"},
-    {ch:"ل", name:"لام"},
-    {ch:"م", name:"ميم"},
-
-    {ch:"ن", name:"نون"},
-    {ch:"ه", name:"هاء"},
-    {ch:"و", name:"واو"},
-    {ch:"ي", name:"ياء"}
-
+  var WORD_AUDIO_FILES = [
+    "بَ طَ شَ تْ.mp3",
+    "بَ طَ شَ.mp3",
+    "بُ طِ شَ تْ.mp3",
+    "بُ طِ شَ.mp3",
+    "ذَ كَ رَ تْ.mp3",
+    "ذَ كَ رَ.mp3",
+    "ذُ كَ رَ تْ.mp3",
+    "ذُ كَ رَ.mp3",
+    "رَ كِ بَ تْ.mp3",
+    "رَ كِ بَ.mp3",
+    "رُ كِ بَ تْ.mp3",
+    "رُ كِ بَ.mp3",
+    "سَ مِ عَ تْ.mp3",
+    "سَ مِ عَ.mp3",
+    "سُ مِ عَ تْ.mp3",
+    "سُ مِ عَ.mp3",
+    "شَ رِ بَ تْ.mp3",
+    "شَ رِ بَ.mp3",
+    "شَ كَ رَ تْ.mp3",
+    "شَ كَ رَ.mp3",
+    "شُ رِ بَ تْ.mp3",
+    "شُ رِ بَ.mp3",
+    "شُ كَ رَ تْ.mp3",
+    "شُ كَ رَ.mp3",
+    "صَ نَ عَ تْ.mp3",
+    "صَ نَ عَ.mp3",
+    "صُ نِ عَ تْ.mp3",
+    "صُ نِ عَ.mp3",
+    "ضَ رَ بَ تْ.mp3",
+    "ضَ رَ بَ.mp3",
+    "ضُ رِ بَ تْ.mp3",
+    "ضُ رِ بَ.mp3",
+    "فَ عَ لَ تْ.mp3",
+    "فَ عَ لَ.mp3",
+    "فُ عِ لَ تْ.mp3",
+    "فُ عِ لَ.mp3",
+    "لَ بِ سَ تْ.mp3",
+    "لَ بِ سَ.mp3",
+    "لُ بِ سَ تْ.mp3",
+    "لُ بِ سَ.mp3",
+    "مَ دَ حَ تْ.mp3",
+    "مَ دَ حَ.mp3",
+    "مُ دَ حَ تْ.mp3",
+    "مُ دَ حَ.mp3"
   ];
+
+  var LETTERS = WORD_AUDIO_FILES.map(
+    function(fileName){
+      return {
+        ch:fileName,
+        name:fileName.replace(/\.mp3$/i,""),
+        audio:"../../audios/level-2-game-words/" + encodeURIComponent(fileName)
+      };
+    }
+  );
 
 
   /* =========================================================
      ROUND SETTINGS
   ========================================================= */
 
-  var ROUND_SIZES = [7,14,21,28];
+  var ROUND_SIZES = [8,16,24,28];
 
   var SOUNDS_PER_ROUND = 9;
 
   var POINTS_PER_LETTER = 10;
+
+  var FALL_SPEED_PX_PER_SEC = 42;
 
   var MAX_SCORE =
     ROUND_SIZES.length *
@@ -1412,78 +1437,94 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
   }
 
 
-  /* =========================================================
-     LETTER AUDIO
-  ========================================================= */
+    /* =========================================================
+      WORD AUDIO
+    ========================================================= */
+function speak(letter, onComplete){
 
-  function speak(letter){
-
-    if(
-      !letter ||
-      !letter.ch
-    ) return;
-
-
-    var index =
-      LETTERS.findIndex(
-        function(item){
-
-          return item.ch === letter.ch;
-
-        }
-      );
-
-
-    if(index < 0) return;
-
-
-    var audioNumber =
-      (index % 28) + 1;
-
-
-    var audio =
-      new Audio(
-        "../../audios/arabic-letters/" +
-        String(audioNumber).padStart(2,"0") +
-        ".mp3"
-      );
-
-
-    audio.preload = "auto";
-
-
-    audio.onplay =
-      function(){
-
-        speakerBtn.classList.add(
-          "speaking"
-        );
-
-      };
-
-
-    audio.onended =
-    audio.onerror =
-      function(){
-
-        speakerBtn.classList.remove(
-          "speaking"
-        );
-
-      };
-
-
-    audio.play().catch(
-      function(){
-
-        speakerBtn.classList.remove(
-          "speaking"
-        );
-
-      }
-    );
-
+  if(
+    !letter ||
+    !letter.ch
+  ){
+    if(typeof onComplete === "function"){
+      onComplete();
+    }
+    return;
   }
+
+  var audioPath = letter.audio;
+
+  if(!audioPath){
+    if(typeof onComplete === "function"){
+      onComplete();
+    }
+    return;
+  }
+
+  var audio =
+    new Audio(audioPath);
+
+  audio.preload = "auto";
+
+  var completed = false;
+
+  function finishAudio(){
+
+    if(completed){
+      return;
+    }
+
+    completed = true;
+
+    speakerBtn.classList.remove("speaking");
+
+    if(typeof onComplete === "function"){
+      onComplete();
+    }
+  }
+
+  audio.onplay =
+    function(){
+
+      speakerBtn.classList.add(
+        "speaking"
+      );
+
+    };
+
+  audio.onended =
+    function(){
+
+      finishAudio();
+
+    };
+
+  audio.onerror =
+    function(){
+
+      console.error(
+        "Unable to play letter audio:",
+        audio.src
+      );
+
+      finishAudio();
+
+    };
+
+  audio.play().catch(
+    function(error){
+
+      console.error(
+        "Audio playback failed:",
+        error,
+        audio.src
+      );
+
+      finishAudio();
+
+    }
+  );
+}
 
 
   /* =========================================================
@@ -1758,6 +1799,16 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
       letterSet || LETTERS;
 
 
+    var motionScale =
+      set.length >= 28
+        ? 0.72
+        : set.length >= 21
+          ? 0.8
+          : set.length >= 14
+            ? 0.9
+            : 1;
+
+
     board.innerHTML = "";
 
     tiles =
@@ -1773,12 +1824,12 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
 
           el.textContent =
-            L.ch;
+            L.name;
 
 
           el.setAttribute(
             "data-ch",
-            L.ch
+            L.name
           );
 
 
@@ -1845,14 +1896,14 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
             ampX:
               reduceMotion
                 ? 4
-                : 10 +
-                  Math.random() * 10,
+                : (10 +
+                  Math.random() * 10) * motionScale,
 
             ampY:
               reduceMotion
                 ? 3
-                : 6 +
-                  Math.random() * 8,
+                : (6 +
+                  Math.random() * 8) * motionScale,
 
             phaseX:
               Math.random() * 6.28,
@@ -1867,8 +1918,8 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
             rotAmp:
               reduceMotion
                 ? 2
-                : 5 +
-                  Math.random() * 5,
+                : (5 +
+                  Math.random() * 5) * motionScale,
 
             phaseR:
               Math.random() * 6.28
@@ -1968,6 +2019,22 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
   function computeColumns(){
 
+    var count =
+      tiles.length || 7;
+
+    if(window.innerWidth <= 600){
+      return 4;
+    }
+
+
+    if(count >= 28){
+      return 9;
+    }
+
+    if(count >= 21){
+      return 8;
+    }
+
     return 7;
 
   }
@@ -1995,11 +2062,11 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
 
     var topPad =
-      boardH * 0.16;
+      boardH * 0.12;
 
 
     var bottomPad =
-      boardH * 0.22;
+      boardH * 0.12;
 
 
     var usableH =
@@ -2012,7 +2079,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
       boardW / cols;
 
 
-    var gap = 4;
+    var gap = 2;
 
 
     var tileH =
@@ -2034,6 +2101,22 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
         usableH / rows,
         tileH + gap
       );
+
+    if(
+      window.innerWidth <= 600 &&
+      tiles.length === 8
+    ){
+
+      cellH =
+        tileH + 12;
+
+      topPad =
+        Math.max(
+          8,
+          (boardH - cellH * rows) / 2
+        );
+
+    }
 
 
     tiles.forEach(
@@ -2728,87 +2811,141 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
   }
 
-  function startRound(){
+  function hasVisibleTargetOnBoard(){
 
     if(
-      state === STATE.GAMEOVER
+      !target
     ){
 
-      return;
+      return false;
 
     }
 
 
-    if(
-      !targetQueue.length
-    ){
-
-      completeRound();
-
-      return;
-
-    }
-
-
-    var targetIndex =
-      Math.floor(
-        Math.random() * targetQueue.length
-      );
-
-
-    target =
-      targetQueue.splice(
-        targetIndex,
-        1
-      )[0];
-
-
-    shownLetters[
-      target.ch
-    ] = true;
-
-
-    lastShownLetter =
-      target.ch;
-
-
-    promptLabel.textContent =
-      target.ch;
-
-
-    var fallSpeed =
-      34 +
-      Math.random() * 8;
-
-
-    tiles.forEach(
+    return tiles.some(
       function(t){
 
-        t.vy =
-          fallSpeed;
-
-        t.fallOffset =
-          0;
-
-        t.grounded =
-          false;
+        return t.ch === target.ch &&
+          t.el &&
+          t.el.style.visibility !== "hidden";
 
       }
     );
 
+  }
+
+
+function startRound(){
+
+  if(
+    state === STATE.GAMEOVER
+  ){
+    return;
+  }
+
+  if(
+    !targetQueue.length
+  ){
+
+    completeRound();
+
+    return;
+
+  }
+
+  var targetIndex =
+    Math.floor(
+      Math.random() * targetQueue.length
+    );
+
+  target =
+    targetQueue.splice(
+      targetIndex,
+      1
+    )[0];
+
+  shownLetters[
+    target.ch
+  ] = true;
+
+  lastShownLetter =
+    target.ch;
+
+  promptLabel.textContent =
+    target.name;
+
+  var fallSpeed =
+    FALL_SPEED_PX_PER_SEC;
+
+  tiles.forEach(
+    function(t){
+
+      t.vy =
+        fallSpeed;
+
+      t.fallOffset =
+        0;
+
+      t.grounded =
+        false;
+
+    }
+  );
+
+  /*
+    IMPORTANT:
+    Do NOT start FALLING here.
+
+    First play the complete letter sound.
+  */
+
+  state =
+    STATE.SHUFFLE;
+
+  promptWrap.classList.add(
+    "visible"
+  );
+
+  if(
+    hasVisibleTargetOnBoard()
+  ){
+
+    speak(
+      target,
+
+      function(){
+
+        /*
+          The audio has completely finished.
+          NOW start the falling animation.
+        */
+
+        if(
+          state === STATE.GAMEOVER
+        ){
+          return;
+        }
+
+        state =
+          STATE.FALLING;
+
+      }
+    );
+
+  }else{
+
+    /*
+      Safety fallback:
+      If the target isn't visible,
+      start falling without audio.
+    */
 
     state =
       STATE.FALLING;
 
-
-    promptWrap.classList.add(
-      "visible"
-    );
-
-
-    speak(target);
-
   }
+
+}
 
 
   /* =========================================================
@@ -2952,7 +3089,13 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
     playFail();
 
 
-    speak(target);
+    if(
+      hasVisibleTargetOnBoard()
+    ){
+
+      speak(target);
+
+    }
 
 
     showFeedback(
@@ -3244,6 +3387,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
       if(
         target &&
+        hasVisibleTargetOnBoard() &&
         (
           state === STATE.FALLING ||
           state === STATE.FEEDBACK

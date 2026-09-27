@@ -71,15 +71,45 @@
     }
     .la-hero.open .la-hero-arrow { transform: rotate(180deg); }
 
-    /* Letter list — collapsed by default, revealed when the hero is tapped */
+    .level-card + .level-card { margin-top: 16px; }
+    .level-card .la-hero-sub { background-image: url("../../images/Banner/banner-3-reverse.webp"); }
+
+    .level-actions {
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 20px 20px;
+        margin-top: 4px;
+    }
+    .option-btn {
+        align-self: stretch;
+        border: 1px solid #ffffff;
+        border-radius: 16px;
+        padding: 14px 16px;
+        color: #87a6e7;
+         background: #ffffff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(18, 48, 158, 0.24);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+    .option-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(18, 48, 158, 0.12);
+    }
+
     .letter-list {
         display: none;
         padding: 18px 20px 20px;
         flex-direction: column;
         gap: 12px;
-    }
-    .la-hero.open + .letter-list {
-        display: flex;
     }
     .letter-row {
         display: flex;
@@ -119,10 +149,10 @@
 
     .exam-button {
         align-self: stretch;
-        border: 1px solid #0f2a86;
+        border: 1px solid #b1bde5;
         border-radius: 16px;
         padding: 14px 16px;
-        background: linear-gradient(135deg, #12309e 0%, #2d63d8 100%);
+        background:#87a6e7;
         color: #ffffff;
         font-family: 'Outfit', sans-serif;
         font-size: 16px;
@@ -190,8 +220,48 @@
     </div>
     </div>
 
+    <div class="level-actions" id="level-actions">
+        <button type="button" class="option-btn" id="learn-arabic-letters-btn">Learn Arabic Letters</button>
+        <button type="button" class="exam-button" id="level1-exam-btn">
+            <span>LEVEL 1 EXAM</span>
+            <span class="exam-play" aria-hidden="true">
+                <span>PLAY</span>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"></path>
+                </svg>
+            </span>
+        </button>
+    </div>
+
     <div class="letter-list" id="letter-list">
         <!-- JS injects letter rows here -->
+    </div>
+
+    <div class="level-card" data-level="2">
+        <div class="la-hero" id="level2-hero">
+            <div class="la-hero-sub">
+                <div class="la-hero-text">
+                    <p style="margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;">LEVEL 2</p>
+                    <p style="font-size: 15px; font-weight: 600;">Arabic Letters ( Harakat )</p>
+                </div>
+                <svg class="la-hero-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <div class="level-actions" id="level2-actions">
+            <button type="button" class="option-btn" id="learn-arabic-harakat-btn">Learn Arabic Letters [ with Harakat ]</button>
+            <button type="button" class="exam-button" id="level2-exam-btn">
+                <span>LEVEL 2 EXAM </span>
+                <span class="exam-play" aria-hidden="true">
+                    <span>PLAY</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
     </div>
 
 </div>
@@ -231,6 +301,34 @@
     ];
 
     const letterList = document.getElementById('letter-list');
+    const levelActions = document.getElementById('level-actions');
+    const learnBtn = document.getElementById('learn-arabic-letters-btn');
+    const level1ExamBtn = document.getElementById('level1-exam-btn');
+    const laHero = document.getElementById('la-hero');
+    const level2Hero = document.getElementById('level2-hero');
+    const level2Actions = document.getElementById('level2-actions');
+    const learnHarakatBtn = document.getElementById('learn-arabic-harakat-btn');
+    const level2ExamBtn = document.getElementById('level2-exam-btn');
+
+    let viewState = 'closed';
+    let level2Open = false;
+
+    const setView = (state) => {
+        viewState = state;
+
+        const isOpen = state !== 'closed';
+        laHero.classList.toggle('open', isOpen);
+
+        levelActions.style.display = state === 'menu' ? 'flex' : 'none';
+        levelActions.style.paddingTop = state === 'menu' ? '16px' : '0';
+        levelActions.style.marginTop = state === 'menu' ? '4px' : '0';
+        letterList.style.display = state === 'letters' ? 'flex' : 'none';
+
+        learnBtn.style.textAlign = 'left';
+        learnBtn.style.justifyContent = 'flex-start';
+        learnBtn.style.alignItems = 'center';
+        learnBtn.style.display = 'flex';
+    };
 
     LETTERS.forEach((letter, index) => {
         const row = document.createElement('button');
@@ -252,28 +350,41 @@
         letterList.appendChild(row);
     });
 
-    const examButton = document.createElement('button');
-    examButton.type = 'button';
-    examButton.className = 'exam-button';
-    examButton.innerHTML = `
-        <span>LEVEL 1 EXAM</span>
-        <span class="exam-play" aria-hidden="true">
-            <span>PLAY</span>
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"></path>
-            </svg>
-        </span>
-    `;
-    examButton.addEventListener('click', () => {
-        window.location.href = 'game.html';
-    });
-    letterList.appendChild(examButton);
-
-    // Accordion: tap the hero banner to reveal/hide the letter list,
-    // same interaction as the Juz 30 / Thajweed lesson cards.
-    const laHero = document.getElementById('la-hero');
     laHero.addEventListener('click', () => {
-        laHero.classList.toggle('open');
+        if (viewState === 'closed' || viewState === 'letters') {
+            setView('menu');
+            return;
+        }
+
+        setView('closed');
+    });
+
+    learnBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setView('letters');
+    });
+
+    level1ExamBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        window.location.href = 'game-level-1.html';
+    });
+
+    level2Hero.addEventListener('click', () => {
+        level2Open = !level2Open;
+        level2Hero.classList.toggle('open', level2Open);
+        level2Actions.style.display = level2Open ? 'flex' : 'none';
+        level2Actions.style.paddingTop = level2Open ? '16px' : '0';
+        level2Actions.style.marginTop = level2Open ? '4px' : '0';
+    });
+
+    learnHarakatBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        window.location.href = 'level2.html';
+    });
+
+    level2ExamBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        window.location.href = 'game-level-2.html';
     });
 
     const isGuest = sessionStorage.getItem('isGuest') === 'true';
