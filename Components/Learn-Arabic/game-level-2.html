@@ -109,7 +109,7 @@
 
     font-family:'Baloo Bhaijaan 2',sans-serif;
     font-weight:600;
-    font-size:clamp(16px,2.5vw,28px);
+    font-size:clamp(22px,3.5vw,36px);
 
     color:var(--tile-color,var(--blue));
     background:color-mix(
@@ -246,7 +246,7 @@
   @media (max-width:600px){
 
     .letter-tile{
-      font-size:clamp(10px,2.4vw,16px);
+      font-size:clamp(14px,4vw,24px);
       padding:.22em .28em;
       border-radius:12px;
 
@@ -1037,7 +1037,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
      ROUND SETTINGS
   ========================================================= */
 
-  var ROUND_SIZES = [7,14,21,28];
+  var ROUND_SIZES = [8,16,24,28];
 
   var SOUNDS_PER_ROUND = 9;
 
@@ -2022,6 +2022,10 @@ function speak(letter, onComplete){
     var count =
       tiles.length || 7;
 
+    if(window.innerWidth <= 600){
+      return 4;
+    }
+
 
     if(count >= 28){
       return 9;
@@ -2097,6 +2101,22 @@ function speak(letter, onComplete){
         usableH / rows,
         tileH + gap
       );
+
+    if(
+      window.innerWidth <= 600 &&
+      tiles.length === 8
+    ){
+
+      cellH =
+        tileH + 12;
+
+      topPad =
+        Math.max(
+          8,
+          (boardH - cellH * rows) / 2
+        );
+
+    }
 
 
     tiles.forEach(
