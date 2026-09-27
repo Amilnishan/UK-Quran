@@ -1282,6 +1282,18 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
   async function persistCompletedResult(){
 
+    if(sessionStorage.getItem("isGuest") === "true"){
+
+      if(resultSaveStatus){
+
+        resultSaveStatus.textContent = "";
+
+      }
+
+      return;
+
+    }
+
     if(resultSaveStatus){
 
       resultSaveStatus.textContent =
