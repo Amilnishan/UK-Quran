@@ -1051,12 +1051,34 @@ const SUKOON = [
 ];
 
 
-const ALIF = [
-  // Alif (vertical body)
+const ALIF_TOP = [
   {
-    p0: { x: 160, y: 65 },
-    p2: { x: 160, y: 190 }
+    p0: { x: 168, y: 63 },
+    p1: { x: 153, y: 55 },
+    p2: { x: 150, y: 73 }
+  },
+  {
+    p0: { x: 150, y: 73 },
+    p1: { x: 153, y: 80 },
+    p2: { x: 165, y: 79 }
+  },
+  {
+    p0: { x: 165, y: 79 },
+    p1: { x: 155, y: 89 },
+    p2: { x: 145, y: 92 }
   }
+];
+
+const ALIF_BODY = [
+  {
+    p0: { x: 160, y: 115 },
+    p2: { x: 160, y: 200 }
+  }
+];
+
+const ALIF = [
+  ...ALIF_TOP,
+  ...ALIF_BODY
 ];
 
 
@@ -1071,7 +1093,11 @@ const ALIF = [
       arName:"ألف",
       enName:"Alif",
       shape:ALIF,
-      dots:[]
+      dots:[],
+      subShapes:[
+        ALIF_BODY,
+        ALIF_TOP
+      ]
     },
 
     {
@@ -2274,8 +2300,13 @@ const ALIF = [
     if(strokePoints.length === 0) return;
 
     const l = LETTERS[currentIndex];
-    const sukoonGuideComplete = touchedSukoon.length === l.sukoonGuideDots.length && touchedSukoon.every(Boolean);
-    const letterGuideComplete = touchedGuide.length === l.guideDots.length && touchedGuide.every(Boolean);
+    const sukoonGuideComplete = l.sukoonGuideDots.every(function(_,index){
+      return touchedSukoon[index] === true;
+    });
+
+    const letterGuideComplete = l.guideDots.every(function(_,index){
+      return touchedGuide[index] === true;
+    });
 
     const strokesForEval = allStrokes.concat(currentStroke.length ? [currentStroke] : []);
 
@@ -2377,7 +2408,9 @@ const ALIF = [
       }
     }
 
-    const allDiacriticTouched = touchedDiacritic.length === l.diacriticDots.length && touchedDiacritic.every(Boolean);
+    const allDiacriticTouched = l.diacriticDots.every(function(_,index){
+      return touchedDiacritic[index] === true;
+    });
 
     const correct =
       shapeOk &&
