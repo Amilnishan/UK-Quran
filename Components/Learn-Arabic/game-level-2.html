@@ -1238,7 +1238,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
     }
   );
 
-  async function saveLevel1Result(){
+  async function saveLevel2Result(){
 
     await identityReadyPromise;
 
@@ -1265,13 +1265,25 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
     await update(
       resultRef,
       {
-        level1:score
+        level2:score
       }
     );
 
   }
 
   async function persistCompletedResult(){
+
+    if(sessionStorage.getItem("isGuest") === "true"){
+
+      if(resultSaveStatus){
+
+        resultSaveStatus.textContent = "";
+
+      }
+
+      return;
+
+    }
 
     if(resultSaveStatus){
 
@@ -1282,7 +1294,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
     try{
 
-      await saveLevel1Result();
+      await saveLevel2Result();
 
       if(resultSaveStatus){
 
@@ -1296,7 +1308,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
 
     }catch(error){
 
-      console.error("Unable to save Level 1 game result:",error);
+      console.error("Unable to save Level 2 game result:",error);
 
       if(resultSaveStatus){
 

@@ -468,7 +468,7 @@ function loadGameResult(studentId) {
 
             levelKeys.forEach((levelKey) => {
                 const points = Number(results[levelKey]) || 0;
-                const totalPerLevel = 340;
+                const totalPerLevel = levelKey === 'level2' ? 360 : 340;
                 const levelLabel = `Level ${levelKey.replace('level', '')}`;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
