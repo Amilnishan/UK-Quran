@@ -469,7 +469,7 @@ btnGotoTeacherView?.addEventListener('click', () => {
     if (!btnGotoTeacherView) return;
 
     btnGotoTeacherView.disabled = true;
-    btnGotoTeacherView.innerHTML = '<span class="loader-inline1" aria-hidden="true"></span>Teacher View';
+    btnGotoTeacherView.innerHTML = '🏫 Teacher View';
 
     setTimeout(() => {
         window.location.href = '../Teacher/teacher.html';

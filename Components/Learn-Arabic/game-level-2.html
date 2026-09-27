@@ -94,7 +94,7 @@
     background:radial-gradient(circle,#FFF4DA,transparent 70%);
   }
 
-  /* ---------- board / letters ---------- */
+  /* ---------- board / word audio tiles ---------- */
 
   #board{
     position:absolute;
@@ -109,7 +109,7 @@
 
     font-family:'Baloo Bhaijaan 2',sans-serif;
     font-weight:600;
-    font-size:35px;
+    font-size:clamp(16px,2.5vw,28px);
 
     color:var(--tile-color,var(--blue));
     background:color-mix(
@@ -123,7 +123,10 @@
     box-shadow:
       0 0 8px rgba(255,255,255,.9),
       0 0 18px rgba(255,255,255,.45);
-    line-height:1;
+    line-height:1.15;
+    text-align:center;
+    white-space:normal;
+    overflow-wrap:anywhere;
     cursor:pointer;
     user-select:none;
     -webkit-user-select:none;
@@ -243,7 +246,7 @@
   @media (max-width:600px){
 
     .letter-tile{
-      font-size:26px;
+      font-size:clamp(10px,2.4vw,16px);
       padding:.22em .28em;
       border-radius:12px;
 
@@ -968,78 +971,66 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
   "use strict";
 
 
-  /* =========================================================
-     LETTER DATA
-  ========================================================= */
+    /* =========================================================
+      WORD AUDIO DATA
+    ========================================================= */
 
-  var LETTERS = [
-
-    {ch:"ا", name:"ألف"},
-    {ch:"ب", name:"باء"},
-    {ch:"ت", name:"تاء"},
-    {ch:"ث", name:"ثاء"},
-    {ch:"ج", name:"جيم"},
-    {ch:"ح", name:"حاء"},
-
-    {ch:"خ", name:"خاء"},
-    {ch:"د", name:"دال"},
-    {ch:"ذ", name:"ذال"},
-    {ch:"ر", name:"راء"},
-    {ch:"ز", name:"زاي"},
-    {ch:"س", name:"سين"},
-
-    {ch:"ش", name:"شين"},
-    {ch:"ص", name:"صاد"},
-    {ch:"ض", name:"ضاد"},
-    {ch:"ط", name:"طاء"},
-    {ch:"ظ", name:"ظاء"},
-    {ch:"ع", name:"عين"},
-
-    {ch:"غ", name:"غين"},
-    {ch:"ف", name:"فاء"},
-    {ch:"ق", name:"قاف"},
-    {ch:"ك", name:"كاف"},
-    {ch:"ل", name:"لام"},
-    {ch:"م", name:"ميم"},
-
-    {ch:"ن", name:"نون"},
-    {ch:"ه", name:"هاء"},
-    {ch:"و", name:"واو"},
-    {ch:"ي", name:"ياء"}
-
+  var WORD_AUDIO_FILES = [
+    "بَ طَ شَ تْ.mp3",
+    "بَ طَ شَ.mp3",
+    "بُ طِ شَ تْ.mp3",
+    "بُ طِ شَ.mp3",
+    "ذَ كَ رَ تْ.mp3",
+    "ذَ كَ رَ.mp3",
+    "ذُ كَ رَ تْ.mp3",
+    "ذُ كَ رَ.mp3",
+    "رَ كِ بَ تْ.mp3",
+    "رَ كِ بَ.mp3",
+    "رُ كِ بَ تْ.mp3",
+    "رُ كِ بَ.mp3",
+    "سَ مِ عَ تْ.mp3",
+    "سَ مِ عَ.mp3",
+    "سُ مِ عَ تْ.mp3",
+    "سُ مِ عَ.mp3",
+    "شَ رِ بَ تْ.mp3",
+    "شَ رِ بَ.mp3",
+    "شَ كَ رَ تْ.mp3",
+    "شَ كَ رَ.mp3",
+    "شُ رِ بَ تْ.mp3",
+    "شُ رِ بَ.mp3",
+    "شُ كَ رَ تْ.mp3",
+    "شُ كَ رَ.mp3",
+    "صَ نَ عَ تْ.mp3",
+    "صَ نَ عَ.mp3",
+    "صُ نِ عَ تْ.mp3",
+    "صُ نِ عَ.mp3",
+    "ضَ رَ بَ تْ.mp3",
+    "ضَ رَ بَ.mp3",
+    "ضُ رِ بَ تْ.mp3",
+    "ضُ رِ بَ.mp3",
+    "فَ عَ لَ تْ.mp3",
+    "فَ عَ لَ.mp3",
+    "فُ عِ لَ تْ.mp3",
+    "فُ عِ لَ.mp3",
+    "لَ بِ سَ تْ.mp3",
+    "لَ بِ سَ.mp3",
+    "لُ بِ سَ تْ.mp3",
+    "لُ بِ سَ.mp3",
+    "مَ دَ حَ تْ.mp3",
+    "مَ دَ حَ.mp3",
+    "مُ دَ حَ تْ.mp3",
+    "مُ دَ حَ.mp3"
   ];
 
-  var LETTER_AUDIO = {
-    "ا":"../../audios/arabic-letters/01.mp3",
-    "ب":"../../audios/arabic-letters/02.mp3",
-    "ت":"../../audios/arabic-letters/03.mp3",
-    "ث":"../../audios/arabic-letters/04.mp3",
-    "ج":"../../audios/arabic-letters/05.mp3",
-    "ح":"../../audios/arabic-letters/06.mp3",
-    "خ":"../../audios/arabic-letters/07.mp3",
-    "د":"../../audios/arabic-letters/08.mp3",
-    "ذ":"../../audios/arabic-letters/09.mp3",
-    "ر":"../../audios/arabic-letters/10.mp3",
-    "ز":"../../audios/arabic-letters/11.mp3",
-    "س":"../../audios/arabic-letters/12.mp3",
-    "ش":"../../audios/arabic-letters/13.mp3",
-    "ص":"../../audios/arabic-letters/14.mp3",
-    "ض":"../../audios/arabic-letters/15.mp3",
-    "ط":"../../audios/arabic-letters/16.mp3",
-    "ظ":"../../audios/arabic-letters/17.mp3",
-    "ع":"../../audios/arabic-letters/18.mp3",
-    "غ":"../../audios/arabic-letters/19.mp3",
-    "ف":"../../audios/arabic-letters/20.mp3",
-    "ق":"../../audios/arabic-letters/21.mp3",
-    "ك":"../../audios/arabic-letters/22.mp3",
-    "ل":"../../audios/arabic-letters/23.mp3",
-    "م":"../../audios/arabic-letters/24.mp3",
-    "ن":"../../audios/arabic-letters/25.mp3",
-    "ه":"../../audios/arabic-letters/26.mp3",
-    "هـ":"../../audios/arabic-letters/26.mp3",
-    "و":"../../audios/arabic-letters/27.mp3",
-    "ي":"../../audios/arabic-letters/28.mp3"
-  };
+  var LETTERS = WORD_AUDIO_FILES.map(
+    function(fileName){
+      return {
+        ch:fileName,
+        name:fileName.replace(/\.mp3$/i,""),
+        audio:"../../audios/level-2-game-words/" + encodeURIComponent(fileName)
+      };
+    }
+  );
 
 
   /* =========================================================
@@ -1446,9 +1437,9 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
   }
 
 
-  /* =========================================================
-     LETTER AUDIO
-  ========================================================= */
+    /* =========================================================
+      WORD AUDIO
+    ========================================================= */
 function speak(letter, onComplete){
 
   if(
@@ -1461,25 +1452,7 @@ function speak(letter, onComplete){
     return;
   }
 
-  var audioPath =
-    LETTER_AUDIO[letter.ch] ||
-    LETTER_AUDIO["هـ"];
-
-  if(!audioPath){
-    var index =
-      LETTERS.findIndex(
-        function(item){
-          return item.ch === letter.ch;
-        }
-      );
-
-    if(index >= 0){
-      audioPath =
-        "../../audios/arabic-letters/" +
-        String((index % 28) + 1).padStart(2,"0") +
-        ".mp3";
-    }
-  }
+  var audioPath = letter.audio;
 
   if(!audioPath){
     if(typeof onComplete === "function"){
@@ -1851,12 +1824,12 @@ function speak(letter, onComplete){
 
 
           el.textContent =
-            L.ch;
+            L.name;
 
 
           el.setAttribute(
             "data-ch",
-            L.ch
+            L.name
           );
 
 
@@ -2879,7 +2852,7 @@ function startRound(){
     target.ch;
 
   promptLabel.textContent =
-    target.ch;
+    target.name;
 
   var fallSpeed =
     FALL_SPEED_PX_PER_SEC;

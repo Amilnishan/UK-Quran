@@ -63,6 +63,7 @@
   }
 
   header{
+    position:relative;
     background:linear-gradient(160deg,var(--blue) 0%,var(--blue-dark) 100%);
     color:#fff;
     padding:16px 14px 20px;
@@ -70,11 +71,22 @@
   }
 
   .exit-row{
+    position:relative;
+    height:38px;
     display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
     margin-bottom:10px;
+  }
+
+  .exit-row .exit-btn{
+    position:absolute;
+    top:0;
+    left:0;
+  }
+
+  .exit-row .idx{
+    position:absolute;
+    top:10px;
+    right:0;
   }
 
   .exit-btn{
@@ -88,10 +100,23 @@
   }
 
   .nav-row{
+    position:relative;
+    min-height:90px;
     display:flex;
-    align-items:center;
-    justify-content:space-between;
     gap:8px;
+  }
+
+  .nav-row .nav-btn{
+    position:absolute;
+    top:0;
+  }
+
+  .nav-row #backBtn{
+    left:0;
+  }
+
+  .nav-row #nextBtn{
+    right:0;
   }
 
   .nav-btn{
