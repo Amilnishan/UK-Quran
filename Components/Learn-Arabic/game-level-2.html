@@ -246,7 +246,7 @@
   @media (max-width:600px){
 
     .letter-tile{
-      font-size:clamp(14px,4vw,24px);
+      font-size:clamp(28px,7.5vw,48px);
       padding:.22em .28em;
       border-radius:12px;
 
@@ -1037,7 +1037,7 @@ import { auth, database } from "../../JavaScript/firebase-config.js";
      ROUND SETTINGS
   ========================================================= */
 
-  var ROUND_SIZES = [8,16,24,28];
+  var ROUND_SIZES = [3,6,9,12];
 
   var SOUNDS_PER_ROUND = 9;
 
@@ -1539,6 +1539,35 @@ function speak(letter, onComplete){
 }
 
 
+function speakRepeatedly(letter, times, onComplete){
+
+  if(times <= 0){
+
+    if(typeof onComplete === "function"){
+      onComplete();
+    }
+
+    return;
+
+  }
+
+
+  speak(
+    letter,
+    function(){
+
+      speakRepeatedly(
+        letter,
+        times - 1,
+        onComplete
+      );
+
+    }
+  );
+
+}
+
+
   /* =========================================================
      GAME STATE
   ========================================================= */
@@ -2035,7 +2064,7 @@ function speak(letter, onComplete){
       tiles.length || 7;
 
     if(window.innerWidth <= 600){
-      return 4;
+      return 3;
     }
 
 
@@ -2922,8 +2951,9 @@ function startRound(){
     hasVisibleTargetOnBoard()
   ){
 
-    speak(
+    speakRepeatedly(
       target,
+      3,
 
       function(){
 

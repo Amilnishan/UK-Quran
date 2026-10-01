@@ -23,6 +23,17 @@
         padding: 18px 20px 8px;
     }
 
+    .language-toggle {
+        margin-left: auto;
+        padding: 8px 12px;
+        border: 1px solid #d8ddea;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--harakat-symbol);
+        font: 600 13px 'Outfit', sans-serif;
+        cursor: pointer;
+    }
+
     .harakat-header h1 {
         margin: 0;
         color: #5c4b37;
@@ -103,6 +114,10 @@
         line-height: 1.35;
     }
 
+    html:lang(en) .harakat-copy p {
+        font-size: 12px !important;
+    }
+
     .harakat-arrow {
         flex: 0 0 auto;
         color: #c0c5d2;
@@ -147,16 +162,47 @@
             </svg>
         </button>
         <h1>Arabic Letters with Harakat</h1>
+        <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language to English">ENG</button>
     </header>
 
-    <p class="harakat-intro">Learn to recognize and write</p>
 
     <main class="harakat-list" aria-label="Harakat lessons">
+                <div class="donation-upi-row1" style="background: white; ">
+        <p style="color:#4b4b4b; font-size:16px; font-weight:800;  background-color:var(--harakat-blue);  text-align:center;  border-radius:11px;height:40px;display:flex; align-items:center;  justify-content:center;margin:0;">
+            <span data-ml="ഹറക്കത്തുകളെ കുറിച്ച് പഠിക്കാം" data-en="Learn about Harakat">ഹറക്കത്തുകളെ കുറിച്ച് പഠിക്കാം</span></p>
+            <br>
+       <div style="background-color: var(--harakat-blue);border-radius: 11px;padding: 15px;"> 
+        <p style="color:#4b4b4b; line-height:1.6; font-size: 14px; font-weight: 600;">
+            <br> 
+
+
+             <span data-ml="അറബി അക്ഷരങ്ങളെ അ, ഇ, ഉ, അം, അൻ, ഇൻ, ഉൻ എന്നിങ്ങനെ ചലിപ്പിക്കാൻ നമ്മൾ ഉപയോഗിക്കുന്ന ചിഹ്നങ്ങളാണ് നമ്മൾ ഇനി പഠിക്കുന്നത്." data-en="We are going to learn the symbols used to give Arabic letters the sounds a, i, u, am, an, in, and un.">അറബി അക്ഷരങ്ങളെ അ, ഇ, ഉ, അം, അൻ, ഇൻ, ഉൻ എന്നിങ്ങനെ ചലിപ്പിക്കാൻ നമ്മൾ ഇനി പഠിക്കുന്നത്.</span></p>
+<p style="
+    color:#4b4b4b;
+    line-height:1.6;
+    font-size:clamp(24px, 8vw, 54px);
+    direction:rtl;
+    background-color:#ffffff;
+    border-radius:10px;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+">
+    ـَــــــِــــــُــــــْــــــًــــــٍــــــٌ
+</p>
+
+              
+
+        <p style="margin:0 0 0; color:#4b4b4b; line-height:1.6; text-align:right; direction:rtl;">
+            بارك الله فيك
+        </p>
+        </div>
+        </div>   
         <button class="harakat-card" type="button" data-harakat="fathah">
             <span class="harakat-symbol" lang="ar" dir="rtl">ـَ</span>
             <span class="harakat-copy">
                 <h2>Fat-hah</h2>
-                <p>Learn to recognize and write</p>
+                <p style="font-size: 10px;" data-ml="അറബി അക്ഷരത്തെ 'അ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു." data-en="Makes the Arabic letter sound like 'a'.">അറബി അക്ഷരത്തെ 'അ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു.</p>
             </span>
             <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -167,7 +213,7 @@
             <span class="harakat-symbol" lang="ar" dir="rtl">ـِ</span>
             <span class="harakat-copy">
                 <h2>Kas-rah</h2>
-                <p>Learn to recognize and write</p>
+                <p style="font-size: 10px;" data-ml="അറബി അക്ഷരത്തെ 'ഇ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു." data-en="Makes the Arabic letter sound like 'i'.">അറബി അക്ഷരത്തെ 'ഇ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു.</p>
             </span>
             <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -178,7 +224,7 @@
             <span class="harakat-symbol" lang="ar" dir="rtl">ـُ</span>
             <span class="harakat-copy">
                 <h2>Damm-ah</h2>
-                <p>Learn to recognize and write</p>
+                <p style="font-size: 10px;" data-ml="അറബി അക്ഷരത്തെ 'ഉ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു." data-en="Makes the Arabic letter sound like 'u'.">അറബി അക്ഷരത്തെ 'ഉ' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു.</p>
             </span>
             <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -189,7 +235,7 @@
             <span class="harakat-symbol" lang="ar" dir="rtl">ـْ</span>
             <span class="harakat-copy">
                 <h2>Su-koon</h2>
-                <p>Learn to recognize and write</p>
+                <p style="font-size: 10px;" data-ml="അറബി അക്ഷരത്തെ 'അ്' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു." data-en="Stops the Arabic letter without adding a vowel sound.">അറബി അക്ഷരത്തെ 'അ്' എന്ന് ചലിപ്പിക്കാൻ ഉപയോഗിക്കുന്നു.</p>
             </span>
             <svg class="harakat-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -200,6 +246,22 @@
 
 <script>
     const isGuest = sessionStorage.getItem('isGuest') === 'true';
+
+    const languageToggle = document.getElementById('language-toggle');
+    let currentLanguage = 'ml';
+
+    languageToggle.addEventListener('click', () => {
+        currentLanguage = currentLanguage === 'ml' ? 'en' : 'ml';
+        document.querySelectorAll('[data-ml][data-en]').forEach((element) => {
+            element.textContent = element.dataset[currentLanguage];
+        });
+        languageToggle.textContent = currentLanguage === 'ml' ? 'ENG' : 'MAL';
+        languageToggle.setAttribute(
+            'aria-label',
+            currentLanguage === 'ml' ? 'Switch language to English' : 'Switch language to Malayalam'
+        );
+        document.documentElement.lang = currentLanguage;
+    });
 
     document.getElementById('btn-back').addEventListener('click', () => {
         window.location.href = 'learn-arabic-without-harakat.html';
