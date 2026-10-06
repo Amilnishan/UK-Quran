@@ -10,13 +10,35 @@
         .greeting { padding: 20px 20px 0; }
         .greeting h1 { color:#5C4B37; font-size: 22px; margin: 0 0 5px; }
         .greeting p { color: var(--text-muted); font-size: 13px; margin: 0; }
+        .ask-button-row { display: flex; justify-content: flex-end; margin: 8px 20px 0; }
+        .ask-button { position: relative; display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; box-sizing: border-box; width: 64px; min-height: 44px; overflow: hidden; padding: 0; border-radius: 20px 0 0 20px; background: #ffffff; color:#99aceb; font-size: 14px; font-weight: 700; text-decoration: none; animation: ask-button-size 9s ease-in-out 1; }
+        .ask-button span { position: absolute; white-space: nowrap; }
+        .ask-button .ask-question { opacity: 0; animation: ask-question-visibility 9s ease-in-out 1; }
+        .ask-button .ask-label { animation: ask-label-visibility 9s ease-in-out 1; }
+        @keyframes ask-button-size {
+            0%, 11.1%, 88.9%, 100% { width: 64px; }
+            22.2%, 77.8% { width: 200px; }
+        }
+        @keyframes ask-question-visibility {
+            0%, 11.1%, 88.9%, 100% { opacity: 0; }
+            22.2%, 77.8% { opacity: 1; }
+        }
+        @keyframes ask-label-visibility {
+            0%, 11.1% { opacity: 1; }
+            22.2%, 77.8% { opacity: 0; }
+            88.9%, 100% { opacity: 1; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ask-button, .ask-button .ask-label, .ask-button .ask-question { animation: none; }
+            .ask-button .ask-question { display: none; }
+        }
         
         .header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
         .header-actions .header-action-btn { 
             border: none; 
-            background: #eef2ff; 
-            color: #1d4ed8; 
-            padding: 10px 18px; 
+            background: #99aceb; 
+            color: white; 
+            padding: 10px 14px; 
             border-radius: 999px; 
             font-weight: 700; 
             font-size: 13px; 
@@ -83,6 +105,12 @@
     <div class="greeting">
         <h1>Assalamu Alaikum</h1>
         <p>Access Tajweed & Qira'at lessons freely.</p>
+    </div>
+    <div class="ask-button-row">
+        <a class="ask-button" href="https://fatawa.xyz/" target="_blank" rel="noopener noreferrer" aria-label="Ask a question">
+            <span class="ask-label">Ask</span>
+            <span class="ask-question">have any questions ?</span>
+        </a>
     </div>
 
     <!-- Free Learning Cards -->
