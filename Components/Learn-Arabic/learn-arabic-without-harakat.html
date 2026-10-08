@@ -73,6 +73,7 @@
 
     .level-card + .level-card { margin-top: 16px; }
     .level-card .la-hero-sub { background-image: url("../../images/Banner/banner-3-reverse.webp"); }
+    #level3-hero .la-hero-sub { background-image: url("../../images/Banner/banner-2-reverse.webp"); }
 
     .level-actions {
         display: none;
@@ -264,8 +265,54 @@
         </div>
     </div>
 
+    <div class="level-card" data-level="3">
+        <div class="la-hero" id="level3-hero">
+            <div class="la-hero-sub">
+                <div class="la-hero-text">
+                    <p style="margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;">LEVEL 3</p>
+                    <p style="font-size: 15px; font-weight: 600;">Arabic Letters ( Connected )</p>
+                </div>
+
+                <svg class="la-hero-arrow"
+                     width="20"
+                     height="20"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <div class="letter-list" id="level3-letter-list">
+            <!-- JS injects the connected-letter rows here. -->
+        </div>
+        <div class="level-actions" id="level3-actions">
+            <button type="button" class="option-btn" id="learn-connected-arabic-letters-btn">Learn Connected Arabic Letters</button>
+            <button type="button"
+                    class="exam-button"
+                    id="level3-exam-btn">
+                <span>LEVEL 3 EXAM</span>
+
+                <span class="exam-play" aria-hidden="true">
+                    <span>PLAY</span>
+
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+
+
 </div>
 
+<script src="level3-data.js"></script>
 <script>
     // Same 28-letter set used by the tracer (kept in the same visual order).
     // Only name + glyph needed here — the tracer owns the actual stroke data.
@@ -310,8 +357,19 @@
     const learnHarakatBtn = document.getElementById('learn-arabic-harakat-btn');
     const level2ExamBtn = document.getElementById('level2-exam-btn');
 
+    /* =========================================================
+       LEVEL 3
+    ========================================================= */
+
+    const level3Hero = document.getElementById('level3-hero');
+    const level3Actions = document.getElementById('level3-actions');
+    const level3LetterList = document.getElementById('level3-letter-list');
+    const learnConnectedArabicLettersBtn = document.getElementById('learn-connected-arabic-letters-btn');
+    const level3ExamBtn = document.getElementById('level3-exam-btn');
+
     let viewState = 'closed';
     let level2Open = false;
+    let level3ViewState = 'closed';
 
     const setView = (state) => {
         viewState = state;
@@ -385,6 +443,62 @@
     level2ExamBtn.addEventListener('click', (event) => {
         event.stopPropagation();
         window.location.href = 'game-level-2.html';
+    });
+
+    /* =========================================================
+       LEVEL 3 EVENTS
+    ========================================================= */
+
+    const setLevel3View = (state) => {
+        level3ViewState = state;
+
+        const isOpen = state !== 'closed';
+        level3Hero.classList.toggle('open', isOpen);
+        level3Actions.style.display = state === 'menu' ? 'flex' : 'none';
+        level3Actions.style.paddingTop = state === 'menu' ? '16px' : '0';
+        level3Actions.style.marginTop = state === 'menu' ? '4px' : '0';
+        level3LetterList.style.display = state === 'letters' ? 'flex' : 'none';
+    };
+
+    level3Hero.addEventListener('click', () => {
+        if (level3ViewState === 'closed' || level3ViewState === 'letters') {
+            setLevel3View('menu');
+            return;
+        }
+
+        setLevel3View('closed');
+    });
+
+    learnConnectedArabicLettersBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        setLevel3View('letters');
+    });
+
+    Level3Letters.forEach((letter, index) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'letter-row';
+        row.innerHTML = `
+            <div class="letter-glyph">${letter.display}</div>
+            <div class="letter-info">
+                <h4>${letter.name}</h4>
+                <p>Learn connected forms</p>
+            </div>
+            <svg class="letter-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        `;
+        row.addEventListener('click', () => {
+            window.location.href = `level3.html?letter=${index}`;
+        });
+        level3LetterList.appendChild(row);
+    });
+
+    level3ExamBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+
+        window.location.href =
+            'game-level-3.html';
     });
 
     const isGuest = sessionStorage.getItem('isGuest') === 'true';
