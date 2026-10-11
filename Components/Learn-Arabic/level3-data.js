@@ -19,7 +19,7 @@ window.Level3Letters = [
   { name: 'Zay',   ar: 'ز', display: 'زَ', forms: ['زَهْرَةُ', 'مَزْرَعَةُ', 'رَمَزَ'], gameWord: 'مَوْزُ' },
   { name: 'Seen',  ar: 'س', display: 'سَ', forms: ['سَمَكُ', 'مَسْجِدُ', 'شَمْسُ'], gameWord: 'سَمَكُ' },
   { name: 'Sheen', ar: 'ش', display: 'شَ', forms: ['شَمْسُ', 'مَشْرُوبُ', 'جَيْشُ'], gameWord: 'شَمْسُ' },
-  { name: 'Saad',  ar: 'ص', display: 'صَ', forms: ['صَبْرُ', 'مَصْدَرُ', 'قِصَصُ'], gameWord: 'صَبْرُ' },
+  { name: 'Saad',  ar: 'ص', display: 'صَ', forms: ['صَبْرُ', 'مَصْدَرُ', 'قِصَصُ'], highlightOccurrences: [0, 0, 1], gameWord: 'صَبْرُ' },
   { name: 'Dad',   ar: 'ض', display: 'ضَ', forms: ['ضَيْفُ', 'مَضْرِبُ', 'بَيْضُ'], gameWord: 'ضَيْفُ' },
   { name: 'Taa',   ar: 'ط', display: 'طَ', forms: ['طَعَامُ', 'مَطَرُ', 'خَيْطُ'], gameWord: 'طَعَامُ' },
   { name: 'Dhaa',  ar: 'ظ', display: 'ظَ', forms: ['ظَرْفُ', 'مَنْظَرُ', 'حِفْظُ'], gameWord: 'ظَرْفُ' },
@@ -35,4 +35,3 @@ window.Level3Letters = [
   { name: 'Waw',   ar: 'و', display: 'وَ', forms: ['وَرَقُ', 'نَوْمُ', 'دَلْوُ'], gameWord: 'نَوْمُ' },
   { name: 'Ya',    ar: 'ي', display: 'يَ', forms: ['يَدُ', 'بَيْتُ', 'كُرْسِيّ'], gameWord: 'بَيْتُ' }
 ];
-
