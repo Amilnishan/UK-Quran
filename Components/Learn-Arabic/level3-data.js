@@ -11,91 +11,104 @@ window.Level3Letters = [
     ar: 'أ',
     display: 'أَ',
     forms: ['أَسَدٌ', 'سَأَلَ', 'قَرَأَ'],
-    gameWord: 'أَسَدٌ'
+    gameWord: 'أَسَدٌ',
+    svgSprite: 'level3-svg/alif.svg'
   },
   {
     name: 'Ba',
     ar: 'ب',
     display: 'بَ',
     forms: ['بَيْتٌ', 'كَبِيرٌ', 'لَعِبَ'],
-    gameWord: 'كَبِيرٌ'
+    gameWord: 'كَبِيرٌ',
+    svgSprite: 'level3-svg/ba.svg'
   },
   {
     name: 'Ta',
     ar: 'ت',
     display: 'تَ',
     forms: ['تَمْرٌ', 'فَتَحَ', 'بِنْتٌ'],
-    gameWord: 'تَمْرٌ'
+    gameWord: 'تَمْرٌ',
+    svgSprite: 'level3-svg/ta.svg'
   },
   {
     name: 'Tha',
     ar: 'ث',
     display: 'ثَ',
     forms: ['ثَوْبٌ', 'مَثَلٌ', 'حَدِيثٌ'],
-    gameWord: 'مَثَلٌ'
+    gameWord: 'مَثَلٌ',
+    svgSprite: 'level3-svg/tha.svg'
   },
   {
     name: 'Jeem',
     ar: 'ج',
     display: 'جَ',
     forms: ['جَمَلٌ', 'شَجَرَةٌ', 'ثَلْجٌ'],
-    gameWord: 'جَمَلٌ'
+    gameWord: 'جَمَلٌ',
+    svgSprite: 'level3-svg/jeem.svg'
   },
   {
     name: 'Haa',
     ar: 'ح',
     display: 'حَ',
     forms: ['حُوتٌ', 'بَحْرٌ', 'سَبَحَ'],
-    gameWord: 'سَبَحَ'
+    gameWord: 'سَبَحَ',
+    svgSprite: 'level3-svg/haa.svg'
   },
   {
     name: 'Khaa',
     ar: 'خ',
     display: 'خَ',
     forms: ['خُبْزٌ', 'يَخْرُجُ', 'شَيْخٌ'],
-    gameWord: 'يَخْرُجُ'
+    gameWord: 'يَخْرُجُ',
+    svgSprite: 'level3-svg/khaa.svg'
   },
   {
     name: 'Dal',
     ar: 'د',
     display: 'دَ',
     forms: ['دَارٌ', 'مَدْرَسَةٌ', 'وَلَدٌ'],
-    gameWord: 'دَارٌ'
+    gameWord: 'دَارٌ',
+    svgSprite: 'level3-svg/dal.svg'
   },
   {
     name: 'Thal',
     ar: 'ذ',
     display: 'ذَ',
     forms: ['ذَهَبَ', 'مَذْهَبٌ', 'أَخَذَ'],
-    gameWord: 'مَذْهَبٌ'
+    gameWord: 'مَذْهَبٌ',
+    svgSprite: 'level3-svg/thal.svg'
   },
   {
     name: 'Ra',
     ar: 'ر',
     display: 'رَ',
     forms: ['رَجُلٌ', 'مَرَضٌ', 'قَمَرٌ'],
-    gameWord: 'قَمَرٌ'
+    gameWord: 'قَمَرٌ',
+    svgSprite: 'level3-svg/ra.svg'
   },
   {
     name: 'Zay',
     ar: 'ز',
     display: 'زَ',
     forms: ['زَهْرَةٌ', 'مَزْرَعَةٌ', 'رَمَزَ'],
-    gameWord: 'زَهْرَةٌ'
+    gameWord: 'زَهْرَةٌ',
+    svgSprite: 'level3-svg/zay.svg'
   },
   {
     name: 'Seen',
     ar: 'س',
     display: 'سَ',
     forms: ['سَمَكٌ', 'مَسْجِدٌ', 'شَمْسٌ'],
-    gameWord: 'مَسْجِدٌ'
+    gameWord: 'مَسْجِدٌ',
+    svgSprite: 'level3-svg/seen.svg'
   },
   {
     name: 'Sheen',
     ar: 'ش',
     display: 'شَ',
     forms: ['شَمْسٌ', 'مَشْرُوبٌ', 'جَيْشٌ'],
-    gameWord: 'جَيْشٌ'
+    gameWord: 'جَيْشٌ',
+    svgSprite: 'level3-svg/sheen.svg'
   },
   {
   name: 'Saad',
@@ -103,6 +116,7 @@ window.Level3Letters = [
   display: 'صَ',
   forms: ['صَبْرٌ', 'مَصْدَرٌ', 'قِصَصٌ'],
   gameWord: 'قِصَصٌ',
+  svgSprite: 'level3-svg/saad.svg',
   highlightOccurrences: [0, 0, 1]
 },
   {
@@ -110,97 +124,111 @@ window.Level3Letters = [
     ar: 'ض',
     display: 'ضَ',
     forms: ['ضَيْفٌ', 'مَضْرِبٌ', 'بَيْضٌ'],
-    gameWord: 'ضَيْفٌ'
+    gameWord: 'ضَيْفٌ',
+    svgSprite: 'level3-svg/dad.svg'
   },
   {
     name: 'Taa',
     ar: 'ط',
     display: 'طَ',
     forms: ['طَعَامٌ', 'مَطَرٌ', 'خَيْطٌ'],
-    gameWord: 'مَطَرٌ'
+    gameWord: 'مَطَرٌ',
+    svgSprite: 'level3-svg/taa.svg'
   },
   {
     name: 'Dhaa',
     ar: 'ظ',
     display: 'ظَ',
     forms: ['ظَرْفٌ', 'مَنْظَرٌ', 'حِفْظٌ'],
-    gameWord: 'مَنْظَرٌ'
+    gameWord: 'مَنْظَرٌ',
+    svgSprite: 'level3-svg/dhaa.svg'
   },
   {
     name: 'Ain',
     ar: 'ع',
     display: 'عَ',
     forms: ['عَيْنٌ', 'مُعَلِّمٌ', 'سَمِعَ'],
-    gameWord: 'سَمِعَ'
+    gameWord: 'سَمِعَ',
+    svgSprite: 'level3-svg/ain.svg'
   },
   {
     name: 'Ghain',
     ar: 'غ',
     display: 'غَ',
     forms: ['غُرْفَةٌ', 'صَغِيرٌ', 'بَلَغَ'],
-    gameWord: 'صَغِيرٌ'
+    gameWord: 'صَغِيرٌ',
+    svgSprite: 'level3-svg/ghain.svg'
   },
   {
     name: 'Fa',
     ar: 'ف',
     display: 'فَ',
     forms: ['فَمٌ', 'مِفْتَاحٌ', 'كَتِفٌ'],
-    gameWord: 'مِفْتَاحٌ'
+    gameWord: 'مِفْتَاحٌ',
+    svgSprite: 'level3-svg/fa.svg'
   },
   {
     name: 'Qaf',
     ar: 'ق',
     display: 'قَ',
     forms: ['قَلَمٌ', 'بَقَرَةٌ', 'طَرِيقٌ'],
-    gameWord: 'قَلَمٌ'
+    gameWord: 'قَلَمٌ',
+    svgSprite: 'level3-svg/qaf.svg'
   },
   {
     name: 'Kaf',
     ar: 'ك',
     display: 'كَ',
     forms: ['كَلْبٌ', 'مَكْتَبٌ', 'مَلَكٌ'],
-    gameWord: 'مَكْتَبٌ'
+    gameWord: 'مَكْتَبٌ',
+    svgSprite: 'level3-svg/kaf.svg'
   },
   {
     name: 'Lam',
     ar: 'ل',
     display: 'لَ',
     forms: ['لَبَنٌ', 'قَلَمٌ', 'جَمَلٌ'],
-    gameWord: 'لَبَنٌ'
+    gameWord: 'لَبَنٌ',
+    svgSprite: 'level3-svg/lam.svg'
   },
   {
     name: 'Meem',
     ar: 'م',
     display: 'مَ',
     forms: ['مَدْرَسَةٌ', 'سَمَكٌ', 'عَلَمٌ'],
-    gameWord: 'عَلَمٌ'
+    gameWord: 'عَلَمٌ',
+    svgSprite: 'level3-svg/meem.svg'
   },
   {
     name: 'Nun',
     ar: 'ن',
     display: 'نَ',
     forms: ['نَجْمٌ', 'جَنَّةٌ', 'حَزِينٌ'],
-    gameWord: 'جَنَّةٌ'
+    gameWord: 'جَنَّةٌ',
+    svgSprite: 'level3-svg/nun.svg'
   },
   {
     name: 'Ha',
     ar: 'ه',
     display: 'هَ',
     forms: ['هَوَاءٌ', 'مَهْدٌ', 'وَجْهٌ'],
-    gameWord: 'هَوَاءٌ'
+    gameWord: 'هَوَاءٌ',
+    svgSprite: 'level3-svg/ha.svg'
   },
   {
     name: 'Waw',
     ar: 'و',
     display: 'وَ',
     forms: ['وَرَقٌ', 'نَوْمٌ', 'دَلْوٌ'],
-    gameWord: 'نَوْمٌ'
+    gameWord: 'نَوْمٌ',
+    svgSprite: 'level3-svg/waw.svg'
   },
   {
     name: 'Ya',
     ar: 'ي',
     display: 'يَ',
     forms: ['يَدٌ', 'بَيْتٌ', 'كُرْسِيٌّ'],
-    gameWord: 'بَيْتٌ'
+    gameWord: 'بَيْتٌ',
+    svgSprite: 'level3-svg/ya.svg'
   }
 ];
