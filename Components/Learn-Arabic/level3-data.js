@@ -232,3 +232,46 @@ window.Level3Letters = [
     svgSprite: 'level3-svg/ya.svg'
   }
 ];
+
+window.Level3SpecialRules = {
+  Alif: {
+    title: 'Special Forms: Hamza',
+    forms: [
+      { symbol: 'أ', label: 'Hamza on Alif' },
+      { symbol: 'إ', label: 'Hamza under Alif' },
+      { symbol: 'ؤ', label: 'Hamza on Waw' },
+      { symbol: 'ئ', label: 'Hamza on Ya' },
+      { symbol: 'ء', label: 'Standalone Hamza' }
+    ],
+    explanation: 'Hamza can be written on Alif, Waw, Ya, or written by itself.'
+  },
+  Ta: {
+    title: 'Special Ending: Taa Marbuta (ة)',
+    symbol: 'ة',
+    connectedSymbol: 'ـة',
+    examples: [
+      {
+        word: 'مَدْرَسَةٌ',
+        svgSprite: 'level3-svg/taa-marbuta.svg',
+        svgSymbol: 'special'
+      }
+    ],
+    explanation: 'Taa Marbuta comes at the end of a word. When we pause, it is commonly pronounced like “h”. In connected speech, its “t” sound is pronounced according to the word’s grammatical ending.'
+  },
+  Ha: {
+    title: 'Special Ending: Final Ha (ه)',
+    symbol: 'ه',
+    connectedSymbol: 'ـه',
+    showSymbol: false,
+    symbolLabel: 'Haa',
+    connectedSymbolLabel: 'Haa connected to the preceding letter',
+    examples: [
+      {
+        word: 'وَجْهٌ',
+        svgSprite: 'level3-svg/ha.svg',
+        svgSymbol: 'final'
+      }
+    ],
+    explanation: 'Ordinary Ha can come at the end of a word. When it connects to the letter before it, it takes the final connected shape ـه, as in وَجْهٌ.'
+  }
+};
